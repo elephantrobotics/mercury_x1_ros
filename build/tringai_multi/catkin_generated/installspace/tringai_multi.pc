@@ -1,0 +1,8 @@
+prefix=/home/er/mercury_x1_ros/install
+
+Name: tringai_multi
+Description: Description of tringai_multi
+Version: 0.0.0
+Cflags: -I${prefix}/include
+Libs: -L${prefix}/lib 
+Requires: roscpp

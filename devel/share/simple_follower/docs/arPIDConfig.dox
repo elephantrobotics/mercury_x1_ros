@@ -1,0 +1,16 @@
+\subsubsection parameters ROS parameters
+
+Reads and maintains the following parameters on the ROS server
+
+- \b "~linearfront_p" : \b [double] linearfront_p min: 0.0, default: 0.4, max: 2.0
+- \b "~linearback_p" : \b [double] linearback_p min: 0.0, default: 0.5, max: 2.0
+- \b "~angularleft_p" : \b [double] angularleft_p min: 0.0, default: 3.3, max: 5.0
+- \b "~angularright_p" : \b [double] angularright_p min: 0.0, default: 3.0, max: 5.0
+- \b "~d_param" : \b [double] d_param min: 0.0, default: 0.6, max: 1.0
+- \b "~max_angular_speed" : \b [double] max_angular_speed min: 0.0, default: 0.5, max: 1.0
+- \b "~min_angular_speed" : \b [double] min_angular_speed min: -1.0, default: -0.5, max: 1.0
+- \b "~max_linear_speed" : \b [double] max_linear_speed min: 0.0, default: 0.2, max: 1.0
+- \b "~min_linear_speed" : \b [double] min_linear_speed min: -1.0, default: -0.2, max: 1.0
+- \b "~goal_x" : \b [double] goal_x min: 0.0, default: 0.6, max: 1.0
+- \b "~goal_y" : \b [double] goal_y min: 0.0, default: 0.0, max: 1.0
+

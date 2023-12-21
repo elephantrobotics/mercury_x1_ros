@@ -1,0 +1,8 @@
+<launch>
+  <!-- turtlebot_teleop_key already has its own built in velocity smoother -->
+  <include file="$(find turn_on_tringai_robot)/launch/turn_on_tringai_robot.launch"/>
+  <node pkg="tringai_robot_rc" type="turtlebot_teleop_key.py" name="turtlebot_teleop_keyboard"  output="screen">
+    <remap from="turtlebot_teleop_keyboard/cmd_vel" to="/cmd_vel"/>
+  </node>
+  <include file="$(find usb_cam)/launch/usb_cam-test.launch" />
+</launch>

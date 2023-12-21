@@ -1,0 +1,31 @@
+<launch>
+  <node pkg="simple_follower" name="ar_follower" type="ar_follow.py" clear_params="true" output="screen">
+  	<!-- 参数设置文件 -->
+    <rosparam command='load' file='$(find simple_follower)/parameters/ar_param.yaml' />
+    
+  </node>
+  <!-- 开启摄像头 -->
+    <include file="$(find astra_camera)/launch/astra.launch" />
+	<arg name="marker_size" default="7" />
+	<arg name="max_new_marker_error" default="0.08" />
+	<arg name="max_track_error" default="0.2" />
+
+	<arg name="cam_image_topic" default="/camera/depth_registered/points" />
+	<arg name="cam_info_topic" default="/camera/rgb/camera_info" />
+	<arg name="output_frame" default="camera_link" />
+    
+	<!-- 开启AR节点 -->
+	<node name="ar_track_alvar" pkg="ar_track_alvar" type="individualMarkers" respawn="false" output="screen">
+		<param name="marker_size"           type="double" value="$(arg marker_size)" />
+		<param name="max_new_marker_error"  type="double" value="$(arg max_new_marker_error)" />
+		<param name="max_track_error"       type="double" value="$(arg max_track_error)" />
+		<param name="output_frame"          type="string" value="$(arg output_frame)" />
+
+		<remap from="camera_image"  to="$(arg cam_image_topic)" />
+		<remap from="camera_info"   to="$(arg cam_info_topic)" />
+	</node>
+  <!-- 开启机器人底层相关节点  -->
+  <include file="$(find turn_on_tringai_robot)/launch/turn_on_tringai_robot.launch" />
+  
+</launch>
+

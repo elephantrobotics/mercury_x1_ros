@@ -1,0 +1,13 @@
+\subsubsection usage Usage
+\verbatim
+<node name="simple_follower" pkg="simple_follower" type="simple_follower">
+  <param name="color" type="int" value="0" />
+  <param name="HSV_H_MIN" type="int" value="0" />
+  <param name="HSV_S_MIN" type="int" value="60" />
+  <param name="HSV_V_MIN" type="int" value="60" />
+  <param name="HSV_H_MAX" type="int" value="180" />
+  <param name="HSV_S_MAX" type="int" value="255" />
+  <param name="HSV_V_MAX" type="int" value="255" />
+</node>
+\endverbatim
+

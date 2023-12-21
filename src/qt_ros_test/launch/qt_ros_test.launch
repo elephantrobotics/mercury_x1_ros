@@ -1,0 +1,5 @@
+<launch>
+  <node name="qt_ros_test"          pkg="qt_ros_test"  type="qt_ros_test" output="screen">
+  <param name="user_passward" value="raspberry"/>    <!-- 虚拟机root密码 -->
+  </node>
+</launch>

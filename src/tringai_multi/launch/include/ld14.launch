@@ -1,0 +1,11 @@
+<launch>
+
+<param name="/LD14/port_name" value="/dev/wheeltec_lidar"/>
+<param name="/LD14/product" type = "string" value = "LD14"/>
+
+<node name = "LD14" pkg = "ldlidar_14" type = "ldlidar" output = "screen">
+  
+  <remap from="/LD14/LD14/LDLiDAR" to="/scan"/>
+
+</node>
+</launch>

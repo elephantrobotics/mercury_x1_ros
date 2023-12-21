@@ -1,0 +1,7 @@
+
+<launch>
+ <!-- MarkerArray功能节点> -->
+ <node name='send_mark_1' pkg="xf_mic_asr_offline" type="send_mark_1.py" output="screen">
+ </node>
+
+</launch>

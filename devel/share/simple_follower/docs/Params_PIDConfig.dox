@@ -1,0 +1,11 @@
+\subsubsection parameters ROS parameters
+
+Reads and maintains the following parameters on the ROS server
+
+- \b "~speed_ap" : \b [double] SPEED P PARAM min: 0.0, default: 1.4, max: 3.0
+- \b "~speed_ai" : \b [double] SPEED I PARAM min: -1.0, default: 0.0, max: 1.0
+- \b "~speed_ad" : \b [double] SPEED D PARAM min: -1.0, default: 0.03, max: 1.0
+- \b "~speed_vp" : \b [double] SPEED P PARAM min: 0.0, default: 0.4, max: 0.8
+- \b "~speed_vi" : \b [double] SPEED I PARAM min: -0.05, default: 0.0, max: 0.05
+- \b "~speed_vd" : \b [double] SPEED D PARAM min: -0.05, default: 0.0, max: 0.05
+

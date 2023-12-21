@@ -1,0 +1,18 @@
+\subsubsection parameters ROS parameters
+
+Reads and maintains the following parameters on the ROS server
+
+- \b "~angle_start" : \b [double] start angle min: 0.0, default: 0.0, max: 360.0
+- \b "~angle_end" : \b [double] end angle min: 0.0, default: 360.0, max: 360.0
+- \b "~distance_min" : \b [double] min distance min: 0.0, default: 0.0, max: 10.0
+- \b "~distance_max" : \b [double] max distance min: 0.0, default: 30.0, max: 30.0
+- \b "~is_parted" : \b [bool] scan parted or not min: False, default: False, max: True
+- \b "~angle1_start" : \b [double] start angle1 min: 0.0, default: 40.0, max: 360.0
+- \b "~angle1_end" : \b [double] end angle1 min: 0.0, default: 50.0, max: 360.0
+- \b "~angle2_start" : \b [double] start angle2 min: 0.0, default: 130.0, max: 360.0
+- \b "~angle2_end" : \b [double] end angle2 min: 0.0, default: 140.0, max: 360.0
+- \b "~angle3_start" : \b [double] start angle3 min: 0.0, default: 220.0, max: 360.0
+- \b "~angle3_end" : \b [double] end angle3 min: 0.0, default: 230.0, max: 360.0
+- \b "~angle4_start" : \b [double] start angle4 min: 0.0, default: 310.0, max: 360.0
+- \b "~angle4_end" : \b [double] end angle4 min: 0.0, default: 320.0, max: 360.0
+

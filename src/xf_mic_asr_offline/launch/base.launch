@@ -1,0 +1,17 @@
+
+<launch>
+  <!-- 开启机器人底层相关节点  -->
+  <include file="$(find xf_mic_asr_offline)/launch/include/voi_navigation1.launch" />
+  <include file='$(find simple_follower)/launch/nodes/laserTracker.launch' />
+  <rosparam command="load" file="$(find xf_mic_asr_offline)/config/recognition_params.yaml" />
+
+  <node pkg="xf_mic_asr_offline" type="call_recognition" name="call_recognition" />
+  <node pkg="xf_mic_asr_offline" type="command_recognition" name="command_recognition" output="screen"/>
+  <node pkg="xf_mic_asr_offline" type="motion_control" name="motion_control" />
+  <node pkg="xf_mic_asr_offline" type="refresh_mic" name="refresh_mic" />
+  <node pkg="xf_mic_asr_offline" type="node_opne_feedback" name="node_opne_feedback" output="screen"/>
+  <node pkg="xf_mic_asr_offline" type="node_close_feedback" name="node_close_feedback" />
+  <node pkg="xf_mic_asr_offline" type="point_navigation" name="point_navigation" />
+
+  
+</launch>

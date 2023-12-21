@@ -1,0 +1,10 @@
+<launch>
+    <arg name="slave_robot"             default=""/>
+    <node name="lsm10_v2" pkg="lsm10_v2" type="lsm10_v2" output="screen">
+        <param name="scan_topic" value="scan"/>         <!--设置激光数据topic名称-->
+        <param name="frame_id" type="string" value="$(arg slave_robot)/laser"/>     <!--激光坐标-->
+        <param name="serial_port" value="/dev/wheeltec_lidar"/>  <!--雷达连接的串口-->
+        <param name="baud_rate" value="460800" />        <!--雷达连接的串口波特率-->
+    </node>
+</launch>
+

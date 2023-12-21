@@ -1,0 +1,13 @@
+\subsubsection parameters ROS parameters
+
+Reads and maintains the following parameters on the ROS server
+
+- \b "~maxSpeed" : \b [double] max speed min: 0.2, default: 0.6, max: 1.0
+- \b "~targetDist" : \b [double] targetDist min: 0.5, default: 0.9, max: 1.5
+- \b "~P_v" : \b [double] Ratio of linear velocity min: 0.0, default: 1.6, max: 3.0
+- \b "~P_w" : \b [double] Ratio of angular velocity min: 0.0, default: 0.5, max: 1.0
+- \b "~I_v" : \b [double] Linear velocity integral min: 0.0, default: 0.0, max: 0.1
+- \b "~I_w" : \b [double] Angular velocity integral min: 0.0, default: 0.0, max: 0.1
+- \b "~D_v" : \b [double] Differential of linear velocity min: 0.0, default: 0.0, max: 0.1
+- \b "~D_w" : \b [double] Angular velocity differential min: 0.0, default: 0.0, max: 0.1
+

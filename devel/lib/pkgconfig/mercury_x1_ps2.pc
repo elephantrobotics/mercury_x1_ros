@@ -1,0 +1,8 @@
+prefix=/home/er/mercury_x1_ros/devel
+
+Name: mercury_x1_ps2
+Description: Description of mercury_x1_ps2
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

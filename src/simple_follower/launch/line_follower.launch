@@ -1,0 +1,13 @@
+<launch>
+  <!-- 开启RGB摄像头  -->
+  <include file="$(find astra_camera)/launch/astra.launch" />
+  <!-- 开启巡线节点  -->
+  <node name='line_tracker' pkg="simple_follower" type="line_follow.py">
+  </node>
+  <node pkg="simple_follower" type="avoidance" name="avoidance" />
+  <!-- 开启机器人底层相关节点  -->
+  <include file="$(find turn_on_tringai_robot)/launch/turn_on_tringai_robot.launch" />
+  <!-- turn on lidar开启雷达  -->
+  <include file="$(find turn_on_tringai_robot)/launch/tringai_lidar.launch" />
+  <include file='$(find simple_follower)/launch/nodes/laserTracker.launch' />
+</launch>

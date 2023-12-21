@@ -1,0 +1,19 @@
+\subsubsection usage Usage
+\verbatim
+<node name="rplidar_ros" pkg="rplidar_ros" type="rplidar_ros">
+  <param name="angle_start" type="double" value="0.0" />
+  <param name="angle_end" type="double" value="360.0" />
+  <param name="distance_min" type="double" value="0.0" />
+  <param name="distance_max" type="double" value="30.0" />
+  <param name="is_parted" type="bool" value="False" />
+  <param name="angle1_start" type="double" value="40.0" />
+  <param name="angle1_end" type="double" value="50.0" />
+  <param name="angle2_start" type="double" value="130.0" />
+  <param name="angle2_end" type="double" value="140.0" />
+  <param name="angle3_start" type="double" value="220.0" />
+  <param name="angle3_end" type="double" value="230.0" />
+  <param name="angle4_start" type="double" value="310.0" />
+  <param name="angle4_end" type="double" value="320.0" />
+</node>
+\endverbatim
+

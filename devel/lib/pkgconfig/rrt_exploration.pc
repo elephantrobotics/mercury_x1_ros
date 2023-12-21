@@ -1,0 +1,8 @@
+prefix=/home/er/mercury_x1_ros/devel
+
+Name: rrt_exploration
+Description: Description of rrt_exploration
+Version: 1.0.0
+Cflags: -I/home/er/mercury_x1_ros/devel/include
+Libs: -L${prefix}/lib 
+Requires: message_runtime

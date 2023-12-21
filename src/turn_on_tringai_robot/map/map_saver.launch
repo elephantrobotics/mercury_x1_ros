@@ -1,0 +1,4 @@
+<launch>
+	<node pkg="map_server" type="map_saver" name="map_saver1" args="-f /home/er/tringai_robot/src/turn_on_tringai_robot/map/TRINGAI" output="screen">	
+	</node>
+</launch>

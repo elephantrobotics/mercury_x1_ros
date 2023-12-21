@@ -1,0 +1,8 @@
+prefix=/home/er/mercury_x1_ros/devel
+
+Name: ldlidar_14
+Description: Description of ldlidar_14
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

@@ -1,0 +1,8 @@
+prefix=/home/er/mercury_x1_ros/install
+
+Name: qt_ros_test
+Description: Description of qt_ros_test
+Version: 0.1.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

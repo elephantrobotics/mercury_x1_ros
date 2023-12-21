@@ -1,0 +1,17 @@
+yolo_model:
+
+  config_file:
+    name: yolov4-tiny.cfg
+  weight_file:
+    name: yolov4-tiny.weights
+  threshold:
+    value: 0.3
+  detection_classes:
+    names:
+      - 0-hand
+      - 1-hand
+      - 2-hand
+      - 3-hand
+      - 4-hand
+      - 5-hand
+     

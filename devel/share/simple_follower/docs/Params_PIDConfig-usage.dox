@@ -1,0 +1,12 @@
+\subsubsection usage Usage
+\verbatim
+<node name="simple_follower" pkg="simple_follower" type="simple_follower">
+  <param name="speed_ap" type="double" value="1.4" />
+  <param name="speed_ai" type="double" value="0.0" />
+  <param name="speed_ad" type="double" value="0.03" />
+  <param name="speed_vp" type="double" value="0.4" />
+  <param name="speed_vi" type="double" value="0.0" />
+  <param name="speed_vd" type="double" value="0.0" />
+</node>
+\endverbatim
+

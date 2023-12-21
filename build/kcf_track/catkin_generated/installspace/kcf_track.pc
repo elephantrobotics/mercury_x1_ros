@@ -1,0 +1,8 @@
+prefix=/home/er/mercury_x1_ros/install
+
+Name: kcf_track
+Description: Description of kcf_track
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

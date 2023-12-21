@@ -1,0 +1,8 @@
+prefix=/home/er/mercury_x1_ros/install
+
+Name: jpeg_streamer
+Description: Description of jpeg_streamer
+Version: 0.2.7
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

@@ -1,0 +1,12 @@
+\subsubsection parameters ROS parameters
+
+Reads and maintains the following parameters on the ROS server
+
+- \b "~color" : \b [int] chose present HSV thrshold min: 0, default: 0, max: 4
+- \b "~HSV_H_MIN" : \b [int] HSV_H_MIN min: 0, default: 0, max: 180
+- \b "~HSV_S_MIN" : \b [int] HSV_S_MIN min: 0, default: 60, max: 255
+- \b "~HSV_V_MIN" : \b [int] HSV_V_MIN min: 0, default: 60, max: 255
+- \b "~HSV_H_MAX" : \b [int] HSV_H_MAX min: 0, default: 180, max: 180
+- \b "~HSV_S_MAX" : \b [int] HSV_S_MAX min: 0, default: 255, max: 255
+- \b "~HSV_V_MAX" : \b [int] HSV_V_MAX min: 0, default: 255, max: 255
+

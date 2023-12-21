@@ -1,0 +1,8 @@
+prefix=/home/er/mercury_x1_ros/install
+
+Name: lsn10
+Description: Description of lsn10
+Version: 2.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: roscpp std_srvs rospy std_msgs message_runtime dynamic_reconfigure

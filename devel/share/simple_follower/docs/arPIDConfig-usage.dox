@@ -1,0 +1,17 @@
+\subsubsection usage Usage
+\verbatim
+<node name="simple_follower" pkg="simple_follower" type="simple_follower">
+  <param name="linearfront_p" type="double" value="0.4" />
+  <param name="linearback_p" type="double" value="0.5" />
+  <param name="angularleft_p" type="double" value="3.3" />
+  <param name="angularright_p" type="double" value="3.0" />
+  <param name="d_param" type="double" value="0.6" />
+  <param name="max_angular_speed" type="double" value="0.5" />
+  <param name="min_angular_speed" type="double" value="-0.5" />
+  <param name="max_linear_speed" type="double" value="0.2" />
+  <param name="min_linear_speed" type="double" value="-0.2" />
+  <param name="goal_x" type="double" value="0.6" />
+  <param name="goal_y" type="double" value="0.0" />
+</node>
+\endverbatim
+

@@ -1,0 +1,7 @@
+
+<launch>
+
+  <node pkg="xf_mic_asr_offline" type="kill1" name="kill1" />
+
+  
+</launch>

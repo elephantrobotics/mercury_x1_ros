@@ -1,0 +1,8 @@
+prefix=/home/er/mercury_x1_ros/devel
+
+Name: ros_detection
+Description: Description of ros_detection
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

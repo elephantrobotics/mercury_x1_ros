@@ -1,0 +1,12 @@
+
+<launch>
+<!-- 重复开启底层节点 因为此处运行自主建图节点前会先杀死move_base节点 需要重新开启teb算法来开启move_base节点-->
+<include file="$(find turn_on_tringai_robot)/launch/turn_on_tringai_robot.launch">
+    <arg name="navigation"  default="true"/>
+    <arg name="repeat"  default="true"/>
+</include>
+
+<include file="$(find turn_on_tringai_robot)/launch/simple.launch" />
+<include file="$(find xf_mic_asr_offline)/launch/include/voi_mapping.launch" />
+
+</launch>

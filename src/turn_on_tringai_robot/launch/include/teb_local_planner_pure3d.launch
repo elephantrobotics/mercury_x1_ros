@@ -1,0 +1,30 @@
+<launch>
+
+<!-- navigation common params-->
+<rosparam file="$(find turn_on_tringai_robot)/param_common/local_costmap_params.yaml"      command="load" ns="move_base"/>
+<rosparam file="$(find turn_on_tringai_robot)/param_common/global_costmap_params.yaml"     command="load" ns="move_base"/>
+<rosparam file="$(find turn_on_tringai_robot)/param_common/move_base_params.yaml"          command="load" ns="move_base"/>
+<rosparam file="$(find turn_on_tringai_robot)/param_common/base_global_planner_param.yaml" command="load" ns="move_base"/>
+
+<param name="move_base/base_local_planner"    type="string" value="teb_local_planner/TebLocalPlannerROS"/>
+
+<!-- Arguments参数 -->
+<arg name="car_mode"  default="" />
+
+<!-- car_mode and params -->
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+    <!-- 话题重命名后输入给 "move_base" ,该节点需要订阅传感器话题、全局地图话题、目标位置话题、还有tf树、odom_combined，proj_map为读取地图数据包后生成的地图同时会继续更新 --> 
+    <!-- 用于以摄像头点云数据为观测源，已弃用 --> 
+    <!-- <remap from="openni_points" to="/camera/depth_registered/points"/> --> 
+    <!-- 全局地图来源 --> 
+    <remap from="map" to="/rtabmap/grid_map"/>
+    <!-- movebase导航所需参数 --> 
+    <rosparam file="$(find turn_on_tringai_robot)/costmap_common_params/param_$(arg car_mode)/costmap_common_params_pure3d.yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find turn_on_tringai_robot)/costmap_common_params/param_$(arg car_mode)/costmap_common_params_pure3d.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find turn_on_tringai_robot)/costmap_common_params/param_$(arg car_mode)/teb_local_planner_params.yaml"  command="load"/>
+  </node>
+
+    
+</launch>
+
+

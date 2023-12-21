@@ -1,0 +1,8 @@
+<launch>
+  <!-- 开启RGB摄像头  -->
+  <include file="$(find astra_camera)/launch/astra.launch" />
+  <!-- 开启人脸追踪  -->
+  <include file='$(find simple_follower)/launch/nodes/faceTracker.launch' />
+   <!-- 开启机器人底层相关节点  -->
+  <include file="$(find turn_on_tringai_robot)/launch/turn_on_tringai_robot.launch" />
+</launch>
