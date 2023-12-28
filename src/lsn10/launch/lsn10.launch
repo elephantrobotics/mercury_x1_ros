@@ -1,0 +1,8 @@
+<launch>
+    <node name="lsn10" pkg="lsn10" type="lsn10" output="screen" >
+        <param name="scan_topic" value="scan"/> <!--设置激光数据topic名称-->
+        <param name="frame_id" value="laser"/> <!--激光坐标-->
+        <param name="serial_port" value="/dev/wheeltec_lidar"/> <!--雷达连接的串口-->
+        <param name="baud_rate" value="230400" /> <!--雷达连接的串口波特率-->
+    </node>
+</launch>
