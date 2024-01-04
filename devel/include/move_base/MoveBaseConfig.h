@@ -252,6 +252,8 @@ class DEFAULT
         if("shutdown_costmaps"==(*_i)->name){shutdown_costmaps = boost::any_cast<bool>(val);}
         if("oscillation_timeout"==(*_i)->name){oscillation_timeout = boost::any_cast<double>(val);}
         if("oscillation_distance"==(*_i)->name){oscillation_distance = boost::any_cast<double>(val);}
+        if("make_plan_clear_costmap"==(*_i)->name){make_plan_clear_costmap = boost::any_cast<bool>(val);}
+        if("make_plan_add_unreachable_goal"==(*_i)->name){make_plan_add_unreachable_goal = boost::any_cast<bool>(val);}
         if("restore_defaults"==(*_i)->name){restore_defaults = boost::any_cast<bool>(val);}
       }
     }
@@ -269,6 +271,8 @@ bool clearing_rotation_allowed;
 bool shutdown_costmaps;
 double oscillation_timeout;
 double oscillation_distance;
+bool make_plan_clear_costmap;
+bool make_plan_add_unreachable_goal;
 bool restore_defaults;
 
     bool state;
@@ -305,6 +309,10 @@ bool restore_defaults;
       double oscillation_timeout;
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       double oscillation_distance;
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      bool make_plan_clear_costmap;
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      bool make_plan_add_unreachable_goal;
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       bool restore_defaults;
 //#line 231 "/opt/ros/noetic/share/dynamic_reconfigure/cmake/../templates/ConfigType.h.template"
@@ -575,6 +583,26 @@ MoveBaseConfig::GroupDescription<MoveBaseConfig::DEFAULT, MoveBaseConfig> Defaul
       Default.abstract_parameters.push_back(MoveBaseConfig::AbstractParamDescriptionConstPtr(new MoveBaseConfig::ParamDescription<double>("oscillation_distance", "double", 0, "How far in meters the robot must move to be considered not to be oscillating.", "", &MoveBaseConfig::oscillation_distance)));
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       __param_descriptions__.push_back(MoveBaseConfig::AbstractParamDescriptionConstPtr(new MoveBaseConfig::ParamDescription<double>("oscillation_distance", "double", 0, "How far in meters the robot must move to be considered not to be oscillating.", "", &MoveBaseConfig::oscillation_distance)));
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      __min__.make_plan_clear_costmap = 0;
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      __max__.make_plan_clear_costmap = 1;
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      __default__.make_plan_clear_costmap = 1;
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      Default.abstract_parameters.push_back(MoveBaseConfig::AbstractParamDescriptionConstPtr(new MoveBaseConfig::ParamDescription<bool>("make_plan_clear_costmap", "bool", 0, "Whether or not to clear the global costmap on make_plan service call.", "", &MoveBaseConfig::make_plan_clear_costmap)));
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      __param_descriptions__.push_back(MoveBaseConfig::AbstractParamDescriptionConstPtr(new MoveBaseConfig::ParamDescription<bool>("make_plan_clear_costmap", "bool", 0, "Whether or not to clear the global costmap on make_plan service call.", "", &MoveBaseConfig::make_plan_clear_costmap)));
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      __min__.make_plan_add_unreachable_goal = 0;
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      __max__.make_plan_add_unreachable_goal = 1;
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      __default__.make_plan_add_unreachable_goal = 1;
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      Default.abstract_parameters.push_back(MoveBaseConfig::AbstractParamDescriptionConstPtr(new MoveBaseConfig::ParamDescription<bool>("make_plan_add_unreachable_goal", "bool", 0, "Whether or not to add the original goal to the path if it is unreachable in the make_plan service call.", "", &MoveBaseConfig::make_plan_add_unreachable_goal)));
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      __param_descriptions__.push_back(MoveBaseConfig::AbstractParamDescriptionConstPtr(new MoveBaseConfig::ParamDescription<bool>("make_plan_add_unreachable_goal", "bool", 0, "Whether or not to add the original goal to the path if it is unreachable in the make_plan service call.", "", &MoveBaseConfig::make_plan_add_unreachable_goal)));
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       __min__.restore_defaults = 0;
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"

@@ -1,21 +1,21 @@
 Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
 Change Dir: /home/er/mercury_x1_ros/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/make cmTC_d493c/fast && /usr/bin/make -f CMakeFiles/cmTC_d493c.dir/build.make CMakeFiles/cmTC_d493c.dir/build
+Run Build Command(s):/usr/bin/make cmTC_9d364/fast && /usr/bin/make -f CMakeFiles/cmTC_9d364.dir/build.make CMakeFiles/cmTC_9d364.dir/build
 make[1]: Entering directory '/home/er/mercury_x1_ros/build/CMakeFiles/CMakeTmp'
-Building C object CMakeFiles/cmTC_d493c.dir/src.c.o
-/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_d493c.dir/src.c.o   -c /home/er/mercury_x1_ros/build/CMakeFiles/CMakeTmp/src.c
-Linking C executable cmTC_d493c
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_d493c.dir/link.txt --verbose=1
-/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_d493c.dir/src.c.o  -o cmTC_d493c 
-/usr/bin/ld: CMakeFiles/cmTC_d493c.dir/src.c.o: in function `main':
+Building C object CMakeFiles/cmTC_9d364.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_9d364.dir/src.c.o   -c /home/er/mercury_x1_ros/build/CMakeFiles/CMakeTmp/src.c
+Linking C executable cmTC_9d364
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_9d364.dir/link.txt --verbose=1
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_9d364.dir/src.c.o  -o cmTC_9d364 
+/usr/bin/ld: CMakeFiles/cmTC_9d364.dir/src.c.o: in function `main':
 src.c:(.text+0x48): undefined reference to `pthread_create'
 /usr/bin/ld: src.c:(.text+0x50): undefined reference to `pthread_detach'
 /usr/bin/ld: src.c:(.text+0x5c): undefined reference to `pthread_join'
 collect2: error: ld returned 1 exit status
-make[1]: *** [CMakeFiles/cmTC_d493c.dir/build.make:87: cmTC_d493c] Error 1
+make[1]: *** [CMakeFiles/cmTC_9d364.dir/build.make:87: cmTC_9d364] Error 1
 make[1]: Leaving directory '/home/er/mercury_x1_ros/build/CMakeFiles/CMakeTmp'
-make: *** [Makefile:121: cmTC_d493c/fast] Error 2
+make: *** [Makefile:121: cmTC_9d364/fast] Error 2
 
 
 Source file was:
@@ -41,18 +41,35 @@ int main(void)
 Determining if the function pthread_create exists in the pthreads failed with the following output:
 Change Dir: /home/er/mercury_x1_ros/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/make cmTC_b3178/fast && /usr/bin/make -f CMakeFiles/cmTC_b3178.dir/build.make CMakeFiles/cmTC_b3178.dir/build
+Run Build Command(s):/usr/bin/make cmTC_ee76d/fast && /usr/bin/make -f CMakeFiles/cmTC_ee76d.dir/build.make CMakeFiles/cmTC_ee76d.dir/build
 make[1]: Entering directory '/home/er/mercury_x1_ros/build/CMakeFiles/CMakeTmp'
-Building C object CMakeFiles/cmTC_b3178.dir/CheckFunctionExists.c.o
-/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_b3178.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
-Linking C executable cmTC_b3178
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b3178.dir/link.txt --verbose=1
-/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_b3178.dir/CheckFunctionExists.c.o  -o cmTC_b3178  -lpthreads 
+Building C object CMakeFiles/cmTC_ee76d.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_ee76d.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+Linking C executable cmTC_ee76d
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_ee76d.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_ee76d.dir/CheckFunctionExists.c.o  -o cmTC_ee76d  -lpthreads 
 /usr/bin/ld: cannot find -lpthreads
 collect2: error: ld returned 1 exit status
-make[1]: *** [CMakeFiles/cmTC_b3178.dir/build.make:87: cmTC_b3178] Error 1
+make[1]: *** [CMakeFiles/cmTC_ee76d.dir/build.make:87: cmTC_ee76d] Error 1
 make[1]: Leaving directory '/home/er/mercury_x1_ros/build/CMakeFiles/CMakeTmp'
-make: *** [Makefile:121: cmTC_b3178/fast] Error 2
+make: *** [Makefile:121: cmTC_ee76d/fast] Error 2
+
+
+
+Determining if the include file pgm.h exists failed with the following output:
+Change Dir: /home/er/mercury_x1_ros/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_c76dc/fast && /usr/bin/make -f CMakeFiles/cmTC_c76dc.dir/build.make CMakeFiles/cmTC_c76dc.dir/build
+make[1]: Entering directory '/home/er/mercury_x1_ros/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_c76dc.dir/CheckIncludeFile.cxx.o
+/usr/bin/c++     -o CMakeFiles/cmTC_c76dc.dir/CheckIncludeFile.cxx.o -c /home/er/mercury_x1_ros/build/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx
+/home/er/mercury_x1_ros/build/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx:1:10: fatal error: pgm.h: No such file or directory
+    1 | #include <pgm.h>
+      |          ^~~~~~~
+compilation terminated.
+make[1]: *** [CMakeFiles/cmTC_c76dc.dir/build.make:66: CMakeFiles/cmTC_c76dc.dir/CheckIncludeFile.cxx.o] Error 1
+make[1]: Leaving directory '/home/er/mercury_x1_ros/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_c76dc/fast] Error 2
 
 
 

@@ -67,7 +67,7 @@ set(nav_core_CONFIG_INCLUDED TRUE)
 
 # set variables for source/devel/install prefixes
 if("TRUE" STREQUAL "TRUE")
-  set(nav_core_SOURCE_PREFIX /home/er/mercury_x1_ros/src/navigation-melodic/nav_core)
+  set(nav_core_SOURCE_PREFIX /home/er/mercury_x1_ros/src/navigation/nav_core)
   set(nav_core_DEVEL_PREFIX /home/er/mercury_x1_ros/devel)
   set(nav_core_INSTALL_PREFIX "")
   set(nav_core_PREFIX ${nav_core_DEVEL_PREFIX})
@@ -91,9 +91,9 @@ endif()
 # flag project as catkin-based to distinguish if a find_package()-ed project is a catkin project
 set(nav_core_FOUND_CATKIN_PROJECT TRUE)
 
-if(NOT "/home/er/mercury_x1_ros/src/navigation-melodic/nav_core/include " STREQUAL " ")
+if(NOT "/home/er/mercury_x1_ros/src/navigation/nav_core/include " STREQUAL " ")
   set(nav_core_INCLUDE_DIRS "")
-  set(_include_dirs "/home/er/mercury_x1_ros/src/navigation-melodic/nav_core/include")
+  set(_include_dirs "/home/er/mercury_x1_ros/src/navigation/nav_core/include")
   if(NOT " " STREQUAL " ")
     set(_report "Check the issue tracker '' and consider creating a ticket if the problem has not been reported yet.")
   elseif(NOT "http://wiki.ros.org/nav_core " STREQUAL " ")
@@ -110,7 +110,7 @@ if(NOT "/home/er/mercury_x1_ros/src/navigation-melodic/nav_core/include " STREQU
         message(FATAL_ERROR "Project 'nav_core' specifies '${idir}' as an include dir, which is not found.  It does not exist in '${include}'.  ${_report}")
       endif()
     else()
-      message(FATAL_ERROR "Project 'nav_core' specifies '${idir}' as an include dir, which is not found.  It does neither exist as an absolute directory nor in '/home/er/mercury_x1_ros/src/navigation-melodic/nav_core/${idir}'.  ${_report}")
+      message(FATAL_ERROR "Project 'nav_core' specifies '${idir}' as an include dir, which is not found.  It does neither exist as an absolute directory nor in '/home/er/mercury_x1_ros/src/navigation/nav_core/${idir}'.  ${_report}")
     endif()
     _list_append_unique(nav_core_INCLUDE_DIRS ${include})
   endforeach()
@@ -154,7 +154,7 @@ foreach(library ${libraries})
     set(lib_path "")
     set(lib "${library}-NOTFOUND")
     # since the path where the library is found is returned we have to iterate over the paths manually
-    foreach(path /home/er/mercury_x1_ros/devel/lib;/home/er/tringai_robot/devel/lib;/home/er/myagv_ros/devel/lib;/opt/ros/noetic/lib)
+    foreach(path /home/er/mercury_x1_ros/devel/lib;/home/er/mercury_x1_ros/devel/lib;/opt/ros/noetic/lib)
       find_library(lib ${library}
         PATHS ${path}
         NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)

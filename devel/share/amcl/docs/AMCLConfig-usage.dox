@@ -15,6 +15,8 @@
   <param name="beam_skip_distance" type="double" value="0.5" />
   <param name="beam_skip_threshold" type="double" value="0.3" />
   <param name="tf_broadcast" type="bool" value="True" />
+  <param name="force_update_after_initialpose" type="bool" value="False" />
+  <param name="force_update_after_set_map" type="bool" value="False" />
   <param name="gui_publish_rate" type="double" value="-1.0" />
   <param name="save_pose_rate" type="double" value="0.5" />
   <param name="use_map_topic" type="bool" value="False" />

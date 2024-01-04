@@ -2,7 +2,7 @@ prefix=/home/er/mercury_x1_ros/devel
 
 Name: clear_costmap_recovery
 Description: Description of clear_costmap_recovery
-Version: 1.16.4
-Cflags: -I/home/er/mercury_x1_ros/src/navigation-melodic/clear_costmap_recovery/include
+Version: 1.17.3
+Cflags: -I/home/er/mercury_x1_ros/src/navigation/clear_costmap_recovery/include
 Libs: -L${prefix}/lib -lclear_costmap_recovery
 Requires: costmap_2d nav_core pluginlib roscpp tf2_ros

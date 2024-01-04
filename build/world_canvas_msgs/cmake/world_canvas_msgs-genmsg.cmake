@@ -19,12 +19,12 @@ add_custom_target(world_canvas_msgs_generate_messages ALL)
 
 get_filename_component(_filename "/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg" NAME_WE)
 add_custom_target(_world_canvas_msgs_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "world_canvas_msgs" "/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg" "geometry_msgs/Vector3:geometry_msgs/Quaternion:geometry_msgs/Point:geometry_msgs/PoseWithCovarianceStamped:std_msgs/ColorRGBA:geometry_msgs/PoseWithCovariance:geometry_msgs/Pose:uuid_msgs/UniqueID:std_msgs/Header"
+  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "world_canvas_msgs" "/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg" "geometry_msgs/Point:std_msgs/ColorRGBA:uuid_msgs/UniqueID:geometry_msgs/Quaternion:std_msgs/Header:geometry_msgs/Pose:geometry_msgs/Vector3:geometry_msgs/PoseWithCovariance:geometry_msgs/PoseWithCovarianceStamped"
 )
 
 get_filename_component(_filename "/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotations.msg" NAME_WE)
 add_custom_target(_world_canvas_msgs_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "world_canvas_msgs" "/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotations.msg" "geometry_msgs/Vector3:geometry_msgs/Quaternion:geometry_msgs/Point:geometry_msgs/PoseWithCovarianceStamped:std_msgs/ColorRGBA:world_canvas_msgs/Annotation:geometry_msgs/PoseWithCovariance:geometry_msgs/Pose:uuid_msgs/UniqueID:std_msgs/Header"
+  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "world_canvas_msgs" "/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotations.msg" "geometry_msgs/Point:std_msgs/ColorRGBA:uuid_msgs/UniqueID:geometry_msgs/Quaternion:world_canvas_msgs/Annotation:std_msgs/Header:geometry_msgs/Pose:geometry_msgs/Vector3:geometry_msgs/PoseWithCovariance:geometry_msgs/PoseWithCovarianceStamped"
 )
 
 get_filename_component(_filename "/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/AnnotationData.msg" NAME_WE)
@@ -69,17 +69,17 @@ add_custom_target(_world_canvas_msgs_generate_messages_check_deps_${_filename}
 
 get_filename_component(_filename "/home/er/mercury_x1_ros/src/world_canvas_msgs/srv/DeleteAnnotations.srv" NAME_WE)
 add_custom_target(_world_canvas_msgs_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "world_canvas_msgs" "/home/er/mercury_x1_ros/src/world_canvas_msgs/srv/DeleteAnnotations.srv" "geometry_msgs/Vector3:geometry_msgs/Quaternion:geometry_msgs/Point:geometry_msgs/PoseWithCovarianceStamped:std_msgs/ColorRGBA:world_canvas_msgs/Annotation:geometry_msgs/PoseWithCovariance:geometry_msgs/Pose:uuid_msgs/UniqueID:std_msgs/Header"
+  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "world_canvas_msgs" "/home/er/mercury_x1_ros/src/world_canvas_msgs/srv/DeleteAnnotations.srv" "geometry_msgs/Point:std_msgs/ColorRGBA:uuid_msgs/UniqueID:geometry_msgs/Quaternion:world_canvas_msgs/Annotation:std_msgs/Header:geometry_msgs/Pose:geometry_msgs/Vector3:geometry_msgs/PoseWithCovariance:geometry_msgs/PoseWithCovarianceStamped"
 )
 
 get_filename_component(_filename "/home/er/mercury_x1_ros/src/world_canvas_msgs/srv/GetAnnotations.srv" NAME_WE)
 add_custom_target(_world_canvas_msgs_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "world_canvas_msgs" "/home/er/mercury_x1_ros/src/world_canvas_msgs/srv/GetAnnotations.srv" "geometry_msgs/Vector3:geometry_msgs/Quaternion:geometry_msgs/Point:geometry_msgs/PoseWithCovarianceStamped:std_msgs/ColorRGBA:world_canvas_msgs/Annotation:geometry_msgs/PoseWithCovariance:geometry_msgs/Pose:uuid_msgs/UniqueID:std_msgs/Header"
+  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "world_canvas_msgs" "/home/er/mercury_x1_ros/src/world_canvas_msgs/srv/GetAnnotations.srv" "geometry_msgs/Point:std_msgs/ColorRGBA:uuid_msgs/UniqueID:geometry_msgs/Quaternion:world_canvas_msgs/Annotation:std_msgs/Header:geometry_msgs/Pose:geometry_msgs/Vector3:geometry_msgs/PoseWithCovariance:geometry_msgs/PoseWithCovarianceStamped"
 )
 
 get_filename_component(_filename "/home/er/mercury_x1_ros/src/world_canvas_msgs/srv/GetAnnotationsData.srv" NAME_WE)
 add_custom_target(_world_canvas_msgs_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "world_canvas_msgs" "/home/er/mercury_x1_ros/src/world_canvas_msgs/srv/GetAnnotationsData.srv" "uuid_msgs/UniqueID:world_canvas_msgs/AnnotationData"
+  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "world_canvas_msgs" "/home/er/mercury_x1_ros/src/world_canvas_msgs/srv/GetAnnotationsData.srv" "world_canvas_msgs/AnnotationData:uuid_msgs/UniqueID"
 )
 
 get_filename_component(_filename "/home/er/mercury_x1_ros/src/world_canvas_msgs/srv/PubAnnotationsData.srv" NAME_WE)
@@ -89,12 +89,12 @@ add_custom_target(_world_canvas_msgs_generate_messages_check_deps_${_filename}
 
 get_filename_component(_filename "/home/er/mercury_x1_ros/src/world_canvas_msgs/srv/EditAnnotationsData.srv" NAME_WE)
 add_custom_target(_world_canvas_msgs_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "world_canvas_msgs" "/home/er/mercury_x1_ros/src/world_canvas_msgs/srv/EditAnnotationsData.srv" "geometry_msgs/Vector3:geometry_msgs/Quaternion:geometry_msgs/Point:geometry_msgs/PoseWithCovarianceStamped:world_canvas_msgs/AnnotationData:std_msgs/ColorRGBA:world_canvas_msgs/Annotation:geometry_msgs/PoseWithCovariance:geometry_msgs/Pose:uuid_msgs/UniqueID:std_msgs/Header"
+  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "world_canvas_msgs" "/home/er/mercury_x1_ros/src/world_canvas_msgs/srv/EditAnnotationsData.srv" "world_canvas_msgs/AnnotationData:geometry_msgs/Point:std_msgs/ColorRGBA:uuid_msgs/UniqueID:geometry_msgs/Quaternion:world_canvas_msgs/Annotation:std_msgs/Header:geometry_msgs/Pose:geometry_msgs/Vector3:geometry_msgs/PoseWithCovariance:geometry_msgs/PoseWithCovarianceStamped"
 )
 
 get_filename_component(_filename "/home/er/mercury_x1_ros/src/world_canvas_msgs/srv/SaveAnnotationsData.srv" NAME_WE)
 add_custom_target(_world_canvas_msgs_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "world_canvas_msgs" "/home/er/mercury_x1_ros/src/world_canvas_msgs/srv/SaveAnnotationsData.srv" "geometry_msgs/Vector3:geometry_msgs/Quaternion:geometry_msgs/Point:geometry_msgs/PoseWithCovarianceStamped:world_canvas_msgs/AnnotationData:std_msgs/ColorRGBA:world_canvas_msgs/Annotation:geometry_msgs/PoseWithCovariance:geometry_msgs/Pose:uuid_msgs/UniqueID:std_msgs/Header"
+  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "world_canvas_msgs" "/home/er/mercury_x1_ros/src/world_canvas_msgs/srv/SaveAnnotationsData.srv" "world_canvas_msgs/AnnotationData:geometry_msgs/Point:std_msgs/ColorRGBA:uuid_msgs/UniqueID:geometry_msgs/Quaternion:world_canvas_msgs/Annotation:std_msgs/Header:geometry_msgs/Pose:geometry_msgs/Vector3:geometry_msgs/PoseWithCovariance:geometry_msgs/PoseWithCovarianceStamped"
 )
 
 get_filename_component(_filename "/home/er/mercury_x1_ros/src/world_canvas_msgs/srv/ListWorlds.srv" NAME_WE)
@@ -136,13 +136,13 @@ add_custom_target(_world_canvas_msgs_generate_messages_check_deps_${_filename}
 _generate_msg_cpp(world_canvas_msgs
   "/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg"
   ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/world_canvas_msgs
 )
 _generate_msg_cpp(world_canvas_msgs
   "/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotations.msg"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg"
   ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/world_canvas_msgs
 )
 _generate_msg_cpp(world_canvas_msgs
@@ -198,19 +198,19 @@ _generate_srv_cpp(world_canvas_msgs
 _generate_srv_cpp(world_canvas_msgs
   "/home/er/mercury_x1_ros/src/world_canvas_msgs/srv/DeleteAnnotations.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg"
   ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/world_canvas_msgs
 )
 _generate_srv_cpp(world_canvas_msgs
   "/home/er/mercury_x1_ros/src/world_canvas_msgs/srv/GetAnnotations.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg"
   ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/world_canvas_msgs
 )
 _generate_srv_cpp(world_canvas_msgs
   "/home/er/mercury_x1_ros/src/world_canvas_msgs/srv/GetAnnotationsData.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/AnnotationData.msg"
+  "/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/AnnotationData.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg"
   ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/world_canvas_msgs
 )
 _generate_srv_cpp(world_canvas_msgs
@@ -222,13 +222,13 @@ _generate_srv_cpp(world_canvas_msgs
 _generate_srv_cpp(world_canvas_msgs
   "/home/er/mercury_x1_ros/src/world_canvas_msgs/srv/EditAnnotationsData.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/AnnotationData.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  "/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/AnnotationData.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg"
   ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/world_canvas_msgs
 )
 _generate_srv_cpp(world_canvas_msgs
   "/home/er/mercury_x1_ros/src/world_canvas_msgs/srv/SaveAnnotationsData.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/AnnotationData.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  "/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/AnnotationData.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg"
   ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/world_canvas_msgs
 )
 _generate_srv_cpp(world_canvas_msgs
@@ -337,13 +337,13 @@ list(APPEND ${PROJECT_NAME}_EXPORTED_TARGETS world_canvas_msgs_generate_messages
 _generate_msg_eus(world_canvas_msgs
   "/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg"
   ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/world_canvas_msgs
 )
 _generate_msg_eus(world_canvas_msgs
   "/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotations.msg"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg"
   ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/world_canvas_msgs
 )
 _generate_msg_eus(world_canvas_msgs
@@ -399,19 +399,19 @@ _generate_srv_eus(world_canvas_msgs
 _generate_srv_eus(world_canvas_msgs
   "/home/er/mercury_x1_ros/src/world_canvas_msgs/srv/DeleteAnnotations.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg"
   ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/world_canvas_msgs
 )
 _generate_srv_eus(world_canvas_msgs
   "/home/er/mercury_x1_ros/src/world_canvas_msgs/srv/GetAnnotations.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg"
   ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/world_canvas_msgs
 )
 _generate_srv_eus(world_canvas_msgs
   "/home/er/mercury_x1_ros/src/world_canvas_msgs/srv/GetAnnotationsData.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/AnnotationData.msg"
+  "/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/AnnotationData.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg"
   ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/world_canvas_msgs
 )
 _generate_srv_eus(world_canvas_msgs
@@ -423,13 +423,13 @@ _generate_srv_eus(world_canvas_msgs
 _generate_srv_eus(world_canvas_msgs
   "/home/er/mercury_x1_ros/src/world_canvas_msgs/srv/EditAnnotationsData.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/AnnotationData.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  "/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/AnnotationData.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg"
   ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/world_canvas_msgs
 )
 _generate_srv_eus(world_canvas_msgs
   "/home/er/mercury_x1_ros/src/world_canvas_msgs/srv/SaveAnnotationsData.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/AnnotationData.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  "/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/AnnotationData.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg"
   ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/world_canvas_msgs
 )
 _generate_srv_eus(world_canvas_msgs
@@ -538,13 +538,13 @@ list(APPEND ${PROJECT_NAME}_EXPORTED_TARGETS world_canvas_msgs_generate_messages
 _generate_msg_lisp(world_canvas_msgs
   "/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg"
   ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/world_canvas_msgs
 )
 _generate_msg_lisp(world_canvas_msgs
   "/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotations.msg"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg"
   ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/world_canvas_msgs
 )
 _generate_msg_lisp(world_canvas_msgs
@@ -600,19 +600,19 @@ _generate_srv_lisp(world_canvas_msgs
 _generate_srv_lisp(world_canvas_msgs
   "/home/er/mercury_x1_ros/src/world_canvas_msgs/srv/DeleteAnnotations.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg"
   ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/world_canvas_msgs
 )
 _generate_srv_lisp(world_canvas_msgs
   "/home/er/mercury_x1_ros/src/world_canvas_msgs/srv/GetAnnotations.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg"
   ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/world_canvas_msgs
 )
 _generate_srv_lisp(world_canvas_msgs
   "/home/er/mercury_x1_ros/src/world_canvas_msgs/srv/GetAnnotationsData.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/AnnotationData.msg"
+  "/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/AnnotationData.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg"
   ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/world_canvas_msgs
 )
 _generate_srv_lisp(world_canvas_msgs
@@ -624,13 +624,13 @@ _generate_srv_lisp(world_canvas_msgs
 _generate_srv_lisp(world_canvas_msgs
   "/home/er/mercury_x1_ros/src/world_canvas_msgs/srv/EditAnnotationsData.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/AnnotationData.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  "/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/AnnotationData.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg"
   ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/world_canvas_msgs
 )
 _generate_srv_lisp(world_canvas_msgs
   "/home/er/mercury_x1_ros/src/world_canvas_msgs/srv/SaveAnnotationsData.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/AnnotationData.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  "/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/AnnotationData.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg"
   ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/world_canvas_msgs
 )
 _generate_srv_lisp(world_canvas_msgs
@@ -739,13 +739,13 @@ list(APPEND ${PROJECT_NAME}_EXPORTED_TARGETS world_canvas_msgs_generate_messages
 _generate_msg_nodejs(world_canvas_msgs
   "/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg"
   ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/world_canvas_msgs
 )
 _generate_msg_nodejs(world_canvas_msgs
   "/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotations.msg"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg"
   ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/world_canvas_msgs
 )
 _generate_msg_nodejs(world_canvas_msgs
@@ -801,19 +801,19 @@ _generate_srv_nodejs(world_canvas_msgs
 _generate_srv_nodejs(world_canvas_msgs
   "/home/er/mercury_x1_ros/src/world_canvas_msgs/srv/DeleteAnnotations.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg"
   ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/world_canvas_msgs
 )
 _generate_srv_nodejs(world_canvas_msgs
   "/home/er/mercury_x1_ros/src/world_canvas_msgs/srv/GetAnnotations.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg"
   ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/world_canvas_msgs
 )
 _generate_srv_nodejs(world_canvas_msgs
   "/home/er/mercury_x1_ros/src/world_canvas_msgs/srv/GetAnnotationsData.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/AnnotationData.msg"
+  "/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/AnnotationData.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg"
   ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/world_canvas_msgs
 )
 _generate_srv_nodejs(world_canvas_msgs
@@ -825,13 +825,13 @@ _generate_srv_nodejs(world_canvas_msgs
 _generate_srv_nodejs(world_canvas_msgs
   "/home/er/mercury_x1_ros/src/world_canvas_msgs/srv/EditAnnotationsData.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/AnnotationData.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  "/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/AnnotationData.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg"
   ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/world_canvas_msgs
 )
 _generate_srv_nodejs(world_canvas_msgs
   "/home/er/mercury_x1_ros/src/world_canvas_msgs/srv/SaveAnnotationsData.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/AnnotationData.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  "/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/AnnotationData.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg"
   ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/world_canvas_msgs
 )
 _generate_srv_nodejs(world_canvas_msgs
@@ -940,13 +940,13 @@ list(APPEND ${PROJECT_NAME}_EXPORTED_TARGETS world_canvas_msgs_generate_messages
 _generate_msg_py(world_canvas_msgs
   "/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg"
   ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/world_canvas_msgs
 )
 _generate_msg_py(world_canvas_msgs
   "/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotations.msg"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg"
   ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/world_canvas_msgs
 )
 _generate_msg_py(world_canvas_msgs
@@ -1002,19 +1002,19 @@ _generate_srv_py(world_canvas_msgs
 _generate_srv_py(world_canvas_msgs
   "/home/er/mercury_x1_ros/src/world_canvas_msgs/srv/DeleteAnnotations.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg"
   ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/world_canvas_msgs
 )
 _generate_srv_py(world_canvas_msgs
   "/home/er/mercury_x1_ros/src/world_canvas_msgs/srv/GetAnnotations.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg"
   ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/world_canvas_msgs
 )
 _generate_srv_py(world_canvas_msgs
   "/home/er/mercury_x1_ros/src/world_canvas_msgs/srv/GetAnnotationsData.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/AnnotationData.msg"
+  "/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/AnnotationData.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg"
   ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/world_canvas_msgs
 )
 _generate_srv_py(world_canvas_msgs
@@ -1026,13 +1026,13 @@ _generate_srv_py(world_canvas_msgs
 _generate_srv_py(world_canvas_msgs
   "/home/er/mercury_x1_ros/src/world_canvas_msgs/srv/EditAnnotationsData.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/AnnotationData.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  "/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/AnnotationData.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg"
   ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/world_canvas_msgs
 )
 _generate_srv_py(world_canvas_msgs
   "/home/er/mercury_x1_ros/src/world_canvas_msgs/srv/SaveAnnotationsData.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/AnnotationData.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  "/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/AnnotationData.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/ColorRGBA.msg;/opt/ros/noetic/share/uuid_msgs/cmake/../msg/UniqueID.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/home/er/mercury_x1_ros/src/world_canvas_msgs/msg/Annotation.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg"
   ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/world_canvas_msgs
 )
 _generate_srv_py(world_canvas_msgs

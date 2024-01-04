@@ -14,6 +14,8 @@
   <param name="shutdown_costmaps" type="bool" value="False" />
   <param name="oscillation_timeout" type="double" value="0.0" />
   <param name="oscillation_distance" type="double" value="0.5" />
+  <param name="make_plan_clear_costmap" type="bool" value="True" />
+  <param name="make_plan_add_unreachable_goal" type="bool" value="True" />
   <param name="restore_defaults" type="bool" value="False" />
 </node>
 \endverbatim

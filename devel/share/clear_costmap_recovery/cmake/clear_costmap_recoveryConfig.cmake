@@ -67,7 +67,7 @@ set(clear_costmap_recovery_CONFIG_INCLUDED TRUE)
 
 # set variables for source/devel/install prefixes
 if("TRUE" STREQUAL "TRUE")
-  set(clear_costmap_recovery_SOURCE_PREFIX /home/er/mercury_x1_ros/src/navigation-melodic/clear_costmap_recovery)
+  set(clear_costmap_recovery_SOURCE_PREFIX /home/er/mercury_x1_ros/src/navigation/clear_costmap_recovery)
   set(clear_costmap_recovery_DEVEL_PREFIX /home/er/mercury_x1_ros/devel)
   set(clear_costmap_recovery_INSTALL_PREFIX "")
   set(clear_costmap_recovery_PREFIX ${clear_costmap_recovery_DEVEL_PREFIX})
@@ -91,9 +91,9 @@ endif()
 # flag project as catkin-based to distinguish if a find_package()-ed project is a catkin project
 set(clear_costmap_recovery_FOUND_CATKIN_PROJECT TRUE)
 
-if(NOT "/home/er/mercury_x1_ros/src/navigation-melodic/clear_costmap_recovery/include " STREQUAL " ")
+if(NOT "/home/er/mercury_x1_ros/src/navigation/clear_costmap_recovery/include " STREQUAL " ")
   set(clear_costmap_recovery_INCLUDE_DIRS "")
-  set(_include_dirs "/home/er/mercury_x1_ros/src/navigation-melodic/clear_costmap_recovery/include")
+  set(_include_dirs "/home/er/mercury_x1_ros/src/navigation/clear_costmap_recovery/include")
   if(NOT " " STREQUAL " ")
     set(_report "Check the issue tracker '' and consider creating a ticket if the problem has not been reported yet.")
   elseif(NOT "http://wiki.ros.org/clear_costmap_recovery " STREQUAL " ")
@@ -110,7 +110,7 @@ if(NOT "/home/er/mercury_x1_ros/src/navigation-melodic/clear_costmap_recovery/in
         message(FATAL_ERROR "Project 'clear_costmap_recovery' specifies '${idir}' as an include dir, which is not found.  It does not exist in '${include}'.  ${_report}")
       endif()
     else()
-      message(FATAL_ERROR "Project 'clear_costmap_recovery' specifies '${idir}' as an include dir, which is not found.  It does neither exist as an absolute directory nor in '/home/er/mercury_x1_ros/src/navigation-melodic/clear_costmap_recovery/${idir}'.  ${_report}")
+      message(FATAL_ERROR "Project 'clear_costmap_recovery' specifies '${idir}' as an include dir, which is not found.  It does neither exist as an absolute directory nor in '/home/er/mercury_x1_ros/src/navigation/clear_costmap_recovery/${idir}'.  ${_report}")
     endif()
     _list_append_unique(clear_costmap_recovery_INCLUDE_DIRS ${include})
   endforeach()
@@ -154,7 +154,7 @@ foreach(library ${libraries})
     set(lib_path "")
     set(lib "${library}-NOTFOUND")
     # since the path where the library is found is returned we have to iterate over the paths manually
-    foreach(path /home/er/mercury_x1_ros/devel/lib;/home/er/tringai_robot/devel/lib;/home/er/myagv_ros/devel/lib;/opt/ros/noetic/lib)
+    foreach(path /home/er/mercury_x1_ros/devel/lib;/home/er/mercury_x1_ros/devel/lib;/opt/ros/noetic/lib)
       find_library(lib ${library}
         PATHS ${path}
         NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)

@@ -1,10 +1,10 @@
 
 "use strict";
 
-let Pcm_Msg = require('./Pcm_Msg.js');
 let position = require('./position.js');
+let Pcm_Msg = require('./Pcm_Msg.js');
 
 module.exports = {
-  Pcm_Msg: Pcm_Msg,
   position: position,
+  Pcm_Msg: Pcm_Msg,
 };

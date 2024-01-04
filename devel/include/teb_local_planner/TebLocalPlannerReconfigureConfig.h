@@ -273,8 +273,11 @@ class DEFAULT
         if("force_reinit_new_goal_dist"==(*_i)->name){force_reinit_new_goal_dist = boost::any_cast<double>(val);}
         if("force_reinit_new_goal_angular"==(*_i)->name){force_reinit_new_goal_angular = boost::any_cast<double>(val);}
         if("feasibility_check_no_poses"==(*_i)->name){feasibility_check_no_poses = boost::any_cast<int>(val);}
+        if("feasibility_check_lookahead_distance"==(*_i)->name){feasibility_check_lookahead_distance = boost::any_cast<double>(val);}
         if("exact_arc_length"==(*_i)->name){exact_arc_length = boost::any_cast<bool>(val);}
         if("publish_feedback"==(*_i)->name){publish_feedback = boost::any_cast<bool>(val);}
+        if("control_look_ahead_poses"==(*_i)->name){control_look_ahead_poses = boost::any_cast<int>(val);}
+        if("prevent_look_ahead_poses_near_goal"==(*_i)->name){prevent_look_ahead_poses_near_goal = boost::any_cast<int>(val);}
         if("visualize_with_time_as_z_axis_scale"==(*_i)->name){visualize_with_time_as_z_axis_scale = boost::any_cast<double>(val);}
       }
     }
@@ -288,8 +291,11 @@ double max_global_plan_lookahead_dist;
 double force_reinit_new_goal_dist;
 double force_reinit_new_goal_angular;
 int feasibility_check_no_poses;
+double feasibility_check_lookahead_distance;
 bool exact_arc_length;
 bool publish_feedback;
+int control_look_ahead_poses;
+int prevent_look_ahead_poses_near_goal;
 double visualize_with_time_as_z_axis_scale;
 
     bool state;
@@ -351,6 +357,7 @@ class ROBOT
         if("acc_lim_theta"==(*_i)->name){acc_lim_theta = boost::any_cast<double>(val);}
         if("is_footprint_dynamic"==(*_i)->name){is_footprint_dynamic = boost::any_cast<bool>(val);}
         if("use_proportional_saturation"==(*_i)->name){use_proportional_saturation = boost::any_cast<bool>(val);}
+        if("transform_tolerance"==(*_i)->name){transform_tolerance = boost::any_cast<double>(val);}
       }
     }
 
@@ -361,6 +368,7 @@ double acc_lim_x;
 double acc_lim_theta;
 bool is_footprint_dynamic;
 bool use_proportional_saturation;
+double transform_tolerance;
 
     bool state;
     std::string name;
@@ -414,11 +422,13 @@ class OMNIDIRECTIONAL
         (*_i)->getValue(config, val);
 
         if("max_vel_y"==(*_i)->name){max_vel_y = boost::any_cast<double>(val);}
+        if("max_vel_trans"==(*_i)->name){max_vel_trans = boost::any_cast<double>(val);}
         if("acc_lim_y"==(*_i)->name){acc_lim_y = boost::any_cast<double>(val);}
       }
     }
 
     double max_vel_y;
+double max_vel_trans;
 double acc_lim_y;
 
     bool state;
@@ -448,12 +458,16 @@ class GOALTOLERANCE
         if("xy_goal_tolerance"==(*_i)->name){xy_goal_tolerance = boost::any_cast<double>(val);}
         if("yaw_goal_tolerance"==(*_i)->name){yaw_goal_tolerance = boost::any_cast<double>(val);}
         if("free_goal_vel"==(*_i)->name){free_goal_vel = boost::any_cast<bool>(val);}
+        if("trans_stopped_vel"==(*_i)->name){trans_stopped_vel = boost::any_cast<double>(val);}
+        if("theta_stopped_vel"==(*_i)->name){theta_stopped_vel = boost::any_cast<double>(val);}
       }
     }
 
     double xy_goal_tolerance;
 double yaw_goal_tolerance;
 bool free_goal_vel;
+double trans_stopped_vel;
+double theta_stopped_vel;
 
     bool state;
     std::string name;
@@ -630,11 +644,13 @@ class HCPLANNING
 
         if("enable_multithreading"==(*_i)->name){enable_multithreading = boost::any_cast<bool>(val);}
         if("max_number_classes"==(*_i)->name){max_number_classes = boost::any_cast<int>(val);}
+        if("max_number_plans_in_current_class"==(*_i)->name){max_number_plans_in_current_class = boost::any_cast<int>(val);}
         if("selection_cost_hysteresis"==(*_i)->name){selection_cost_hysteresis = boost::any_cast<double>(val);}
         if("selection_prefer_initial_plan"==(*_i)->name){selection_prefer_initial_plan = boost::any_cast<double>(val);}
         if("selection_obst_cost_scale"==(*_i)->name){selection_obst_cost_scale = boost::any_cast<double>(val);}
         if("selection_viapoint_cost_scale"==(*_i)->name){selection_viapoint_cost_scale = boost::any_cast<double>(val);}
         if("selection_alternative_time_cost"==(*_i)->name){selection_alternative_time_cost = boost::any_cast<bool>(val);}
+        if("selection_dropping_probability"==(*_i)->name){selection_dropping_probability = boost::any_cast<double>(val);}
         if("switching_blocking_period"==(*_i)->name){switching_blocking_period = boost::any_cast<double>(val);}
         if("roadmap_graph_no_samples"==(*_i)->name){roadmap_graph_no_samples = boost::any_cast<int>(val);}
         if("roadmap_graph_area_width"==(*_i)->name){roadmap_graph_area_width = boost::any_cast<double>(val);}
@@ -649,11 +665,13 @@ class HCPLANNING
 
     bool enable_multithreading;
 int max_number_classes;
+int max_number_plans_in_current_class;
 double selection_cost_hysteresis;
 double selection_prefer_initial_plan;
 double selection_obst_cost_scale;
 double selection_viapoint_cost_scale;
 bool selection_alternative_time_cost;
+double selection_dropping_probability;
 double switching_blocking_period;
 int roadmap_graph_no_samples;
 double roadmap_graph_area_width;
@@ -697,181 +715,232 @@ bool oscillation_recovery;
     bool state;
     std::string name;
 
+    class DIVERGENCE_DETECTION
+{
+  public:
+    DIVERGENCE_DETECTION()
+    {
+      state = true;
+      name = "Divergence_Detection";
+    }
+
+    void setParams(TebLocalPlannerReconfigureConfig &config, const std::vector<AbstractParamDescriptionConstPtr> params)
+    {
+      for (std::vector<AbstractParamDescriptionConstPtr>::const_iterator _i = params.begin(); _i != params.end(); ++_i)
+      {
+        boost::any val;
+        (*_i)->getValue(config, val);
+
+        if("divergence_detection_enable"==(*_i)->name){divergence_detection_enable = boost::any_cast<bool>(val);}
+        if("divergence_detection_max_chi_squared"==(*_i)->name){divergence_detection_max_chi_squared = boost::any_cast<double>(val);}
+      }
+    }
+
+    bool divergence_detection_enable;
+double divergence_detection_max_chi_squared;
+
+    bool state;
+    std::string name;
+
     
+}divergence_detection;
+
 }recovery;
 
 }groups;
 
 
 
-//#line 21 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 21 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       bool teb_autosize;
-//#line 25 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 25 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double dt_ref;
-//#line 29 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 29 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double dt_hysteresis;
-//#line 33 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 33 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       bool global_plan_overwrite_orientation;
-//#line 37 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 37 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       bool allow_init_with_backwards_motion;
-//#line 41 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 41 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double max_global_plan_lookahead_dist;
-//#line 45 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 45 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double force_reinit_new_goal_dist;
-//#line 49 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 49 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double force_reinit_new_goal_angular;
-//#line 53 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 53 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       int feasibility_check_no_poses;
-//#line 57 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 57 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      double feasibility_check_lookahead_distance;
+//#line 61 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       bool exact_arc_length;
-//#line 61 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 65 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       bool publish_feedback;
-//#line 65 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 69 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      int control_look_ahead_poses;
+//#line 73 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      int prevent_look_ahead_poses_near_goal;
+//#line 77 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double visualize_with_time_as_z_axis_scale;
-//#line 72 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 84 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double global_plan_viapoint_sep;
-//#line 76 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 88 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       bool via_points_ordered;
-//#line 83 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 95 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double max_vel_x;
-//#line 87 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 99 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double max_vel_x_backwards;
-//#line 91 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 103 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double max_vel_theta;
-//#line 95 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 107 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double acc_lim_x;
-//#line 99 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 111 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double acc_lim_theta;
-//#line 103 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 115 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       bool is_footprint_dynamic;
-//#line 107 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 119 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       bool use_proportional_saturation;
-//#line 115 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 122 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      double transform_tolerance;
+//#line 130 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double min_turning_radius;
-//#line 119 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 134 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double wheelbase;
-//#line 123 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 138 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       bool cmd_angle_instead_rotvel;
-//#line 131 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 146 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double max_vel_y;
-//#line 135 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 150 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      double max_vel_trans;
+//#line 154 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double acc_lim_y;
-//#line 142 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 161 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double xy_goal_tolerance;
-//#line 146 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 165 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double yaw_goal_tolerance;
-//#line 150 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 169 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       bool free_goal_vel;
-//#line 157 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 173 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      double trans_stopped_vel;
+//#line 177 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      double theta_stopped_vel;
+//#line 184 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double min_obstacle_dist;
-//#line 161 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 188 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double inflation_dist;
-//#line 165 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 192 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double dynamic_obstacle_inflation_dist;
-//#line 169 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 196 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       bool include_dynamic_obstacles;
-//#line 173 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 200 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       bool include_costmap_obstacles;
-//#line 177 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 204 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       bool legacy_obstacle_association;
-//#line 181 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 208 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double obstacle_association_force_inclusion_factor;
-//#line 185 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 212 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double obstacle_association_cutoff_factor;
-//#line 189 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 216 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double costmap_obstacles_behind_robot_dist;
-//#line 193 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 220 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       int obstacle_poses_affected;
-//#line 200 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 227 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double obstacle_proximity_ratio_max_vel;
-//#line 204 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 231 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double obstacle_proximity_lower_bound;
-//#line 208 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 235 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double obstacle_proximity_upper_bound;
-//#line 215 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 242 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       int no_inner_iterations;
-//#line 219 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 246 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       int no_outer_iterations;
-//#line 223 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 250 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       bool optimization_activate;
-//#line 227 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 254 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       bool optimization_verbose;
-//#line 231 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 258 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double penalty_epsilon;
-//#line 235 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 262 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double weight_max_vel_x;
-//#line 239 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 266 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double weight_max_vel_y;
-//#line 243 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 270 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double weight_max_vel_theta;
-//#line 247 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 274 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double weight_acc_lim_x;
-//#line 251 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 278 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double weight_acc_lim_y;
-//#line 255 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 282 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double weight_acc_lim_theta;
-//#line 259 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 286 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double weight_kinematics_nh;
-//#line 263 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 290 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double weight_kinematics_forward_drive;
-//#line 267 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 294 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double weight_kinematics_turning_radius;
-//#line 271 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 298 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double weight_optimaltime;
-//#line 275 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 302 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double weight_shortest_path;
-//#line 279 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 306 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double weight_obstacle;
-//#line 283 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 310 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double weight_inflation;
-//#line 287 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 314 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double weight_dynamic_obstacle;
-//#line 291 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 318 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double weight_dynamic_obstacle_inflation;
-//#line 295 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 322 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double weight_velocity_obstacle_ratio;
-//#line 299 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 326 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double weight_viapoint;
-//#line 303 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 330 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double weight_adapt_factor;
-//#line 307 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 334 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double obstacle_cost_exponent;
-//#line 316 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 342 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       bool enable_multithreading;
-//#line 320 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 346 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       int max_number_classes;
-//#line 324 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 350 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      int max_number_plans_in_current_class;
+//#line 354 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double selection_cost_hysteresis;
-//#line 329 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 359 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double selection_prefer_initial_plan;
-//#line 333 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 363 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double selection_obst_cost_scale;
-//#line 337 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 367 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double selection_viapoint_cost_scale;
-//#line 341 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 371 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       bool selection_alternative_time_cost;
-//#line 345 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 375 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      double selection_dropping_probability;
+//#line 379 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double switching_blocking_period;
-//#line 349 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 383 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       int roadmap_graph_no_samples;
-//#line 353 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 387 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double roadmap_graph_area_width;
-//#line 357 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 391 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double roadmap_graph_area_length_scale;
-//#line 361 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 395 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double h_signature_prescaler;
-//#line 365 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 399 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double h_signature_threshold;
-//#line 369 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 403 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       double obstacle_heading_threshold;
-//#line 373 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 407 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       bool viapoints_all_candidates;
-//#line 377 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 411 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       bool visualize_hc_graph;
-//#line 385 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 419 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       bool shrink_horizon_backup;
-//#line 389 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 423 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       bool oscillation_recovery;
+//#line 429 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      bool divergence_detection_enable;
+//#line 437 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      double divergence_detection_max_chi_squared;
 //#line 231 "/opt/ros/noetic/share/dynamic_reconfigure/cmake/../templates/ConfigType.h.template"
 
     bool __fromMessage__(dynamic_reconfigure::Config &msg)
@@ -1011,125 +1080,155 @@ bool oscillation_recovery;
     {
 TebLocalPlannerReconfigureConfig::GroupDescription<TebLocalPlannerReconfigureConfig::DEFAULT, TebLocalPlannerReconfigureConfig> Default("Default", "", 0, 0, true, &TebLocalPlannerReconfigureConfig::groups);
 TebLocalPlannerReconfigureConfig::GroupDescription<TebLocalPlannerReconfigureConfig::DEFAULT::TRAJECTORY, TebLocalPlannerReconfigureConfig::DEFAULT> Trajectory("Trajectory", "tab", 0, 1, true, &TebLocalPlannerReconfigureConfig::DEFAULT::trajectory);
-//#line 21 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 21 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.teb_autosize = 0;
-//#line 21 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 21 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.teb_autosize = 1;
-//#line 21 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 21 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.teb_autosize = 1;
-//#line 21 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 21 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Trajectory.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<bool>("teb_autosize", "bool", 0, "Enable the automatic resizing of the trajectory during optimization (based on the temporal resolution of the trajectory, recommended)", "", &TebLocalPlannerReconfigureConfig::teb_autosize)));
-//#line 21 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 21 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<bool>("teb_autosize", "bool", 0, "Enable the automatic resizing of the trajectory during optimization (based on the temporal resolution of the trajectory, recommended)", "", &TebLocalPlannerReconfigureConfig::teb_autosize)));
-//#line 25 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 25 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.dt_ref = 0.01;
-//#line 25 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 25 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.dt_ref = 1.0;
-//#line 25 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 25 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.dt_ref = 0.3;
-//#line 25 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 25 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Trajectory.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("dt_ref", "double", 0, "Temporal resolution of the planned trajectory (usually it is set to the magnitude of the 1/control_rate)", "", &TebLocalPlannerReconfigureConfig::dt_ref)));
-//#line 25 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 25 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("dt_ref", "double", 0, "Temporal resolution of the planned trajectory (usually it is set to the magnitude of the 1/control_rate)", "", &TebLocalPlannerReconfigureConfig::dt_ref)));
-//#line 29 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 29 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.dt_hysteresis = 0.002;
-//#line 29 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 29 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.dt_hysteresis = 0.5;
-//#line 29 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 29 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.dt_hysteresis = 0.1;
-//#line 29 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 29 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Trajectory.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("dt_hysteresis", "double", 0, "Hysteresis that is utilized for automatic resizing depending on the current temporal resolution (dt): usually 10% of dt_ref", "", &TebLocalPlannerReconfigureConfig::dt_hysteresis)));
-//#line 29 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 29 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("dt_hysteresis", "double", 0, "Hysteresis that is utilized for automatic resizing depending on the current temporal resolution (dt): usually 10% of dt_ref", "", &TebLocalPlannerReconfigureConfig::dt_hysteresis)));
-//#line 33 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 33 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.global_plan_overwrite_orientation = 0;
-//#line 33 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 33 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.global_plan_overwrite_orientation = 1;
-//#line 33 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 33 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.global_plan_overwrite_orientation = 1;
-//#line 33 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 33 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Trajectory.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<bool>("global_plan_overwrite_orientation", "bool", 0, "Some global planners are not considering the orientation at local subgoals between start and global goal, therefore determine it automatically", "", &TebLocalPlannerReconfigureConfig::global_plan_overwrite_orientation)));
-//#line 33 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 33 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<bool>("global_plan_overwrite_orientation", "bool", 0, "Some global planners are not considering the orientation at local subgoals between start and global goal, therefore determine it automatically", "", &TebLocalPlannerReconfigureConfig::global_plan_overwrite_orientation)));
-//#line 37 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 37 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.allow_init_with_backwards_motion = 0;
-//#line 37 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 37 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.allow_init_with_backwards_motion = 1;
-//#line 37 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 37 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.allow_init_with_backwards_motion = 0;
-//#line 37 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 37 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Trajectory.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<bool>("allow_init_with_backwards_motion", "bool", 0, "If true, the underlying trajectories might be initialized with backwards motions in case the goal is behind the start within the local costmap (this is only recommended if the robot is equipped with rear sensors)", "", &TebLocalPlannerReconfigureConfig::allow_init_with_backwards_motion)));
-//#line 37 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 37 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<bool>("allow_init_with_backwards_motion", "bool", 0, "If true, the underlying trajectories might be initialized with backwards motions in case the goal is behind the start within the local costmap (this is only recommended if the robot is equipped with rear sensors)", "", &TebLocalPlannerReconfigureConfig::allow_init_with_backwards_motion)));
-//#line 41 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 41 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.max_global_plan_lookahead_dist = 0.0;
-//#line 41 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 41 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.max_global_plan_lookahead_dist = 50.0;
-//#line 41 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 41 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.max_global_plan_lookahead_dist = 3.0;
-//#line 41 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 41 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Trajectory.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("max_global_plan_lookahead_dist", "double", 0, "Specify maximum length (cumulative Euclidean distances) of the subset of the global plan taken into account for optimization [if 0 or negative: disabled; the length is also bounded by the local costmap size]", "", &TebLocalPlannerReconfigureConfig::max_global_plan_lookahead_dist)));
-//#line 41 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 41 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("max_global_plan_lookahead_dist", "double", 0, "Specify maximum length (cumulative Euclidean distances) of the subset of the global plan taken into account for optimization [if 0 or negative: disabled; the length is also bounded by the local costmap size]", "", &TebLocalPlannerReconfigureConfig::max_global_plan_lookahead_dist)));
-//#line 45 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 45 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.force_reinit_new_goal_dist = 0.0;
-//#line 45 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 45 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.force_reinit_new_goal_dist = 10.0;
-//#line 45 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 45 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.force_reinit_new_goal_dist = 1.0;
-//#line 45 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 45 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Trajectory.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("force_reinit_new_goal_dist", "double", 0, "Force the planner to reinitialize the trajectory if a previous goal is updated with a seperation of more than the specified value in meters (skip hot-starting)", "", &TebLocalPlannerReconfigureConfig::force_reinit_new_goal_dist)));
-//#line 45 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 45 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("force_reinit_new_goal_dist", "double", 0, "Force the planner to reinitialize the trajectory if a previous goal is updated with a seperation of more than the specified value in meters (skip hot-starting)", "", &TebLocalPlannerReconfigureConfig::force_reinit_new_goal_dist)));
-//#line 49 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 49 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.force_reinit_new_goal_angular = 0.0;
-//#line 49 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 49 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.force_reinit_new_goal_angular = 4.0;
-//#line 49 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 49 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.force_reinit_new_goal_angular = 0.78;
-//#line 49 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 49 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Trajectory.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("force_reinit_new_goal_angular", "double", 0, "Force the planner to reinitialize the trajectory if a previous goal is updated with a rotational difference of more than the specified value in radians (skip hot-starting)", "", &TebLocalPlannerReconfigureConfig::force_reinit_new_goal_angular)));
-//#line 49 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 49 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("force_reinit_new_goal_angular", "double", 0, "Force the planner to reinitialize the trajectory if a previous goal is updated with a rotational difference of more than the specified value in radians (skip hot-starting)", "", &TebLocalPlannerReconfigureConfig::force_reinit_new_goal_angular)));
-//#line 53 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
-      __min__.feasibility_check_no_poses = 0;
-//#line 53 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 53 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __min__.feasibility_check_no_poses = -1;
+//#line 53 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.feasibility_check_no_poses = 50;
-//#line 53 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 53 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.feasibility_check_no_poses = 5;
-//#line 53 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
-      Trajectory.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<int>("feasibility_check_no_poses", "int", 0, "Specify up to which pose on the predicted plan the feasibility should be checked each sampling interval", "", &TebLocalPlannerReconfigureConfig::feasibility_check_no_poses)));
-//#line 53 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
-      __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<int>("feasibility_check_no_poses", "int", 0, "Specify up to which pose on the predicted plan the feasibility should be checked each sampling interval", "", &TebLocalPlannerReconfigureConfig::feasibility_check_no_poses)));
-//#line 57 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 53 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      Trajectory.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<int>("feasibility_check_no_poses", "int", 0, "Specify up to which pose (under the feasibility_check_lookahead_distance) on the predicted plan the feasibility should be checked each sampling interval; if -1, all poses up to feasibility_check_lookahead_distance are checked.", "", &TebLocalPlannerReconfigureConfig::feasibility_check_no_poses)));
+//#line 53 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<int>("feasibility_check_no_poses", "int", 0, "Specify up to which pose (under the feasibility_check_lookahead_distance) on the predicted plan the feasibility should be checked each sampling interval; if -1, all poses up to feasibility_check_lookahead_distance are checked.", "", &TebLocalPlannerReconfigureConfig::feasibility_check_no_poses)));
+//#line 57 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __min__.feasibility_check_lookahead_distance = -1.0;
+//#line 57 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __max__.feasibility_check_lookahead_distance = 20.0;
+//#line 57 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __default__.feasibility_check_lookahead_distance = -1.0;
+//#line 57 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      Trajectory.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("feasibility_check_lookahead_distance", "double", 0, "Specify up to which distance (and with an index below feasibility_check_no_poses) from the robot the feasibility should be checked each sampling interval; if -1, all poses up to feasibility_check_no_poses are checked.", "", &TebLocalPlannerReconfigureConfig::feasibility_check_lookahead_distance)));
+//#line 57 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("feasibility_check_lookahead_distance", "double", 0, "Specify up to which distance (and with an index below feasibility_check_no_poses) from the robot the feasibility should be checked each sampling interval; if -1, all poses up to feasibility_check_no_poses are checked.", "", &TebLocalPlannerReconfigureConfig::feasibility_check_lookahead_distance)));
+//#line 61 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.exact_arc_length = 0;
-//#line 57 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 61 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.exact_arc_length = 1;
-//#line 57 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 61 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.exact_arc_length = 0;
-//#line 57 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 61 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Trajectory.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<bool>("exact_arc_length", "bool", 0, "If true, the planner uses the exact arc length in velocity, acceleration and turning rate computations [-> increased cpu time], otherwise the euclidean approximation is used.", "", &TebLocalPlannerReconfigureConfig::exact_arc_length)));
-//#line 57 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 61 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<bool>("exact_arc_length", "bool", 0, "If true, the planner uses the exact arc length in velocity, acceleration and turning rate computations [-> increased cpu time], otherwise the euclidean approximation is used.", "", &TebLocalPlannerReconfigureConfig::exact_arc_length)));
-//#line 61 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 65 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.publish_feedback = 0;
-//#line 61 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 65 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.publish_feedback = 1;
-//#line 61 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 65 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.publish_feedback = 0;
-//#line 61 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 65 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Trajectory.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<bool>("publish_feedback", "bool", 0, "Publish planner feedback containing the full trajectory and a list of active obstacles (should be enabled only for evaluation or debugging purposes)", "", &TebLocalPlannerReconfigureConfig::publish_feedback)));
-//#line 61 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 65 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<bool>("publish_feedback", "bool", 0, "Publish planner feedback containing the full trajectory and a list of active obstacles (should be enabled only for evaluation or debugging purposes)", "", &TebLocalPlannerReconfigureConfig::publish_feedback)));
-//#line 65 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 69 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __min__.control_look_ahead_poses = 1;
+//#line 69 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __max__.control_look_ahead_poses = 100;
+//#line 69 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __default__.control_look_ahead_poses = 1;
+//#line 69 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      Trajectory.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<int>("control_look_ahead_poses", "int", 0, "Index of the pose used to extract the velocity command", "", &TebLocalPlannerReconfigureConfig::control_look_ahead_poses)));
+//#line 69 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<int>("control_look_ahead_poses", "int", 0, "Index of the pose used to extract the velocity command", "", &TebLocalPlannerReconfigureConfig::control_look_ahead_poses)));
+//#line 73 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __min__.prevent_look_ahead_poses_near_goal = 0;
+//#line 73 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __max__.prevent_look_ahead_poses_near_goal = 20;
+//#line 73 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __default__.prevent_look_ahead_poses_near_goal = 0;
+//#line 73 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      Trajectory.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<int>("prevent_look_ahead_poses_near_goal", "int", 0, "Prevents control_look_ahead_poses to look within this many poses of the goal in order to prevent overshoot & oscillation when xy_goal_tolerance is very small", "", &TebLocalPlannerReconfigureConfig::prevent_look_ahead_poses_near_goal)));
+//#line 73 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<int>("prevent_look_ahead_poses_near_goal", "int", 0, "Prevents control_look_ahead_poses to look within this many poses of the goal in order to prevent overshoot & oscillation when xy_goal_tolerance is very small", "", &TebLocalPlannerReconfigureConfig::prevent_look_ahead_poses_near_goal)));
+//#line 77 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.visualize_with_time_as_z_axis_scale = 0.0;
-//#line 65 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 77 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.visualize_with_time_as_z_axis_scale = 1.0;
-//#line 65 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 77 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.visualize_with_time_as_z_axis_scale = 0.0;
-//#line 65 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 77 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Trajectory.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("visualize_with_time_as_z_axis_scale", "double", 0, "If this value is bigger than 0, the trajectory and obstacles are visualized in 3d using the time as the z-axis scaled by this value. Most useful for dynamic obstacles.", "", &TebLocalPlannerReconfigureConfig::visualize_with_time_as_z_axis_scale)));
-//#line 65 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 77 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("visualize_with_time_as_z_axis_scale", "double", 0, "If this value is bigger than 0, the trajectory and obstacles are visualized in 3d using the time as the z-axis scaled by this value. Most useful for dynamic obstacles.", "", &TebLocalPlannerReconfigureConfig::visualize_with_time_as_z_axis_scale)));
 //#line 124 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       Trajectory.convertParams();
@@ -1138,25 +1237,25 @@ TebLocalPlannerReconfigureConfig::GroupDescription<TebLocalPlannerReconfigureCon
 //#line 124 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       __group_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractGroupDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::GroupDescription<TebLocalPlannerReconfigureConfig::DEFAULT::TRAJECTORY, TebLocalPlannerReconfigureConfig::DEFAULT>(Trajectory)));
 TebLocalPlannerReconfigureConfig::GroupDescription<TebLocalPlannerReconfigureConfig::DEFAULT::VIAPOINTS, TebLocalPlannerReconfigureConfig::DEFAULT> ViaPoints("ViaPoints", "tab", 0, 2, true, &TebLocalPlannerReconfigureConfig::DEFAULT::viapoints);
-//#line 72 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 84 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.global_plan_viapoint_sep = -0.1;
-//#line 72 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 84 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.global_plan_viapoint_sep = 5.0;
-//#line 72 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 84 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.global_plan_viapoint_sep = -0.1;
-//#line 72 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 84 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       ViaPoints.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("global_plan_viapoint_sep", "double", 0, "Min. separation between each two consecutive via-points extracted from the global plan [if negative: disabled]", "", &TebLocalPlannerReconfigureConfig::global_plan_viapoint_sep)));
-//#line 72 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 84 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("global_plan_viapoint_sep", "double", 0, "Min. separation between each two consecutive via-points extracted from the global plan [if negative: disabled]", "", &TebLocalPlannerReconfigureConfig::global_plan_viapoint_sep)));
-//#line 76 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 88 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.via_points_ordered = 0;
-//#line 76 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 88 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.via_points_ordered = 1;
-//#line 76 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 88 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.via_points_ordered = 0;
-//#line 76 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 88 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       ViaPoints.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<bool>("via_points_ordered", "bool", 0, "If true, the planner adheres to the order of via-points in the storage container", "", &TebLocalPlannerReconfigureConfig::via_points_ordered)));
-//#line 76 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 88 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<bool>("via_points_ordered", "bool", 0, "If true, the planner adheres to the order of via-points in the storage container", "", &TebLocalPlannerReconfigureConfig::via_points_ordered)));
 //#line 124 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       ViaPoints.convertParams();
@@ -1165,106 +1264,116 @@ TebLocalPlannerReconfigureConfig::GroupDescription<TebLocalPlannerReconfigureCon
 //#line 124 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       __group_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractGroupDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::GroupDescription<TebLocalPlannerReconfigureConfig::DEFAULT::VIAPOINTS, TebLocalPlannerReconfigureConfig::DEFAULT>(ViaPoints)));
 TebLocalPlannerReconfigureConfig::GroupDescription<TebLocalPlannerReconfigureConfig::DEFAULT::ROBOT, TebLocalPlannerReconfigureConfig::DEFAULT> Robot("Robot", "tab", 0, 3, true, &TebLocalPlannerReconfigureConfig::DEFAULT::robot);
-//#line 83 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 95 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.max_vel_x = 0.01;
-//#line 83 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 95 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.max_vel_x = 100.0;
-//#line 83 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 95 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.max_vel_x = 0.4;
-//#line 83 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
-      Robot.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("max_vel_x", "double", 0, "Maximum translational velocity of the robot", "", &TebLocalPlannerReconfigureConfig::max_vel_x)));
-//#line 83 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
-      __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("max_vel_x", "double", 0, "Maximum translational velocity of the robot", "", &TebLocalPlannerReconfigureConfig::max_vel_x)));
-//#line 87 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 95 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      Robot.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("max_vel_x", "double", 0, "Maximum velocity in the x direction of the robot. May be overruled by the max_vel_trans parameter", "", &TebLocalPlannerReconfigureConfig::max_vel_x)));
+//#line 95 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("max_vel_x", "double", 0, "Maximum velocity in the x direction of the robot. May be overruled by the max_vel_trans parameter", "", &TebLocalPlannerReconfigureConfig::max_vel_x)));
+//#line 99 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.max_vel_x_backwards = 0.01;
-//#line 87 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 99 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.max_vel_x_backwards = 100.0;
-//#line 87 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 99 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.max_vel_x_backwards = 0.2;
-//#line 87 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 99 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Robot.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("max_vel_x_backwards", "double", 0, "Maximum translational velocity of the robot for driving backwards", "", &TebLocalPlannerReconfigureConfig::max_vel_x_backwards)));
-//#line 87 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 99 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("max_vel_x_backwards", "double", 0, "Maximum translational velocity of the robot for driving backwards", "", &TebLocalPlannerReconfigureConfig::max_vel_x_backwards)));
-//#line 91 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 103 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.max_vel_theta = 0.01;
-//#line 91 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 103 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.max_vel_theta = 100.0;
-//#line 91 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 103 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.max_vel_theta = 0.3;
-//#line 91 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 103 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Robot.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("max_vel_theta", "double", 0, "Maximum angular velocity of the robot", "", &TebLocalPlannerReconfigureConfig::max_vel_theta)));
-//#line 91 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 103 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("max_vel_theta", "double", 0, "Maximum angular velocity of the robot", "", &TebLocalPlannerReconfigureConfig::max_vel_theta)));
-//#line 95 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 107 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.acc_lim_x = 0.01;
-//#line 95 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 107 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.acc_lim_x = 100.0;
-//#line 95 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 107 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.acc_lim_x = 0.5;
-//#line 95 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 107 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Robot.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("acc_lim_x", "double", 0, "Maximum translational acceleration of the robot", "", &TebLocalPlannerReconfigureConfig::acc_lim_x)));
-//#line 95 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 107 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("acc_lim_x", "double", 0, "Maximum translational acceleration of the robot", "", &TebLocalPlannerReconfigureConfig::acc_lim_x)));
-//#line 99 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 111 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.acc_lim_theta = 0.01;
-//#line 99 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 111 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.acc_lim_theta = 100.0;
-//#line 99 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 111 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.acc_lim_theta = 0.5;
-//#line 99 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 111 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Robot.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("acc_lim_theta", "double", 0, "Maximum angular acceleration of the robot", "", &TebLocalPlannerReconfigureConfig::acc_lim_theta)));
-//#line 99 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 111 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("acc_lim_theta", "double", 0, "Maximum angular acceleration of the robot", "", &TebLocalPlannerReconfigureConfig::acc_lim_theta)));
-//#line 103 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 115 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.is_footprint_dynamic = 0;
-//#line 103 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 115 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.is_footprint_dynamic = 1;
-//#line 103 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 115 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.is_footprint_dynamic = 0;
-//#line 103 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 115 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Robot.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<bool>("is_footprint_dynamic", "bool", 0, "If true, updated the footprint before checking trajectory feasibility", "", &TebLocalPlannerReconfigureConfig::is_footprint_dynamic)));
-//#line 103 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 115 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<bool>("is_footprint_dynamic", "bool", 0, "If true, updated the footprint before checking trajectory feasibility", "", &TebLocalPlannerReconfigureConfig::is_footprint_dynamic)));
-//#line 107 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 119 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.use_proportional_saturation = 0;
-//#line 107 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 119 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.use_proportional_saturation = 1;
-//#line 107 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 119 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.use_proportional_saturation = 0;
-//#line 107 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 119 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Robot.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<bool>("use_proportional_saturation", "bool", 0, "If true, reduce all twists components (linear x and y, and angular z) proportionally if any exceed its corresponding bounds, instead of saturating each one individually", "", &TebLocalPlannerReconfigureConfig::use_proportional_saturation)));
-//#line 107 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 119 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<bool>("use_proportional_saturation", "bool", 0, "If true, reduce all twists components (linear x and y, and angular z) proportionally if any exceed its corresponding bounds, instead of saturating each one individually", "", &TebLocalPlannerReconfigureConfig::use_proportional_saturation)));
+//#line 122 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __min__.transform_tolerance = 0.001;
+//#line 122 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __max__.transform_tolerance = 20.0;
+//#line 122 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __default__.transform_tolerance = 0.5;
+//#line 122 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      Robot.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("transform_tolerance", "double", 0, "Tolerance when querying the TF Tree for a transformation (seconds)", "", &TebLocalPlannerReconfigureConfig::transform_tolerance)));
+//#line 122 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("transform_tolerance", "double", 0, "Tolerance when querying the TF Tree for a transformation (seconds)", "", &TebLocalPlannerReconfigureConfig::transform_tolerance)));
 TebLocalPlannerReconfigureConfig::GroupDescription<TebLocalPlannerReconfigureConfig::DEFAULT::ROBOT::CARLIKE, TebLocalPlannerReconfigureConfig::DEFAULT::ROBOT> Carlike("Carlike", "hide", 3, 4, true, &TebLocalPlannerReconfigureConfig::DEFAULT::ROBOT::carlike);
-//#line 115 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 130 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.min_turning_radius = 0.0;
-//#line 115 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 130 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.min_turning_radius = 50.0;
-//#line 115 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 130 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.min_turning_radius = 0.0;
-//#line 115 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 130 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Carlike.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("min_turning_radius", "double", 0, "Minimum turning radius of a carlike robot (diff-drive robot: zero)", "", &TebLocalPlannerReconfigureConfig::min_turning_radius)));
-//#line 115 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 130 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("min_turning_radius", "double", 0, "Minimum turning radius of a carlike robot (diff-drive robot: zero)", "", &TebLocalPlannerReconfigureConfig::min_turning_radius)));
-//#line 119 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 134 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.wheelbase = -10.0;
-//#line 119 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 134 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.wheelbase = 10.0;
-//#line 119 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 134 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.wheelbase = 1.0;
-//#line 119 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 134 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Carlike.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("wheelbase", "double", 0, "The distance between the drive shaft and steering axle (only required for a carlike robot with 'cmd_angle_instead_rotvel' enabled); The value might be negative for back-wheeled robots!", "", &TebLocalPlannerReconfigureConfig::wheelbase)));
-//#line 119 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 134 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("wheelbase", "double", 0, "The distance between the drive shaft and steering axle (only required for a carlike robot with 'cmd_angle_instead_rotvel' enabled); The value might be negative for back-wheeled robots!", "", &TebLocalPlannerReconfigureConfig::wheelbase)));
-//#line 123 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 138 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.cmd_angle_instead_rotvel = 0;
-//#line 123 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 138 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.cmd_angle_instead_rotvel = 1;
-//#line 123 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 138 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.cmd_angle_instead_rotvel = 0;
-//#line 123 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 138 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Carlike.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<bool>("cmd_angle_instead_rotvel", "bool", 0, "Substitute the rotational velocity in the commanded velocity message by the corresponding steering angle (check 'axles_distance')", "", &TebLocalPlannerReconfigureConfig::cmd_angle_instead_rotvel)));
-//#line 123 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 138 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<bool>("cmd_angle_instead_rotvel", "bool", 0, "Substitute the rotational velocity in the commanded velocity message by the corresponding steering angle (check 'axles_distance')", "", &TebLocalPlannerReconfigureConfig::cmd_angle_instead_rotvel)));
 //#line 124 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       Carlike.convertParams();
@@ -1273,25 +1382,35 @@ TebLocalPlannerReconfigureConfig::GroupDescription<TebLocalPlannerReconfigureCon
 //#line 124 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       __group_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractGroupDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::GroupDescription<TebLocalPlannerReconfigureConfig::DEFAULT::ROBOT::CARLIKE, TebLocalPlannerReconfigureConfig::DEFAULT::ROBOT>(Carlike)));
 TebLocalPlannerReconfigureConfig::GroupDescription<TebLocalPlannerReconfigureConfig::DEFAULT::ROBOT::OMNIDIRECTIONAL, TebLocalPlannerReconfigureConfig::DEFAULT::ROBOT> Omnidirectional("Omnidirectional", "hide", 3, 5, true, &TebLocalPlannerReconfigureConfig::DEFAULT::ROBOT::omnidirectional);
-//#line 131 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 146 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.max_vel_y = 0.0;
-//#line 131 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 146 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.max_vel_y = 100.0;
-//#line 131 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 146 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.max_vel_y = 0.0;
-//#line 131 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
-      Omnidirectional.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("max_vel_y", "double", 0, "Maximum strafing velocity of the robot (should be zero for non-holonomic robots!)", "", &TebLocalPlannerReconfigureConfig::max_vel_y)));
-//#line 131 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
-      __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("max_vel_y", "double", 0, "Maximum strafing velocity of the robot (should be zero for non-holonomic robots!)", "", &TebLocalPlannerReconfigureConfig::max_vel_y)));
-//#line 135 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 146 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      Omnidirectional.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("max_vel_y", "double", 0, "Maximum strafing velocity of the robot (should be zero for non-holonomic robots!). May be overruled by the max_vel_trans parameter", "", &TebLocalPlannerReconfigureConfig::max_vel_y)));
+//#line 146 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("max_vel_y", "double", 0, "Maximum strafing velocity of the robot (should be zero for non-holonomic robots!). May be overruled by the max_vel_trans parameter", "", &TebLocalPlannerReconfigureConfig::max_vel_y)));
+//#line 150 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __min__.max_vel_trans = 0.0;
+//#line 150 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __max__.max_vel_trans = 100.0;
+//#line 150 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __default__.max_vel_trans = 0.0;
+//#line 150 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      Omnidirectional.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("max_vel_trans", "double", 0, "Maximum linear velocity of the robot. Will limit max_vel_x and max_vel_y when their linear combination exceeds its value. When set to default 0.0, it will be set equal to max_vel_x.", "", &TebLocalPlannerReconfigureConfig::max_vel_trans)));
+//#line 150 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("max_vel_trans", "double", 0, "Maximum linear velocity of the robot. Will limit max_vel_x and max_vel_y when their linear combination exceeds its value. When set to default 0.0, it will be set equal to max_vel_x.", "", &TebLocalPlannerReconfigureConfig::max_vel_trans)));
+//#line 154 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.acc_lim_y = 0.01;
-//#line 135 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 154 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.acc_lim_y = 100.0;
-//#line 135 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 154 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.acc_lim_y = 0.5;
-//#line 135 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 154 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Omnidirectional.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("acc_lim_y", "double", 0, "Maximum strafing acceleration of the robot", "", &TebLocalPlannerReconfigureConfig::acc_lim_y)));
-//#line 135 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 154 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("acc_lim_y", "double", 0, "Maximum strafing acceleration of the robot", "", &TebLocalPlannerReconfigureConfig::acc_lim_y)));
 //#line 124 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       Omnidirectional.convertParams();
@@ -1306,36 +1425,56 @@ TebLocalPlannerReconfigureConfig::GroupDescription<TebLocalPlannerReconfigureCon
 //#line 124 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       __group_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractGroupDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::GroupDescription<TebLocalPlannerReconfigureConfig::DEFAULT::ROBOT, TebLocalPlannerReconfigureConfig::DEFAULT>(Robot)));
 TebLocalPlannerReconfigureConfig::GroupDescription<TebLocalPlannerReconfigureConfig::DEFAULT::GOALTOLERANCE, TebLocalPlannerReconfigureConfig::DEFAULT> GoalTolerance("GoalTolerance", "tab", 0, 6, true, &TebLocalPlannerReconfigureConfig::DEFAULT::goaltolerance);
-//#line 142 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 161 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.xy_goal_tolerance = 0.001;
-//#line 142 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 161 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.xy_goal_tolerance = 10.0;
-//#line 142 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 161 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.xy_goal_tolerance = 0.2;
-//#line 142 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 161 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       GoalTolerance.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("xy_goal_tolerance", "double", 0, "Allowed final euclidean distance to the goal position", "", &TebLocalPlannerReconfigureConfig::xy_goal_tolerance)));
-//#line 142 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 161 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("xy_goal_tolerance", "double", 0, "Allowed final euclidean distance to the goal position", "", &TebLocalPlannerReconfigureConfig::xy_goal_tolerance)));
-//#line 146 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 165 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.yaw_goal_tolerance = 0.001;
-//#line 146 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 165 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.yaw_goal_tolerance = 3.2;
-//#line 146 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 165 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.yaw_goal_tolerance = 0.1;
-//#line 146 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 165 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       GoalTolerance.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("yaw_goal_tolerance", "double", 0, "Allowed final orientation error to the goal orientation", "", &TebLocalPlannerReconfigureConfig::yaw_goal_tolerance)));
-//#line 146 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 165 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("yaw_goal_tolerance", "double", 0, "Allowed final orientation error to the goal orientation", "", &TebLocalPlannerReconfigureConfig::yaw_goal_tolerance)));
-//#line 150 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 169 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.free_goal_vel = 0;
-//#line 150 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 169 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.free_goal_vel = 1;
-//#line 150 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 169 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.free_goal_vel = 0;
-//#line 150 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 169 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       GoalTolerance.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<bool>("free_goal_vel", "bool", 0, "Allow the robot's velocity to be nonzero for planning purposes (the robot can arrive at the goal with max speed)", "", &TebLocalPlannerReconfigureConfig::free_goal_vel)));
-//#line 150 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 169 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<bool>("free_goal_vel", "bool", 0, "Allow the robot's velocity to be nonzero for planning purposes (the robot can arrive at the goal with max speed)", "", &TebLocalPlannerReconfigureConfig::free_goal_vel)));
+//#line 173 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __min__.trans_stopped_vel = 0.0;
+//#line 173 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __max__.trans_stopped_vel = std::numeric_limits<double>::infinity();
+//#line 173 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __default__.trans_stopped_vel = 0.1;
+//#line 173 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      GoalTolerance.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("trans_stopped_vel", "double", 0, "Below what maximum velocity we consider the robot to be stopped in translation", "", &TebLocalPlannerReconfigureConfig::trans_stopped_vel)));
+//#line 173 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("trans_stopped_vel", "double", 0, "Below what maximum velocity we consider the robot to be stopped in translation", "", &TebLocalPlannerReconfigureConfig::trans_stopped_vel)));
+//#line 177 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __min__.theta_stopped_vel = 0.0;
+//#line 177 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __max__.theta_stopped_vel = std::numeric_limits<double>::infinity();
+//#line 177 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __default__.theta_stopped_vel = 0.1;
+//#line 177 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      GoalTolerance.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("theta_stopped_vel", "double", 0, "Below what maximum rotation velocity we consider the robot to be stopped in rotation", "", &TebLocalPlannerReconfigureConfig::theta_stopped_vel)));
+//#line 177 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("theta_stopped_vel", "double", 0, "Below what maximum rotation velocity we consider the robot to be stopped in rotation", "", &TebLocalPlannerReconfigureConfig::theta_stopped_vel)));
 //#line 124 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       GoalTolerance.convertParams();
 //#line 124 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
@@ -1343,136 +1482,136 @@ TebLocalPlannerReconfigureConfig::GroupDescription<TebLocalPlannerReconfigureCon
 //#line 124 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       __group_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractGroupDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::GroupDescription<TebLocalPlannerReconfigureConfig::DEFAULT::GOALTOLERANCE, TebLocalPlannerReconfigureConfig::DEFAULT>(GoalTolerance)));
 TebLocalPlannerReconfigureConfig::GroupDescription<TebLocalPlannerReconfigureConfig::DEFAULT::OBSTACLES, TebLocalPlannerReconfigureConfig::DEFAULT> Obstacles("Obstacles", "tab", 0, 7, true, &TebLocalPlannerReconfigureConfig::DEFAULT::obstacles);
-//#line 157 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 184 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.min_obstacle_dist = 0.0;
-//#line 157 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 184 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.min_obstacle_dist = 10.0;
-//#line 157 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 184 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.min_obstacle_dist = 0.5;
-//#line 157 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 184 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Obstacles.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("min_obstacle_dist", "double", 0, "Minimum desired separation from obstacles", "", &TebLocalPlannerReconfigureConfig::min_obstacle_dist)));
-//#line 157 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 184 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("min_obstacle_dist", "double", 0, "Minimum desired separation from obstacles", "", &TebLocalPlannerReconfigureConfig::min_obstacle_dist)));
-//#line 161 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 188 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.inflation_dist = 0.0;
-//#line 161 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 188 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.inflation_dist = 15.0;
-//#line 161 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 188 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.inflation_dist = 0.6;
-//#line 161 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 188 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Obstacles.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("inflation_dist", "double", 0, "Buffer zone around obstacles with non-zero penalty costs (should be larger than min_obstacle_dist in order to take effect)", "", &TebLocalPlannerReconfigureConfig::inflation_dist)));
-//#line 161 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 188 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("inflation_dist", "double", 0, "Buffer zone around obstacles with non-zero penalty costs (should be larger than min_obstacle_dist in order to take effect)", "", &TebLocalPlannerReconfigureConfig::inflation_dist)));
-//#line 165 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 192 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.dynamic_obstacle_inflation_dist = 0.0;
-//#line 165 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 192 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.dynamic_obstacle_inflation_dist = 15.0;
-//#line 165 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 192 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.dynamic_obstacle_inflation_dist = 0.6;
-//#line 165 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 192 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Obstacles.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("dynamic_obstacle_inflation_dist", "double", 0, "Buffer zone around predicted locations of dynamic obstacles with non-zero penalty costs (should be larger than min_obstacle_dist in order to take effect)", "", &TebLocalPlannerReconfigureConfig::dynamic_obstacle_inflation_dist)));
-//#line 165 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 192 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("dynamic_obstacle_inflation_dist", "double", 0, "Buffer zone around predicted locations of dynamic obstacles with non-zero penalty costs (should be larger than min_obstacle_dist in order to take effect)", "", &TebLocalPlannerReconfigureConfig::dynamic_obstacle_inflation_dist)));
-//#line 169 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 196 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.include_dynamic_obstacles = 0;
-//#line 169 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 196 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.include_dynamic_obstacles = 1;
-//#line 169 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 196 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.include_dynamic_obstacles = 0;
-//#line 169 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 196 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Obstacles.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<bool>("include_dynamic_obstacles", "bool", 0, "Specify whether the movement of dynamic obstacles should be predicted by a constant velocity model (this also changes the homotopy class search). If false, all obstacles are considered to be static.", "", &TebLocalPlannerReconfigureConfig::include_dynamic_obstacles)));
-//#line 169 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 196 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<bool>("include_dynamic_obstacles", "bool", 0, "Specify whether the movement of dynamic obstacles should be predicted by a constant velocity model (this also changes the homotopy class search). If false, all obstacles are considered to be static.", "", &TebLocalPlannerReconfigureConfig::include_dynamic_obstacles)));
-//#line 173 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 200 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.include_costmap_obstacles = 0;
-//#line 173 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 200 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.include_costmap_obstacles = 1;
-//#line 173 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 200 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.include_costmap_obstacles = 1;
-//#line 173 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 200 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Obstacles.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<bool>("include_costmap_obstacles", "bool", 0, "Specify whether the obstacles in the costmap should be taken into account directly (this is necessary if no seperate clustering and detection is implemented)", "", &TebLocalPlannerReconfigureConfig::include_costmap_obstacles)));
-//#line 173 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 200 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<bool>("include_costmap_obstacles", "bool", 0, "Specify whether the obstacles in the costmap should be taken into account directly (this is necessary if no seperate clustering and detection is implemented)", "", &TebLocalPlannerReconfigureConfig::include_costmap_obstacles)));
-//#line 177 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 204 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.legacy_obstacle_association = 0;
-//#line 177 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 204 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.legacy_obstacle_association = 1;
-//#line 177 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 204 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.legacy_obstacle_association = 0;
-//#line 177 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 204 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Obstacles.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<bool>("legacy_obstacle_association", "bool", 0, "If true, the old association strategy is used (for each obstacle, find the nearest TEB pose), otherwise the new one (for each teb pose, find only 'relevant' obstacles).", "", &TebLocalPlannerReconfigureConfig::legacy_obstacle_association)));
-//#line 177 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 204 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<bool>("legacy_obstacle_association", "bool", 0, "If true, the old association strategy is used (for each obstacle, find the nearest TEB pose), otherwise the new one (for each teb pose, find only 'relevant' obstacles).", "", &TebLocalPlannerReconfigureConfig::legacy_obstacle_association)));
-//#line 181 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 208 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.obstacle_association_force_inclusion_factor = 0.0;
-//#line 181 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 208 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.obstacle_association_force_inclusion_factor = 100.0;
-//#line 181 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 208 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.obstacle_association_force_inclusion_factor = 1.5;
-//#line 181 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 208 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Obstacles.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("obstacle_association_force_inclusion_factor", "double", 0, "The non-legacy obstacle association technique tries to connect only relevant obstacles with the discretized trajectory during optimization, all obstacles within a specifed distance are forced to be included (as a multiple of min_obstacle_dist), e.g. choose 2.0 in order to consider obstacles within a radius of 2.0*min_obstacle_dist.", "", &TebLocalPlannerReconfigureConfig::obstacle_association_force_inclusion_factor)));
-//#line 181 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 208 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("obstacle_association_force_inclusion_factor", "double", 0, "The non-legacy obstacle association technique tries to connect only relevant obstacles with the discretized trajectory during optimization, all obstacles within a specifed distance are forced to be included (as a multiple of min_obstacle_dist), e.g. choose 2.0 in order to consider obstacles within a radius of 2.0*min_obstacle_dist.", "", &TebLocalPlannerReconfigureConfig::obstacle_association_force_inclusion_factor)));
-//#line 185 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 212 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.obstacle_association_cutoff_factor = 1.0;
-//#line 185 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 212 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.obstacle_association_cutoff_factor = 100.0;
-//#line 185 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 212 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.obstacle_association_cutoff_factor = 5.0;
-//#line 185 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 212 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Obstacles.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("obstacle_association_cutoff_factor", "double", 0, "See obstacle_association_force_inclusion_factor, but beyond a multiple of [value]*min_obstacle_dist all obstacles are ignored during optimization. obstacle_association_force_inclusion_factor is processed first.", "", &TebLocalPlannerReconfigureConfig::obstacle_association_cutoff_factor)));
-//#line 185 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 212 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("obstacle_association_cutoff_factor", "double", 0, "See obstacle_association_force_inclusion_factor, but beyond a multiple of [value]*min_obstacle_dist all obstacles are ignored during optimization. obstacle_association_force_inclusion_factor is processed first.", "", &TebLocalPlannerReconfigureConfig::obstacle_association_cutoff_factor)));
-//#line 189 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 216 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.costmap_obstacles_behind_robot_dist = 0.0;
-//#line 189 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 216 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.costmap_obstacles_behind_robot_dist = 20.0;
-//#line 189 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 216 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.costmap_obstacles_behind_robot_dist = 1.5;
-//#line 189 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 216 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Obstacles.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("costmap_obstacles_behind_robot_dist", "double", 0, "Limit the occupied local costmap obstacles taken into account for planning behind the robot (specify distance in meters)", "", &TebLocalPlannerReconfigureConfig::costmap_obstacles_behind_robot_dist)));
-//#line 189 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 216 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("costmap_obstacles_behind_robot_dist", "double", 0, "Limit the occupied local costmap obstacles taken into account for planning behind the robot (specify distance in meters)", "", &TebLocalPlannerReconfigureConfig::costmap_obstacles_behind_robot_dist)));
-//#line 193 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 220 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.obstacle_poses_affected = 0;
-//#line 193 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 220 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.obstacle_poses_affected = 200;
-//#line 193 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 220 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.obstacle_poses_affected = 30;
-//#line 193 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 220 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Obstacles.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<int>("obstacle_poses_affected", "int", 0, "The obstacle position is attached to the closest pose on the trajectory to reduce computational effort, but take a number of neighbors into account as well", "", &TebLocalPlannerReconfigureConfig::obstacle_poses_affected)));
-//#line 193 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 220 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<int>("obstacle_poses_affected", "int", 0, "The obstacle position is attached to the closest pose on the trajectory to reduce computational effort, but take a number of neighbors into account as well", "", &TebLocalPlannerReconfigureConfig::obstacle_poses_affected)));
 TebLocalPlannerReconfigureConfig::GroupDescription<TebLocalPlannerReconfigureConfig::DEFAULT::OBSTACLES::REDUCE_VELOCITY_NEAR_OBSTACLES, TebLocalPlannerReconfigureConfig::DEFAULT::OBSTACLES> Reduce_velocity_near_obstacles("Reduce_velocity_near_obstacles", "", 7, 8, true, &TebLocalPlannerReconfigureConfig::DEFAULT::OBSTACLES::reduce_velocity_near_obstacles);
-//#line 200 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 227 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.obstacle_proximity_ratio_max_vel = 0.0;
-//#line 200 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 227 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.obstacle_proximity_ratio_max_vel = 1.0;
-//#line 200 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 227 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.obstacle_proximity_ratio_max_vel = 1.0;
-//#line 200 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 227 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Reduce_velocity_near_obstacles.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("obstacle_proximity_ratio_max_vel", "double", 0, "Ratio of the maximum velocities used as an upper bound when reducing the speed due to the proximity to static obstacles", "", &TebLocalPlannerReconfigureConfig::obstacle_proximity_ratio_max_vel)));
-//#line 200 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 227 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("obstacle_proximity_ratio_max_vel", "double", 0, "Ratio of the maximum velocities used as an upper bound when reducing the speed due to the proximity to static obstacles", "", &TebLocalPlannerReconfigureConfig::obstacle_proximity_ratio_max_vel)));
-//#line 204 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 231 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.obstacle_proximity_lower_bound = 0.0;
-//#line 204 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 231 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.obstacle_proximity_lower_bound = 10.0;
-//#line 204 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 231 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.obstacle_proximity_lower_bound = 0.0;
-//#line 204 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 231 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Reduce_velocity_near_obstacles.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("obstacle_proximity_lower_bound", "double", 0, "Distance to a static obstacle for which the velocity should be lower", "", &TebLocalPlannerReconfigureConfig::obstacle_proximity_lower_bound)));
-//#line 204 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 231 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("obstacle_proximity_lower_bound", "double", 0, "Distance to a static obstacle for which the velocity should be lower", "", &TebLocalPlannerReconfigureConfig::obstacle_proximity_lower_bound)));
-//#line 208 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 235 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.obstacle_proximity_upper_bound = 0.0;
-//#line 208 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 235 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.obstacle_proximity_upper_bound = 10.0;
-//#line 208 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 235 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.obstacle_proximity_upper_bound = 0.5;
-//#line 208 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 235 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Reduce_velocity_near_obstacles.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("obstacle_proximity_upper_bound", "double", 0, "Distance to a static obstacle for which the velocity should be higher", "", &TebLocalPlannerReconfigureConfig::obstacle_proximity_upper_bound)));
-//#line 208 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 235 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("obstacle_proximity_upper_bound", "double", 0, "Distance to a static obstacle for which the velocity should be higher", "", &TebLocalPlannerReconfigureConfig::obstacle_proximity_upper_bound)));
 //#line 124 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       Reduce_velocity_near_obstacles.convertParams();
@@ -1487,245 +1626,245 @@ TebLocalPlannerReconfigureConfig::GroupDescription<TebLocalPlannerReconfigureCon
 //#line 124 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       __group_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractGroupDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::GroupDescription<TebLocalPlannerReconfigureConfig::DEFAULT::OBSTACLES, TebLocalPlannerReconfigureConfig::DEFAULT>(Obstacles)));
 TebLocalPlannerReconfigureConfig::GroupDescription<TebLocalPlannerReconfigureConfig::DEFAULT::OPTIMIZATION, TebLocalPlannerReconfigureConfig::DEFAULT> Optimization("Optimization", "tab", 0, 9, true, &TebLocalPlannerReconfigureConfig::DEFAULT::optimization);
-//#line 215 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 242 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.no_inner_iterations = 1;
-//#line 215 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 242 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.no_inner_iterations = 100;
-//#line 215 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 242 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.no_inner_iterations = 5;
-//#line 215 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 242 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Optimization.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<int>("no_inner_iterations", "int", 0, "Number of solver iterations called in each outerloop iteration", "", &TebLocalPlannerReconfigureConfig::no_inner_iterations)));
-//#line 215 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 242 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<int>("no_inner_iterations", "int", 0, "Number of solver iterations called in each outerloop iteration", "", &TebLocalPlannerReconfigureConfig::no_inner_iterations)));
-//#line 219 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 246 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.no_outer_iterations = 1;
-//#line 219 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 246 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.no_outer_iterations = 100;
-//#line 219 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 246 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.no_outer_iterations = 4;
-//#line 219 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 246 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Optimization.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<int>("no_outer_iterations", "int", 0, "Each outerloop iteration automatically resizes the trajectory and invokes the internal optimizer with no_inner_iterations", "", &TebLocalPlannerReconfigureConfig::no_outer_iterations)));
-//#line 219 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 246 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<int>("no_outer_iterations", "int", 0, "Each outerloop iteration automatically resizes the trajectory and invokes the internal optimizer with no_inner_iterations", "", &TebLocalPlannerReconfigureConfig::no_outer_iterations)));
-//#line 223 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 250 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.optimization_activate = 0;
-//#line 223 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 250 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.optimization_activate = 1;
-//#line 223 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 250 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.optimization_activate = 1;
-//#line 223 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 250 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Optimization.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<bool>("optimization_activate", "bool", 0, "Activate the optimization", "", &TebLocalPlannerReconfigureConfig::optimization_activate)));
-//#line 223 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 250 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<bool>("optimization_activate", "bool", 0, "Activate the optimization", "", &TebLocalPlannerReconfigureConfig::optimization_activate)));
-//#line 227 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 254 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.optimization_verbose = 0;
-//#line 227 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 254 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.optimization_verbose = 1;
-//#line 227 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 254 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.optimization_verbose = 0;
-//#line 227 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 254 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Optimization.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<bool>("optimization_verbose", "bool", 0, "Print verbose information", "", &TebLocalPlannerReconfigureConfig::optimization_verbose)));
-//#line 227 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 254 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<bool>("optimization_verbose", "bool", 0, "Print verbose information", "", &TebLocalPlannerReconfigureConfig::optimization_verbose)));
-//#line 231 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 258 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.penalty_epsilon = 0.0;
-//#line 231 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 258 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.penalty_epsilon = 1.0;
-//#line 231 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
-      __default__.penalty_epsilon = 0.1;
-//#line 231 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 258 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __default__.penalty_epsilon = 0.05;
+//#line 258 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Optimization.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("penalty_epsilon", "double", 0, "Add a small safty margin to penalty functions for hard-constraint approximations", "", &TebLocalPlannerReconfigureConfig::penalty_epsilon)));
-//#line 231 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 258 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("penalty_epsilon", "double", 0, "Add a small safty margin to penalty functions for hard-constraint approximations", "", &TebLocalPlannerReconfigureConfig::penalty_epsilon)));
-//#line 235 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 262 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.weight_max_vel_x = 0.0;
-//#line 235 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 262 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.weight_max_vel_x = 1000.0;
-//#line 235 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 262 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.weight_max_vel_x = 2.0;
-//#line 235 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 262 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Optimization.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("weight_max_vel_x", "double", 0, "Optimization weight for satisfying the maximum allowed translational velocity", "", &TebLocalPlannerReconfigureConfig::weight_max_vel_x)));
-//#line 235 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 262 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("weight_max_vel_x", "double", 0, "Optimization weight for satisfying the maximum allowed translational velocity", "", &TebLocalPlannerReconfigureConfig::weight_max_vel_x)));
-//#line 239 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 266 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.weight_max_vel_y = 0.0;
-//#line 239 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 266 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.weight_max_vel_y = 1000.0;
-//#line 239 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 266 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.weight_max_vel_y = 2.0;
-//#line 239 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 266 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Optimization.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("weight_max_vel_y", "double", 0, "Optimization weight for satisfying the maximum allowed strafing velocity (in use only for holonomic robots)", "", &TebLocalPlannerReconfigureConfig::weight_max_vel_y)));
-//#line 239 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 266 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("weight_max_vel_y", "double", 0, "Optimization weight for satisfying the maximum allowed strafing velocity (in use only for holonomic robots)", "", &TebLocalPlannerReconfigureConfig::weight_max_vel_y)));
-//#line 243 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 270 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.weight_max_vel_theta = 0.0;
-//#line 243 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 270 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.weight_max_vel_theta = 1000.0;
-//#line 243 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 270 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.weight_max_vel_theta = 1.0;
-//#line 243 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 270 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Optimization.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("weight_max_vel_theta", "double", 0, "Optimization weight for satisfying the maximum allowed angular velocity", "", &TebLocalPlannerReconfigureConfig::weight_max_vel_theta)));
-//#line 243 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 270 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("weight_max_vel_theta", "double", 0, "Optimization weight for satisfying the maximum allowed angular velocity", "", &TebLocalPlannerReconfigureConfig::weight_max_vel_theta)));
-//#line 247 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 274 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.weight_acc_lim_x = 0.0;
-//#line 247 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 274 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.weight_acc_lim_x = 1000.0;
-//#line 247 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 274 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.weight_acc_lim_x = 1.0;
-//#line 247 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 274 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Optimization.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("weight_acc_lim_x", "double", 0, "Optimization weight for satisfying the maximum allowed translational acceleration", "", &TebLocalPlannerReconfigureConfig::weight_acc_lim_x)));
-//#line 247 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 274 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("weight_acc_lim_x", "double", 0, "Optimization weight for satisfying the maximum allowed translational acceleration", "", &TebLocalPlannerReconfigureConfig::weight_acc_lim_x)));
-//#line 251 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 278 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.weight_acc_lim_y = 0.0;
-//#line 251 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 278 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.weight_acc_lim_y = 1000.0;
-//#line 251 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 278 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.weight_acc_lim_y = 1.0;
-//#line 251 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 278 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Optimization.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("weight_acc_lim_y", "double", 0, "Optimization weight for satisfying the maximum allowed strafing acceleration (in use only for holonomic robots)", "", &TebLocalPlannerReconfigureConfig::weight_acc_lim_y)));
-//#line 251 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 278 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("weight_acc_lim_y", "double", 0, "Optimization weight for satisfying the maximum allowed strafing acceleration (in use only for holonomic robots)", "", &TebLocalPlannerReconfigureConfig::weight_acc_lim_y)));
-//#line 255 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 282 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.weight_acc_lim_theta = 0.0;
-//#line 255 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 282 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.weight_acc_lim_theta = 1000.0;
-//#line 255 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 282 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.weight_acc_lim_theta = 1.0;
-//#line 255 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 282 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Optimization.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("weight_acc_lim_theta", "double", 0, "Optimization weight for satisfying the maximum allowed angular acceleration", "", &TebLocalPlannerReconfigureConfig::weight_acc_lim_theta)));
-//#line 255 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 282 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("weight_acc_lim_theta", "double", 0, "Optimization weight for satisfying the maximum allowed angular acceleration", "", &TebLocalPlannerReconfigureConfig::weight_acc_lim_theta)));
-//#line 259 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 286 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.weight_kinematics_nh = 0.0;
-//#line 259 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 286 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.weight_kinematics_nh = 10000.0;
-//#line 259 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 286 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.weight_kinematics_nh = 1000.0;
-//#line 259 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 286 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Optimization.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("weight_kinematics_nh", "double", 0, "Optimization weight for satisfying the non-holonomic kinematics", "", &TebLocalPlannerReconfigureConfig::weight_kinematics_nh)));
-//#line 259 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 286 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("weight_kinematics_nh", "double", 0, "Optimization weight for satisfying the non-holonomic kinematics", "", &TebLocalPlannerReconfigureConfig::weight_kinematics_nh)));
-//#line 263 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 290 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.weight_kinematics_forward_drive = 0.0;
-//#line 263 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
-      __max__.weight_kinematics_forward_drive = 1000.0;
-//#line 263 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 290 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __max__.weight_kinematics_forward_drive = 10000.0;
+//#line 290 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.weight_kinematics_forward_drive = 1.0;
-//#line 263 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 290 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Optimization.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("weight_kinematics_forward_drive", "double", 0, "Optimization weight for forcing the robot to choose only forward directions (positive transl. velocities, only diffdrive robot)", "", &TebLocalPlannerReconfigureConfig::weight_kinematics_forward_drive)));
-//#line 263 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 290 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("weight_kinematics_forward_drive", "double", 0, "Optimization weight for forcing the robot to choose only forward directions (positive transl. velocities, only diffdrive robot)", "", &TebLocalPlannerReconfigureConfig::weight_kinematics_forward_drive)));
-//#line 267 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 294 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.weight_kinematics_turning_radius = 0.0;
-//#line 267 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 294 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.weight_kinematics_turning_radius = 1000.0;
-//#line 267 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 294 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.weight_kinematics_turning_radius = 1.0;
-//#line 267 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 294 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Optimization.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("weight_kinematics_turning_radius", "double", 0, "Optimization weight for enforcing a minimum turning radius (carlike robots)", "", &TebLocalPlannerReconfigureConfig::weight_kinematics_turning_radius)));
-//#line 267 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 294 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("weight_kinematics_turning_radius", "double", 0, "Optimization weight for enforcing a minimum turning radius (carlike robots)", "", &TebLocalPlannerReconfigureConfig::weight_kinematics_turning_radius)));
-//#line 271 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 298 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.weight_optimaltime = 0.0;
-//#line 271 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 298 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.weight_optimaltime = 1000.0;
-//#line 271 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 298 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.weight_optimaltime = 1.0;
-//#line 271 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 298 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Optimization.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("weight_optimaltime", "double", 0, "Optimization weight for contracting the trajectory w.r.t. transition time", "", &TebLocalPlannerReconfigureConfig::weight_optimaltime)));
-//#line 271 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 298 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("weight_optimaltime", "double", 0, "Optimization weight for contracting the trajectory w.r.t. transition time", "", &TebLocalPlannerReconfigureConfig::weight_optimaltime)));
-//#line 275 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 302 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.weight_shortest_path = 0.0;
-//#line 275 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 302 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.weight_shortest_path = 100.0;
-//#line 275 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 302 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.weight_shortest_path = 0.0;
-//#line 275 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 302 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Optimization.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("weight_shortest_path", "double", 0, "Optimization weight for contracting the trajectory w.r.t. path length", "", &TebLocalPlannerReconfigureConfig::weight_shortest_path)));
-//#line 275 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 302 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("weight_shortest_path", "double", 0, "Optimization weight for contracting the trajectory w.r.t. path length", "", &TebLocalPlannerReconfigureConfig::weight_shortest_path)));
-//#line 279 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 306 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.weight_obstacle = 0.0;
-//#line 279 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 306 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.weight_obstacle = 1000.0;
-//#line 279 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 306 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.weight_obstacle = 50.0;
-//#line 279 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 306 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Optimization.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("weight_obstacle", "double", 0, "Optimization weight for satisfying a minimum seperation from obstacles", "", &TebLocalPlannerReconfigureConfig::weight_obstacle)));
-//#line 279 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 306 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("weight_obstacle", "double", 0, "Optimization weight for satisfying a minimum seperation from obstacles", "", &TebLocalPlannerReconfigureConfig::weight_obstacle)));
-//#line 283 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 310 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.weight_inflation = 0.0;
-//#line 283 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 310 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.weight_inflation = 10.0;
-//#line 283 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 310 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.weight_inflation = 0.1;
-//#line 283 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 310 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Optimization.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("weight_inflation", "double", 0, "Optimization weight for the inflation penalty (should be small)", "", &TebLocalPlannerReconfigureConfig::weight_inflation)));
-//#line 283 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 310 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("weight_inflation", "double", 0, "Optimization weight for the inflation penalty (should be small)", "", &TebLocalPlannerReconfigureConfig::weight_inflation)));
-//#line 287 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 314 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.weight_dynamic_obstacle = 0.0;
-//#line 287 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 314 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.weight_dynamic_obstacle = 1000.0;
-//#line 287 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 314 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.weight_dynamic_obstacle = 50.0;
-//#line 287 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 314 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Optimization.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("weight_dynamic_obstacle", "double", 0, "Optimization weight for satisfying a minimum seperation from dynamic obstacles", "", &TebLocalPlannerReconfigureConfig::weight_dynamic_obstacle)));
-//#line 287 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 314 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("weight_dynamic_obstacle", "double", 0, "Optimization weight for satisfying a minimum seperation from dynamic obstacles", "", &TebLocalPlannerReconfigureConfig::weight_dynamic_obstacle)));
-//#line 291 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 318 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.weight_dynamic_obstacle_inflation = 0.0;
-//#line 291 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 318 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.weight_dynamic_obstacle_inflation = 10.0;
-//#line 291 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 318 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.weight_dynamic_obstacle_inflation = 0.1;
-//#line 291 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 318 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Optimization.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("weight_dynamic_obstacle_inflation", "double", 0, "Optimization weight for the inflation penalty of dynamic obstacles (should be small)", "", &TebLocalPlannerReconfigureConfig::weight_dynamic_obstacle_inflation)));
-//#line 291 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 318 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("weight_dynamic_obstacle_inflation", "double", 0, "Optimization weight for the inflation penalty of dynamic obstacles (should be small)", "", &TebLocalPlannerReconfigureConfig::weight_dynamic_obstacle_inflation)));
-//#line 295 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 322 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.weight_velocity_obstacle_ratio = 0.0;
-//#line 295 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 322 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.weight_velocity_obstacle_ratio = 1000.0;
-//#line 295 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 322 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.weight_velocity_obstacle_ratio = 0.0;
-//#line 295 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 322 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Optimization.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("weight_velocity_obstacle_ratio", "double", 0, "Optimization weight for satisfying a maximum allowed velocity with respect to the distance to a static obstacle", "", &TebLocalPlannerReconfigureConfig::weight_velocity_obstacle_ratio)));
-//#line 295 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 322 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("weight_velocity_obstacle_ratio", "double", 0, "Optimization weight for satisfying a maximum allowed velocity with respect to the distance to a static obstacle", "", &TebLocalPlannerReconfigureConfig::weight_velocity_obstacle_ratio)));
-//#line 299 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 326 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.weight_viapoint = 0.0;
-//#line 299 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 326 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.weight_viapoint = 1000.0;
-//#line 299 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 326 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.weight_viapoint = 1.0;
-//#line 299 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 326 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Optimization.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("weight_viapoint", "double", 0, "Optimization weight for minimizing the distance to via-points", "", &TebLocalPlannerReconfigureConfig::weight_viapoint)));
-//#line 299 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 326 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("weight_viapoint", "double", 0, "Optimization weight for minimizing the distance to via-points", "", &TebLocalPlannerReconfigureConfig::weight_viapoint)));
-//#line 303 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 330 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.weight_adapt_factor = 1.0;
-//#line 303 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 330 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.weight_adapt_factor = 100.0;
-//#line 303 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 330 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.weight_adapt_factor = 2.0;
-//#line 303 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 330 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Optimization.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("weight_adapt_factor", "double", 0, "Some special weights (currently 'weight_obstacle') are repeatedly scaled by this factor in each outer TEB iteration (weight_new: weight_old * factor); Increasing weights iteratively instead of setting a huge value a-priori leads to better numerical conditions of the underlying optimization problem.", "", &TebLocalPlannerReconfigureConfig::weight_adapt_factor)));
-//#line 303 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 330 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("weight_adapt_factor", "double", 0, "Some special weights (currently 'weight_obstacle') are repeatedly scaled by this factor in each outer TEB iteration (weight_new: weight_old * factor); Increasing weights iteratively instead of setting a huge value a-priori leads to better numerical conditions of the underlying optimization problem.", "", &TebLocalPlannerReconfigureConfig::weight_adapt_factor)));
-//#line 307 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 334 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.obstacle_cost_exponent = 0.01;
-//#line 307 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 334 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.obstacle_cost_exponent = 100.0;
-//#line 307 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 334 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.obstacle_cost_exponent = 1.0;
-//#line 307 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 334 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Optimization.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("obstacle_cost_exponent", "double", 0, "Exponent for nonlinear obstacle cost (cost = linear_cost * obstacle_cost_exponent). Set to 1 to disable nonlinear cost (default)", "", &TebLocalPlannerReconfigureConfig::obstacle_cost_exponent)));
-//#line 307 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 334 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("obstacle_cost_exponent", "double", 0, "Exponent for nonlinear obstacle cost (cost = linear_cost * obstacle_cost_exponent). Set to 1 to disable nonlinear cost (default)", "", &TebLocalPlannerReconfigureConfig::obstacle_cost_exponent)));
 //#line 124 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       Optimization.convertParams();
@@ -1734,165 +1873,185 @@ TebLocalPlannerReconfigureConfig::GroupDescription<TebLocalPlannerReconfigureCon
 //#line 124 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       __group_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractGroupDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::GroupDescription<TebLocalPlannerReconfigureConfig::DEFAULT::OPTIMIZATION, TebLocalPlannerReconfigureConfig::DEFAULT>(Optimization)));
 TebLocalPlannerReconfigureConfig::GroupDescription<TebLocalPlannerReconfigureConfig::DEFAULT::HCPLANNING, TebLocalPlannerReconfigureConfig::DEFAULT> HCPlanning("HCPlanning", "tab", 0, 10, true, &TebLocalPlannerReconfigureConfig::DEFAULT::hcplanning);
-//#line 316 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 342 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.enable_multithreading = 0;
-//#line 316 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 342 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.enable_multithreading = 1;
-//#line 316 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 342 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.enable_multithreading = 1;
-//#line 316 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 342 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       HCPlanning.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<bool>("enable_multithreading", "bool", 0, "Activate multiple threading for planning multiple trajectories in parallel", "", &TebLocalPlannerReconfigureConfig::enable_multithreading)));
-//#line 316 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 342 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<bool>("enable_multithreading", "bool", 0, "Activate multiple threading for planning multiple trajectories in parallel", "", &TebLocalPlannerReconfigureConfig::enable_multithreading)));
-//#line 320 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 346 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.max_number_classes = 1;
-//#line 320 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 346 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.max_number_classes = 100;
-//#line 320 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 346 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.max_number_classes = 5;
-//#line 320 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 346 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       HCPlanning.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<int>("max_number_classes", "int", 0, "Specify the maximum number of allowed alternative homotopy classes (limits computational effort)", "", &TebLocalPlannerReconfigureConfig::max_number_classes)));
-//#line 320 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 346 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<int>("max_number_classes", "int", 0, "Specify the maximum number of allowed alternative homotopy classes (limits computational effort)", "", &TebLocalPlannerReconfigureConfig::max_number_classes)));
-//#line 324 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 350 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __min__.max_number_plans_in_current_class = 1;
+//#line 350 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __max__.max_number_plans_in_current_class = 10;
+//#line 350 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __default__.max_number_plans_in_current_class = 1;
+//#line 350 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      HCPlanning.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<int>("max_number_plans_in_current_class", "int", 0, "Max number of trajectories to try that are in the same homotopy class as the current best trajectory (setting this to 2 or more helps avoid local minima). Must be <= max_number_classes", "", &TebLocalPlannerReconfigureConfig::max_number_plans_in_current_class)));
+//#line 350 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<int>("max_number_plans_in_current_class", "int", 0, "Max number of trajectories to try that are in the same homotopy class as the current best trajectory (setting this to 2 or more helps avoid local minima). Must be <= max_number_classes", "", &TebLocalPlannerReconfigureConfig::max_number_plans_in_current_class)));
+//#line 354 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.selection_cost_hysteresis = 0.0;
-//#line 324 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 354 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.selection_cost_hysteresis = 2.0;
-//#line 324 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 354 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.selection_cost_hysteresis = 1.0;
-//#line 324 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 354 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       HCPlanning.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("selection_cost_hysteresis", "double", 0, "Specify how much trajectory cost must a new candidate have w.r.t. a previously selected trajectory in order to be selected (selection if new_cost < old_cost*factor)", "", &TebLocalPlannerReconfigureConfig::selection_cost_hysteresis)));
-//#line 324 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 354 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("selection_cost_hysteresis", "double", 0, "Specify how much trajectory cost must a new candidate have w.r.t. a previously selected trajectory in order to be selected (selection if new_cost < old_cost*factor)", "", &TebLocalPlannerReconfigureConfig::selection_cost_hysteresis)));
-//#line 329 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 359 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.selection_prefer_initial_plan = 0.0;
-//#line 329 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 359 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.selection_prefer_initial_plan = 1.0;
-//#line 329 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 359 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.selection_prefer_initial_plan = 0.95;
-//#line 329 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 359 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       HCPlanning.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("selection_prefer_initial_plan", "double", 0, "Specify a cost reduction in the interval (0,1) for the trajectory in the equivalence class of the initial plan.)", "", &TebLocalPlannerReconfigureConfig::selection_prefer_initial_plan)));
-//#line 329 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 359 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("selection_prefer_initial_plan", "double", 0, "Specify a cost reduction in the interval (0,1) for the trajectory in the equivalence class of the initial plan.)", "", &TebLocalPlannerReconfigureConfig::selection_prefer_initial_plan)));
-//#line 333 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 363 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.selection_obst_cost_scale = 0.0;
-//#line 333 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 363 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.selection_obst_cost_scale = 1000.0;
-//#line 333 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 363 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.selection_obst_cost_scale = 2.0;
-//#line 333 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 363 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       HCPlanning.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("selection_obst_cost_scale", "double", 0, "Extra scaling of obstacle cost terms just for selecting the 'best' candidate (new_obst_cost: obst_cost*factor)", "", &TebLocalPlannerReconfigureConfig::selection_obst_cost_scale)));
-//#line 333 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 363 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("selection_obst_cost_scale", "double", 0, "Extra scaling of obstacle cost terms just for selecting the 'best' candidate (new_obst_cost: obst_cost*factor)", "", &TebLocalPlannerReconfigureConfig::selection_obst_cost_scale)));
-//#line 337 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 367 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.selection_viapoint_cost_scale = 0.0;
-//#line 337 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 367 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.selection_viapoint_cost_scale = 100.0;
-//#line 337 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 367 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.selection_viapoint_cost_scale = 1.0;
-//#line 337 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 367 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       HCPlanning.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("selection_viapoint_cost_scale", "double", 0, "Extra scaling of via-point cost terms just for selecting the 'best' candidate. (new_viapt_cost: viapt_cost*factor)", "", &TebLocalPlannerReconfigureConfig::selection_viapoint_cost_scale)));
-//#line 337 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 367 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("selection_viapoint_cost_scale", "double", 0, "Extra scaling of via-point cost terms just for selecting the 'best' candidate. (new_viapt_cost: viapt_cost*factor)", "", &TebLocalPlannerReconfigureConfig::selection_viapoint_cost_scale)));
-//#line 341 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 371 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.selection_alternative_time_cost = 0;
-//#line 341 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 371 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.selection_alternative_time_cost = 1;
-//#line 341 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 371 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.selection_alternative_time_cost = 0;
-//#line 341 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 371 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       HCPlanning.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<bool>("selection_alternative_time_cost", "bool", 0, "If true, time cost is replaced by the total transition time.", "", &TebLocalPlannerReconfigureConfig::selection_alternative_time_cost)));
-//#line 341 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 371 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<bool>("selection_alternative_time_cost", "bool", 0, "If true, time cost is replaced by the total transition time.", "", &TebLocalPlannerReconfigureConfig::selection_alternative_time_cost)));
-//#line 345 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 375 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __min__.selection_dropping_probability = 0.0;
+//#line 375 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __max__.selection_dropping_probability = 1.0;
+//#line 375 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __default__.selection_dropping_probability = 0.0;
+//#line 375 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      HCPlanning.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("selection_dropping_probability", "double", 0, "At each planning cycle, TEBs other than the current 'best' one will be randomly dropped with this probability. Prevents becoming 'fixated' on sub-optimal alternative homotopies.", "", &TebLocalPlannerReconfigureConfig::selection_dropping_probability)));
+//#line 375 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("selection_dropping_probability", "double", 0, "At each planning cycle, TEBs other than the current 'best' one will be randomly dropped with this probability. Prevents becoming 'fixated' on sub-optimal alternative homotopies.", "", &TebLocalPlannerReconfigureConfig::selection_dropping_probability)));
+//#line 379 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.switching_blocking_period = 0.0;
-//#line 345 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 379 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.switching_blocking_period = 60.0;
-//#line 345 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 379 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.switching_blocking_period = 0.0;
-//#line 345 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 379 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       HCPlanning.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("switching_blocking_period", "double", 0, "Specify a time duration in seconds that needs to be expired before a switch to new equivalence class is allowed", "", &TebLocalPlannerReconfigureConfig::switching_blocking_period)));
-//#line 345 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 379 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("switching_blocking_period", "double", 0, "Specify a time duration in seconds that needs to be expired before a switch to new equivalence class is allowed", "", &TebLocalPlannerReconfigureConfig::switching_blocking_period)));
-//#line 349 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 383 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.roadmap_graph_no_samples = 1;
-//#line 349 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 383 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.roadmap_graph_no_samples = 100;
-//#line 349 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 383 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.roadmap_graph_no_samples = 15;
-//#line 349 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 383 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       HCPlanning.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<int>("roadmap_graph_no_samples", "int", 0, "Specify the number of samples generated for creating the roadmap graph, if simple_exploration is turend off", "", &TebLocalPlannerReconfigureConfig::roadmap_graph_no_samples)));
-//#line 349 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 383 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<int>("roadmap_graph_no_samples", "int", 0, "Specify the number of samples generated for creating the roadmap graph, if simple_exploration is turend off", "", &TebLocalPlannerReconfigureConfig::roadmap_graph_no_samples)));
-//#line 353 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 387 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.roadmap_graph_area_width = 0.1;
-//#line 353 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 387 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.roadmap_graph_area_width = 20.0;
-//#line 353 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 387 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.roadmap_graph_area_width = 5.0;
-//#line 353 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 387 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       HCPlanning.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("roadmap_graph_area_width", "double", 0, "Specify the width of the area in which sampled will be generated between start and goal [m] (the height equals the start-goal distance)", "", &TebLocalPlannerReconfigureConfig::roadmap_graph_area_width)));
-//#line 353 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 387 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("roadmap_graph_area_width", "double", 0, "Specify the width of the area in which sampled will be generated between start and goal [m] (the height equals the start-goal distance)", "", &TebLocalPlannerReconfigureConfig::roadmap_graph_area_width)));
-//#line 357 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 391 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.roadmap_graph_area_length_scale = 0.5;
-//#line 357 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 391 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.roadmap_graph_area_length_scale = 2.0;
-//#line 357 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 391 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.roadmap_graph_area_length_scale = 1.0;
-//#line 357 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 391 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       HCPlanning.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("roadmap_graph_area_length_scale", "double", 0, "The length of the rectangular region is determined by the distance between start and goal. This parameter further scales the distance such that the geometric center remains equal!)", "", &TebLocalPlannerReconfigureConfig::roadmap_graph_area_length_scale)));
-//#line 357 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 391 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("roadmap_graph_area_length_scale", "double", 0, "The length of the rectangular region is determined by the distance between start and goal. This parameter further scales the distance such that the geometric center remains equal!)", "", &TebLocalPlannerReconfigureConfig::roadmap_graph_area_length_scale)));
-//#line 361 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 395 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.h_signature_prescaler = 0.2;
-//#line 361 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 395 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.h_signature_prescaler = 1.0;
-//#line 361 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 395 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.h_signature_prescaler = 1.0;
-//#line 361 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 395 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       HCPlanning.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("h_signature_prescaler", "double", 0, "Scale number of obstacle value in order to allow huge number of obstacles. Do not choose it extremly low, otherwise obstacles cannot be distinguished from each other (0.2<H<=1)", "", &TebLocalPlannerReconfigureConfig::h_signature_prescaler)));
-//#line 361 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 395 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("h_signature_prescaler", "double", 0, "Scale number of obstacle value in order to allow huge number of obstacles. Do not choose it extremly low, otherwise obstacles cannot be distinguished from each other (0.2<H<=1)", "", &TebLocalPlannerReconfigureConfig::h_signature_prescaler)));
-//#line 365 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 399 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.h_signature_threshold = 0.0;
-//#line 365 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 399 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.h_signature_threshold = 1.0;
-//#line 365 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 399 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.h_signature_threshold = 0.1;
-//#line 365 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 399 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       HCPlanning.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("h_signature_threshold", "double", 0, "Two h-signuteres are assumed to be equal, if both the difference of real parts and complex parts are below the specified threshold", "", &TebLocalPlannerReconfigureConfig::h_signature_threshold)));
-//#line 365 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 399 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("h_signature_threshold", "double", 0, "Two h-signuteres are assumed to be equal, if both the difference of real parts and complex parts are below the specified threshold", "", &TebLocalPlannerReconfigureConfig::h_signature_threshold)));
-//#line 369 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 403 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.obstacle_heading_threshold = 0.0;
-//#line 369 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 403 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.obstacle_heading_threshold = 1.0;
-//#line 369 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 403 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.obstacle_heading_threshold = 0.45;
-//#line 369 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 403 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       HCPlanning.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("obstacle_heading_threshold", "double", 0, "Specify the value of the normalized scalar product between obstacle heading and goal heading in order to take them (obstacles) into account for exploration)", "", &TebLocalPlannerReconfigureConfig::obstacle_heading_threshold)));
-//#line 369 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 403 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("obstacle_heading_threshold", "double", 0, "Specify the value of the normalized scalar product between obstacle heading and goal heading in order to take them (obstacles) into account for exploration)", "", &TebLocalPlannerReconfigureConfig::obstacle_heading_threshold)));
-//#line 373 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 407 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.viapoints_all_candidates = 0;
-//#line 373 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 407 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.viapoints_all_candidates = 1;
-//#line 373 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 407 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.viapoints_all_candidates = 1;
-//#line 373 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 407 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       HCPlanning.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<bool>("viapoints_all_candidates", "bool", 0, "If true, all trajectories of different topologies are attached to the set of via-points, otherwise only the trajectory sharing the same one as the initial/global plan is attached (no effect in test_optim_node).", "", &TebLocalPlannerReconfigureConfig::viapoints_all_candidates)));
-//#line 373 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 407 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<bool>("viapoints_all_candidates", "bool", 0, "If true, all trajectories of different topologies are attached to the set of via-points, otherwise only the trajectory sharing the same one as the initial/global plan is attached (no effect in test_optim_node).", "", &TebLocalPlannerReconfigureConfig::viapoints_all_candidates)));
-//#line 377 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 411 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.visualize_hc_graph = 0;
-//#line 377 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 411 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.visualize_hc_graph = 1;
-//#line 377 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 411 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.visualize_hc_graph = 0;
-//#line 377 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 411 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       HCPlanning.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<bool>("visualize_hc_graph", "bool", 0, "Visualize the graph that is created for exploring new homotopy classes", "", &TebLocalPlannerReconfigureConfig::visualize_hc_graph)));
-//#line 377 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 411 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<bool>("visualize_hc_graph", "bool", 0, "Visualize the graph that is created for exploring new homotopy classes", "", &TebLocalPlannerReconfigureConfig::visualize_hc_graph)));
 //#line 124 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       HCPlanning.convertParams();
@@ -1901,26 +2060,53 @@ TebLocalPlannerReconfigureConfig::GroupDescription<TebLocalPlannerReconfigureCon
 //#line 124 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       __group_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractGroupDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::GroupDescription<TebLocalPlannerReconfigureConfig::DEFAULT::HCPLANNING, TebLocalPlannerReconfigureConfig::DEFAULT>(HCPlanning)));
 TebLocalPlannerReconfigureConfig::GroupDescription<TebLocalPlannerReconfigureConfig::DEFAULT::RECOVERY, TebLocalPlannerReconfigureConfig::DEFAULT> Recovery("Recovery", "tab", 0, 11, true, &TebLocalPlannerReconfigureConfig::DEFAULT::recovery);
-//#line 385 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 419 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.shrink_horizon_backup = 0;
-//#line 385 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 419 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.shrink_horizon_backup = 1;
-//#line 385 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 419 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.shrink_horizon_backup = 1;
-//#line 385 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 419 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Recovery.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<bool>("shrink_horizon_backup", "bool", 0, "Allows the planner to shrink the horizon temporary (50%) in case of automatically detected issues.", "", &TebLocalPlannerReconfigureConfig::shrink_horizon_backup)));
-//#line 385 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 419 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<bool>("shrink_horizon_backup", "bool", 0, "Allows the planner to shrink the horizon temporary (50%) in case of automatically detected issues.", "", &TebLocalPlannerReconfigureConfig::shrink_horizon_backup)));
-//#line 389 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 423 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __min__.oscillation_recovery = 0;
-//#line 389 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 423 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __max__.oscillation_recovery = 1;
-//#line 389 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 423 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __default__.oscillation_recovery = 1;
-//#line 389 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 423 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       Recovery.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<bool>("oscillation_recovery", "bool", 0, "Try to detect and resolve oscillations between multiple solutions in the same equivalence class (robot frequently switches between left/right/forward/backwards).", "", &TebLocalPlannerReconfigureConfig::oscillation_recovery)));
-//#line 389 "/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/cfg/TebLocalPlannerReconfigure.cfg"
+//#line 423 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
       __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<bool>("oscillation_recovery", "bool", 0, "Try to detect and resolve oscillations between multiple solutions in the same equivalence class (robot frequently switches between left/right/forward/backwards).", "", &TebLocalPlannerReconfigureConfig::oscillation_recovery)));
+TebLocalPlannerReconfigureConfig::GroupDescription<TebLocalPlannerReconfigureConfig::DEFAULT::RECOVERY::DIVERGENCE_DETECTION, TebLocalPlannerReconfigureConfig::DEFAULT::RECOVERY> Divergence_Detection("Divergence_Detection", "hide", 11, 12, true, &TebLocalPlannerReconfigureConfig::DEFAULT::RECOVERY::divergence_detection);
+//#line 429 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __min__.divergence_detection_enable = 0;
+//#line 429 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __max__.divergence_detection_enable = 1;
+//#line 429 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __default__.divergence_detection_enable = 0;
+//#line 429 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      Divergence_Detection.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<bool>("divergence_detection_enable", "bool", 0, "True to enable divergence detection.", "", &TebLocalPlannerReconfigureConfig::divergence_detection_enable)));
+//#line 429 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<bool>("divergence_detection_enable", "bool", 0, "True to enable divergence detection.", "", &TebLocalPlannerReconfigureConfig::divergence_detection_enable)));
+//#line 437 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __min__.divergence_detection_max_chi_squared = 0.0;
+//#line 437 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __max__.divergence_detection_max_chi_squared = 100.0;
+//#line 437 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __default__.divergence_detection_max_chi_squared = 10.0;
+//#line 437 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      Divergence_Detection.abstract_parameters.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("divergence_detection_max_chi_squared", "double", 0, "Maximum acceptable Mahalanobis distance above which it is assumed that the optimization diverged.", "", &TebLocalPlannerReconfigureConfig::divergence_detection_max_chi_squared)));
+//#line 437 "/home/er/mercury_x1_ros/src/teb_local_planner/cfg/TebLocalPlannerReconfigure.cfg"
+      __param_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractParamDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::ParamDescription<double>("divergence_detection_max_chi_squared", "double", 0, "Maximum acceptable Mahalanobis distance above which it is assumed that the optimization diverged.", "", &TebLocalPlannerReconfigureConfig::divergence_detection_max_chi_squared)));
+//#line 124 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      Divergence_Detection.convertParams();
+//#line 124 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      Recovery.groups.push_back(TebLocalPlannerReconfigureConfig::AbstractGroupDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::GroupDescription<TebLocalPlannerReconfigureConfig::DEFAULT::RECOVERY::DIVERGENCE_DETECTION, TebLocalPlannerReconfigureConfig::DEFAULT::RECOVERY>(Divergence_Detection)));
+//#line 124 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      __group_descriptions__.push_back(TebLocalPlannerReconfigureConfig::AbstractGroupDescriptionConstPtr(new TebLocalPlannerReconfigureConfig::GroupDescription<TebLocalPlannerReconfigureConfig::DEFAULT::RECOVERY::DIVERGENCE_DETECTION, TebLocalPlannerReconfigureConfig::DEFAULT::RECOVERY>(Divergence_Detection)));
 //#line 124 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       Recovery.convertParams();
 //#line 124 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"

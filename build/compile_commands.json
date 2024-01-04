@@ -1,6 +1,16 @@
 [
 {
   "directory": "/home/er/mercury_x1_ros/build/darknet_ros/darknet_ros",
+  "command": "/usr/bin/c++  -DDARKNET_FILE_PATH=\\\"/home/er/mercury_x1_ros/src/darknet_ros/darknet\\\" -DOPENCV -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"darknet_ros\\\" -I/usr/include/opencv4 -I/home/er/mercury_x1_ros/src/darknet_ros/darknet/src -I/home/er/mercury_x1_ros/src/darknet_ros/darknet/include -I/home/er/mercury_x1_ros/src/darknet_ros/darknet_ros/include -I/home/er/mercury_x1_ros/devel/include -I/opt/ros/noetic/include -I/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -isystem /usr/src/googletest/googletest/include -isystem /usr/src/googletest/googletest    -O4 -g -DGTEST_HAS_PTHREAD=1 -std=gnu++11 -o CMakeFiles/darknet_ros_object_detection-test.dir/test/test_main.cpp.o -c /home/er/mercury_x1_ros/src/darknet_ros/darknet_ros/test/test_main.cpp",
+  "file": "/home/er/mercury_x1_ros/src/darknet_ros/darknet_ros/test/test_main.cpp"
+},
+{
+  "directory": "/home/er/mercury_x1_ros/build/darknet_ros/darknet_ros",
+  "command": "/usr/bin/c++  -DDARKNET_FILE_PATH=\\\"/home/er/mercury_x1_ros/src/darknet_ros/darknet\\\" -DOPENCV -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"darknet_ros\\\" -I/usr/include/opencv4 -I/home/er/mercury_x1_ros/src/darknet_ros/darknet/src -I/home/er/mercury_x1_ros/src/darknet_ros/darknet/include -I/home/er/mercury_x1_ros/src/darknet_ros/darknet_ros/include -I/home/er/mercury_x1_ros/devel/include -I/opt/ros/noetic/include -I/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -isystem /usr/src/googletest/googletest/include -isystem /usr/src/googletest/googletest    -O4 -g -DGTEST_HAS_PTHREAD=1 -std=gnu++11 -o CMakeFiles/darknet_ros_object_detection-test.dir/test/ObjectDetection.cpp.o -c /home/er/mercury_x1_ros/src/darknet_ros/darknet_ros/test/ObjectDetection.cpp",
+  "file": "/home/er/mercury_x1_ros/src/darknet_ros/darknet_ros/test/ObjectDetection.cpp"
+},
+{
+  "directory": "/home/er/mercury_x1_ros/build/darknet_ros/darknet_ros",
   "command": "/usr/bin/c++  -DBOOST_ALL_NO_LIB -DBOOST_ATOMIC_DYN_LINK -DBOOST_THREAD_DYN_LINK -DDARKNET_FILE_PATH=\\\"/home/er/mercury_x1_ros/src/darknet_ros/darknet\\\" -DOPENCV -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"darknet_ros\\\" -Ddarknet_ros_lib_EXPORTS -I/home/er/mercury_x1_ros/src/darknet_ros/darknet/src -I/home/er/mercury_x1_ros/src/darknet_ros/darknet/include -I/home/er/mercury_x1_ros/src/darknet_ros/darknet_ros/include -I/home/er/mercury_x1_ros/devel/include -I/opt/ros/noetic/include -I/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -isystem /usr/include/opencv4  -fPIC   -O4 -g -std=gnu++11 -o CMakeFiles/darknet_ros_lib.dir/src/YoloObjectDetector.cpp.o -c /home/er/mercury_x1_ros/src/darknet_ros/darknet_ros/src/YoloObjectDetector.cpp",
   "file": "/home/er/mercury_x1_ros/src/darknet_ros/darknet_ros/src/YoloObjectDetector.cpp"
 },
@@ -326,22 +336,12 @@
 },
 {
   "directory": "/home/er/mercury_x1_ros/build/darknet_ros/darknet_ros",
-  "command": "/usr/bin/c++  -DBOOST_ALL_NO_LIB -DBOOST_ATOMIC_DYN_LINK -DBOOST_THREAD_DYN_LINK -DDARKNET_FILE_PATH=\\\"/home/er/mercury_x1_ros/src/darknet_ros/darknet\\\" -DOPENCV -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"darknet_ros\\\" -Ddarknet_ros_nodelet_EXPORTS -I/home/er/mercury_x1_ros/src/darknet_ros/darknet/src -I/home/er/mercury_x1_ros/src/darknet_ros/darknet/include -I/home/er/mercury_x1_ros/src/darknet_ros/darknet_ros/include -I/home/er/mercury_x1_ros/devel/include -I/opt/ros/noetic/include -I/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -isystem /usr/include/opencv4  -fPIC   -O4 -g -std=gnu++11 -o CMakeFiles/darknet_ros_nodelet.dir/src/yolo_object_detector_nodelet.cpp.o -c /home/er/mercury_x1_ros/src/darknet_ros/darknet_ros/src/yolo_object_detector_nodelet.cpp",
-  "file": "/home/er/mercury_x1_ros/src/darknet_ros/darknet_ros/src/yolo_object_detector_nodelet.cpp"
-},
-{
-  "directory": "/home/er/mercury_x1_ros/build/darknet_ros/darknet_ros",
   "command": "/usr/bin/c++  -DBOOST_ALL_NO_LIB -DBOOST_ATOMIC_DYN_LINK -DBOOST_THREAD_DYN_LINK -DDARKNET_FILE_PATH=\\\"/home/er/mercury_x1_ros/src/darknet_ros/darknet\\\" -DOPENCV -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"darknet_ros\\\" -I/home/er/mercury_x1_ros/src/darknet_ros/darknet/src -I/home/er/mercury_x1_ros/src/darknet_ros/darknet/include -I/home/er/mercury_x1_ros/src/darknet_ros/darknet_ros/include -I/home/er/mercury_x1_ros/devel/include -I/opt/ros/noetic/include -I/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -isystem /usr/include/opencv4    -O4 -g -std=gnu++11 -o CMakeFiles/darknet_ros.dir/src/yolo_object_detector_node.cpp.o -c /home/er/mercury_x1_ros/src/darknet_ros/darknet_ros/src/yolo_object_detector_node.cpp",
   "file": "/home/er/mercury_x1_ros/src/darknet_ros/darknet_ros/src/yolo_object_detector_node.cpp"
 },
 {
   "directory": "/home/er/mercury_x1_ros/build/darknet_ros/darknet_ros",
-  "command": "/usr/bin/c++  -DDARKNET_FILE_PATH=\\\"/home/er/mercury_x1_ros/src/darknet_ros/darknet\\\" -DOPENCV -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"darknet_ros\\\" -I/usr/include/opencv4 -I/home/er/mercury_x1_ros/src/darknet_ros/darknet/src -I/home/er/mercury_x1_ros/src/darknet_ros/darknet/include -I/home/er/mercury_x1_ros/src/darknet_ros/darknet_ros/include -I/home/er/mercury_x1_ros/devel/include -I/opt/ros/noetic/include -I/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -isystem /usr/src/googletest/googletest/include -isystem /usr/src/googletest/googletest    -O4 -g -DGTEST_HAS_PTHREAD=1 -std=gnu++11 -o CMakeFiles/darknet_ros_object_detection-test.dir/test/test_main.cpp.o -c /home/er/mercury_x1_ros/src/darknet_ros/darknet_ros/test/test_main.cpp",
-  "file": "/home/er/mercury_x1_ros/src/darknet_ros/darknet_ros/test/test_main.cpp"
-},
-{
-  "directory": "/home/er/mercury_x1_ros/build/darknet_ros/darknet_ros",
-  "command": "/usr/bin/c++  -DDARKNET_FILE_PATH=\\\"/home/er/mercury_x1_ros/src/darknet_ros/darknet\\\" -DOPENCV -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"darknet_ros\\\" -I/usr/include/opencv4 -I/home/er/mercury_x1_ros/src/darknet_ros/darknet/src -I/home/er/mercury_x1_ros/src/darknet_ros/darknet/include -I/home/er/mercury_x1_ros/src/darknet_ros/darknet_ros/include -I/home/er/mercury_x1_ros/devel/include -I/opt/ros/noetic/include -I/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -isystem /usr/src/googletest/googletest/include -isystem /usr/src/googletest/googletest    -O4 -g -DGTEST_HAS_PTHREAD=1 -std=gnu++11 -o CMakeFiles/darknet_ros_object_detection-test.dir/test/ObjectDetection.cpp.o -c /home/er/mercury_x1_ros/src/darknet_ros/darknet_ros/test/ObjectDetection.cpp",
-  "file": "/home/er/mercury_x1_ros/src/darknet_ros/darknet_ros/test/ObjectDetection.cpp"
+  "command": "/usr/bin/c++  -DBOOST_ALL_NO_LIB -DBOOST_ATOMIC_DYN_LINK -DBOOST_THREAD_DYN_LINK -DDARKNET_FILE_PATH=\\\"/home/er/mercury_x1_ros/src/darknet_ros/darknet\\\" -DOPENCV -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"darknet_ros\\\" -Ddarknet_ros_nodelet_EXPORTS -I/home/er/mercury_x1_ros/src/darknet_ros/darknet/src -I/home/er/mercury_x1_ros/src/darknet_ros/darknet/include -I/home/er/mercury_x1_ros/src/darknet_ros/darknet_ros/include -I/home/er/mercury_x1_ros/devel/include -I/opt/ros/noetic/include -I/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -isystem /usr/include/opencv4  -fPIC   -O4 -g -std=gnu++11 -o CMakeFiles/darknet_ros_nodelet.dir/src/yolo_object_detector_nodelet.cpp.o -c /home/er/mercury_x1_ros/src/darknet_ros/darknet_ros/src/yolo_object_detector_nodelet.cpp",
+  "file": "/home/er/mercury_x1_ros/src/darknet_ros/darknet_ros/src/yolo_object_detector_nodelet.cpp"
 }
 ]

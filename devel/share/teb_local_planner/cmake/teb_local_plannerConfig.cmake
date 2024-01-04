@@ -67,7 +67,7 @@ set(teb_local_planner_CONFIG_INCLUDED TRUE)
 
 # set variables for source/devel/install prefixes
 if("TRUE" STREQUAL "TRUE")
-  set(teb_local_planner_SOURCE_PREFIX /home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel)
+  set(teb_local_planner_SOURCE_PREFIX /home/er/mercury_x1_ros/src/teb_local_planner)
   set(teb_local_planner_DEVEL_PREFIX /home/er/mercury_x1_ros/devel)
   set(teb_local_planner_INSTALL_PREFIX "")
   set(teb_local_planner_PREFIX ${teb_local_planner_DEVEL_PREFIX})
@@ -91,9 +91,9 @@ endif()
 # flag project as catkin-based to distinguish if a find_package()-ed project is a catkin project
 set(teb_local_planner_FOUND_CATKIN_PROJECT TRUE)
 
-if(NOT "/home/er/mercury_x1_ros/devel/include;/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/include;/usr/include/suitesparse;/opt/ros/noetic/include/g2o " STREQUAL " ")
+if(NOT "/home/er/mercury_x1_ros/devel/include;/home/er/mercury_x1_ros/src/teb_local_planner/include;/usr/include/suitesparse;/opt/ros/noetic/include/g2o " STREQUAL " ")
   set(teb_local_planner_INCLUDE_DIRS "")
-  set(_include_dirs "/home/er/mercury_x1_ros/devel/include;/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/include;/usr/include/suitesparse;/opt/ros/noetic/include/g2o")
+  set(_include_dirs "/home/er/mercury_x1_ros/devel/include;/home/er/mercury_x1_ros/src/teb_local_planner/include;/usr/include/suitesparse;/opt/ros/noetic/include/g2o")
   if(NOT " " STREQUAL " ")
     set(_report "Check the issue tracker '' and consider creating a ticket if the problem has not been reported yet.")
   elseif(NOT "http://wiki.ros.org/teb_local_planner " STREQUAL " ")
@@ -110,7 +110,7 @@ if(NOT "/home/er/mercury_x1_ros/devel/include;/home/er/mercury_x1_ros/src/teb_lo
         message(FATAL_ERROR "Project 'teb_local_planner' specifies '${idir}' as an include dir, which is not found.  It does not exist in '${include}'.  ${_report}")
       endif()
     else()
-      message(FATAL_ERROR "Project 'teb_local_planner' specifies '${idir}' as an include dir, which is not found.  It does neither exist as an absolute directory nor in '/home/er/mercury_x1_ros/src/teb_local_planner-melodic-devel/${idir}'.  ${_report}")
+      message(FATAL_ERROR "Project 'teb_local_planner' specifies '${idir}' as an include dir, which is not found.  It does neither exist as an absolute directory nor in '/home/er/mercury_x1_ros/src/teb_local_planner/${idir}'.  ${_report}")
     endif()
     _list_append_unique(teb_local_planner_INCLUDE_DIRS ${include})
   endforeach()
@@ -154,7 +154,7 @@ foreach(library ${libraries})
     set(lib_path "")
     set(lib "${library}-NOTFOUND")
     # since the path where the library is found is returned we have to iterate over the paths manually
-    foreach(path /home/er/mercury_x1_ros/devel/lib;/home/er/tringai_robot/devel/lib;/home/er/myagv_ros/devel/lib;/opt/ros/noetic/lib)
+    foreach(path /home/er/mercury_x1_ros/devel/lib;/home/er/mercury_x1_ros/devel/lib;/opt/ros/noetic/lib)
       find_library(lib ${library}
         PATHS ${path}
         NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
@@ -185,7 +185,7 @@ foreach(t ${teb_local_planner_EXPORTED_TARGETS})
   endif()
 endforeach()
 
-set(depends "base_local_planner;costmap_2d;costmap_converter;dynamic_reconfigure;geometry_msgs;interactive_markers;message_runtime;nav_core;nav_msgs;pluginlib;roscpp;std_msgs;tf2;tf2_ros;visualization_msgs")
+set(depends "base_local_planner;costmap_2d;costmap_converter;dynamic_reconfigure;geometry_msgs;interactive_markers;message_runtime;nav_core;nav_msgs;pluginlib;roscpp;mbf_costmap_core;std_msgs;tf2;tf2_ros;visualization_msgs")
 foreach(depend ${depends})
   string(REPLACE " " ";" depend_list ${depend})
   # the package name of the dependency must be kept in a unique variable so that it is not overwritten in recursive calls

@@ -1,0 +1,4 @@
+<launch>
+	<node pkg="map_server" type="map_saver" name="map_saver1" args="-f /home/er/mercury_x1_ros/src/turn_on_mercury_robot/map/MERRCURY" output="screen">	
+	</node>
+</launch>

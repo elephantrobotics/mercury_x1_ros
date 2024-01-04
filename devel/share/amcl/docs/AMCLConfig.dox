@@ -5,7 +5,7 @@ Reads and maintains the following parameters on the ROS server
 - \b "~min_particles" : \b [int] Minimum allowed number of particles. min: 0, default: 100, max: 1000
 - \b "~max_particles" : \b [int] Mamimum allowed number of particles. min: 0, default: 5000, max: 10000
 - \b "~kld_err" : \b [double] Maximum error between the true distribution and the estimated distribution. min: 0.0, default: 0.01, max: 1.0
-- \b "~kld_z" : \b [double] Upper standard normal quantile for (1 - p), where p is the probability that the error on the estimated distrubition will be less than kld_err. min: 0.0, default: 0.99, max: 1.0
+- \b "~kld_z" : \b [double] Upper standard normal quantile for (1 - p), where p is the probability that the error on the estimated distribution will be less than kld_err. min: 0.0, default: 0.99, max: 1.0
 - \b "~update_min_d" : \b [double] Translational movement required before performing a filter update. min: 0.0, default: 0.2, max: 5.0
 - \b "~update_min_a" : \b [double] Rotational movement required before performing a filter update. min: 0.0, default: 0.5235987755982988, max: 6.283185307179586
 - \b "~resample_interval" : \b [int] Number of filter updates required before resampling. min: 0, default: 2, max: 20
@@ -16,6 +16,8 @@ Reads and maintains the following parameters on the ROS server
 - \b "~beam_skip_distance" : \b [double] Distance from a valid map point before scan is considered invalid min: 0.0, default: 0.5, max: 2.0
 - \b "~beam_skip_threshold" : \b [double] Ratio of samples for which the scans are valid to consider as valid scan min: 0.0, default: 0.3, max: 1.0
 - \b "~tf_broadcast" : \b [bool] When true (the default), publish results via TF.  When false, do not. min: False, default: True, max: True
+- \b "~force_update_after_initialpose" : \b [bool] When true, force a pose update after a new /initialpose is received. min: False, default: False, max: True
+- \b "~force_update_after_set_map" : \b [bool] When true, force a pose update after a new map (and pose) has been set via the /set_map service. min: False, default: False, max: True
 - \b "~gui_publish_rate" : \b [double] Maximum rate (Hz) at which scans and paths are published for visualization, -1.0 to disable. min: -1.0, default: -1.0, max: 100.0
 - \b "~save_pose_rate" : \b [double] Maximum rate (Hz) at which to store the last estimated pose and covariance to the parameter server, in the variables ~initial_pose_* and ~initial_cov_*. This saved pose will be used on subsequent runs to initialize the filter. -1.0 to disable. min: -1.0, default: 0.5, max: 10.0
 - \b "~use_map_topic" : \b [bool] When set to true, AMCL will subscribe to the map topic rather than making a service call to receive its map. min: False, default: False, max: True

@@ -2,7 +2,7 @@ prefix=/home/er/mercury_x1_ros/devel
 
 Name: voxel_grid
 Description: Description of voxel_grid
-Version: 1.16.4
-Cflags: -I/home/er/mercury_x1_ros/src/navigation-melodic/voxel_grid/include
+Version: 1.17.3
+Cflags: -I/home/er/mercury_x1_ros/src/navigation/voxel_grid/include
 Libs: -L${prefix}/lib -lvoxel_grid
 Requires: roscpp

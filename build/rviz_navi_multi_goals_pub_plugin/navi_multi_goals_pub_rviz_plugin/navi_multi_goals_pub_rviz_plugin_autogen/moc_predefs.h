@@ -46,6 +46,7 @@
 #define __GNUC_PATCHLEVEL__ 0
 #define __FLT32_HAS_DENORM__ 1
 #define __UINT_FAST8_MAX__ 0xff
+#define __cpp_rvalue_reference 200610
 #define __has_include(STR) __has_include__(STR)
 #define __DEC64_MAX_EXP__ 385
 #define __INT8_C(c) c
@@ -117,7 +118,7 @@
 #define __FLT16_MIN_EXP__ (-13)
 #define __FLT64_MANT_DIG__ 53
 #define ROS_PACKAGE_NAME "navi_multi_goals_pub_rviz_plugin"
-#define __GNUC__ 8
+#define __GNUC__ 9
 #define __GXX_RTTI 1
 #define __pie__ 2
 #define __cpp_delegating_constructors 200604
@@ -154,10 +155,9 @@
 #define __PTRDIFF_MAX__ 0x7fffffffffffffffL
 #define ROS_BUILD_SHARED_LIBS 1
 #define __FLT32_HAS_QUIET_NAN__ 1
-#define __GNUG__ 8
+#define __GNUG__ 9
 #define __LONG_LONG_MAX__ 0x7fffffffffffffffLL
 #define __SIZEOF_SIZE_T__ 8
-#define __cpp_rvalue_reference 200610
 #define __ARM_ALIGN_MAX_PWR 28
 #define __cpp_nsdmi 200809
 #define __FLT64X_MIN_EXP__ (-16381)
@@ -192,14 +192,13 @@
 #define __DEC128_MIN__ 1E-6143DL
 #define __REGISTER_PREFIX__ 
 #define __UINT16_MAX__ 0xffff
-#define __DBL_HAS_DENORM__ 1
 #define __FLT32_MIN__ 1.17549435082228750796873653722224568e-38F32
 #define __UINT8_TYPE__ unsigned char
 #define __NO_INLINE__ 1
 #define QT_NO_KEYWORDS 1
 #define __FLT_MANT_DIG__ 24
 #define __LDBL_DECIMAL_DIG__ 36
-#define __VERSION__ "8.4.0"
+#define __VERSION__ "9.4.0"
 #define __UINT64_C(c) c ## UL
 #define __cpp_unicode_characters 200704
 #define _STDC_PREDEF_H 1
@@ -225,6 +224,7 @@
 #define __UINT_LEAST16_TYPE__ short unsigned int
 #define __FLT64X_HAS_INFINITY__ 1
 #define unix 1
+#define __DBL_HAS_DENORM__ 1
 #define __INT16_MAX__ 0x7fff
 #define __cpp_rtti 199711
 #define __SIZE_TYPE__ long unsigned int
@@ -399,6 +399,7 @@
 #define __FLT32X_DIG__ 15
 #define __PTRDIFF_TYPE__ long int
 #define __ATOMIC_SEQ_CST 5
+#define __GCC_HAVE_SYNC_COMPARE_AND_SWAP_16 1
 #define __UINT32_TYPE__ unsigned int
 #define __FLT32X_MIN_10_EXP__ (-307)
 #define __UINTPTR_TYPE__ long unsigned int

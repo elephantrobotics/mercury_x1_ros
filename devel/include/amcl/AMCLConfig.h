@@ -253,6 +253,8 @@ class DEFAULT
         if("beam_skip_distance"==(*_i)->name){beam_skip_distance = boost::any_cast<double>(val);}
         if("beam_skip_threshold"==(*_i)->name){beam_skip_threshold = boost::any_cast<double>(val);}
         if("tf_broadcast"==(*_i)->name){tf_broadcast = boost::any_cast<bool>(val);}
+        if("force_update_after_initialpose"==(*_i)->name){force_update_after_initialpose = boost::any_cast<bool>(val);}
+        if("force_update_after_set_map"==(*_i)->name){force_update_after_set_map = boost::any_cast<bool>(val);}
         if("gui_publish_rate"==(*_i)->name){gui_publish_rate = boost::any_cast<double>(val);}
         if("save_pose_rate"==(*_i)->name){save_pose_rate = boost::any_cast<double>(val);}
         if("use_map_topic"==(*_i)->name){use_map_topic = boost::any_cast<bool>(val);}
@@ -295,6 +297,8 @@ bool do_beamskip;
 double beam_skip_distance;
 double beam_skip_threshold;
 bool tf_broadcast;
+bool force_update_after_initialpose;
+bool force_update_after_set_map;
 double gui_publish_rate;
 double save_pose_rate;
 bool use_map_topic;
@@ -357,6 +361,10 @@ bool restore_defaults;
       double beam_skip_threshold;
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       bool tf_broadcast;
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      bool force_update_after_initialpose;
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      bool force_update_after_set_map;
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       double gui_publish_rate;
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
@@ -582,9 +590,9 @@ AMCLConfig::GroupDescription<AMCLConfig::DEFAULT, AMCLConfig> Default("Default",
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       __default__.kld_z = 0.99;
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
-      Default.abstract_parameters.push_back(AMCLConfig::AbstractParamDescriptionConstPtr(new AMCLConfig::ParamDescription<double>("kld_z", "double", 0, "Upper standard normal quantile for (1 - p), where p is the probability that the error on the estimated distrubition will be less than kld_err.", "", &AMCLConfig::kld_z)));
+      Default.abstract_parameters.push_back(AMCLConfig::AbstractParamDescriptionConstPtr(new AMCLConfig::ParamDescription<double>("kld_z", "double", 0, "Upper standard normal quantile for (1 - p), where p is the probability that the error on the estimated distribution will be less than kld_err.", "", &AMCLConfig::kld_z)));
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
-      __param_descriptions__.push_back(AMCLConfig::AbstractParamDescriptionConstPtr(new AMCLConfig::ParamDescription<double>("kld_z", "double", 0, "Upper standard normal quantile for (1 - p), where p is the probability that the error on the estimated distrubition will be less than kld_err.", "", &AMCLConfig::kld_z)));
+      __param_descriptions__.push_back(AMCLConfig::AbstractParamDescriptionConstPtr(new AMCLConfig::ParamDescription<double>("kld_z", "double", 0, "Upper standard normal quantile for (1 - p), where p is the probability that the error on the estimated distribution will be less than kld_err.", "", &AMCLConfig::kld_z)));
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       __min__.update_min_d = 0.0;
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
@@ -685,6 +693,26 @@ AMCLConfig::GroupDescription<AMCLConfig::DEFAULT, AMCLConfig> Default("Default",
       Default.abstract_parameters.push_back(AMCLConfig::AbstractParamDescriptionConstPtr(new AMCLConfig::ParamDescription<bool>("tf_broadcast", "bool", 0, "When true (the default), publish results via TF.  When false, do not.", "", &AMCLConfig::tf_broadcast)));
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       __param_descriptions__.push_back(AMCLConfig::AbstractParamDescriptionConstPtr(new AMCLConfig::ParamDescription<bool>("tf_broadcast", "bool", 0, "When true (the default), publish results via TF.  When false, do not.", "", &AMCLConfig::tf_broadcast)));
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      __min__.force_update_after_initialpose = 0;
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      __max__.force_update_after_initialpose = 1;
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      __default__.force_update_after_initialpose = 0;
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      Default.abstract_parameters.push_back(AMCLConfig::AbstractParamDescriptionConstPtr(new AMCLConfig::ParamDescription<bool>("force_update_after_initialpose", "bool", 0, "When true, force a pose update after a new /initialpose is received.", "", &AMCLConfig::force_update_after_initialpose)));
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      __param_descriptions__.push_back(AMCLConfig::AbstractParamDescriptionConstPtr(new AMCLConfig::ParamDescription<bool>("force_update_after_initialpose", "bool", 0, "When true, force a pose update after a new /initialpose is received.", "", &AMCLConfig::force_update_after_initialpose)));
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      __min__.force_update_after_set_map = 0;
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      __max__.force_update_after_set_map = 1;
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      __default__.force_update_after_set_map = 0;
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      Default.abstract_parameters.push_back(AMCLConfig::AbstractParamDescriptionConstPtr(new AMCLConfig::ParamDescription<bool>("force_update_after_set_map", "bool", 0, "When true, force a pose update after a new map (and pose) has been set via the /set_map service.", "", &AMCLConfig::force_update_after_set_map)));
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      __param_descriptions__.push_back(AMCLConfig::AbstractParamDescriptionConstPtr(new AMCLConfig::ParamDescription<bool>("force_update_after_set_map", "bool", 0, "When true, force a pose update after a new map (and pose) has been set via the /set_map service.", "", &AMCLConfig::force_update_after_set_map)));
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       __min__.gui_publish_rate = -1.0;
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
@@ -832,9 +860,9 @@ AMCLConfig::GroupDescription<AMCLConfig::DEFAULT, AMCLConfig> Default("Default",
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       __default__.laser_model_type = "likelihood_field";
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
-      Default.abstract_parameters.push_back(AMCLConfig::AbstractParamDescriptionConstPtr(new AMCLConfig::ParamDescription<std::string>("laser_model_type", "str", 0, "Which model to use, either beam, likelihood_field or likelihood_field_prob.", "{'enum': [{'name': 'beam_const', 'type': 'str', 'value': 'beam', 'srcline': 52, 'srcfile': '/home/er/mercury_x1_ros/src/navigation-melodic/amcl/cfg/AMCL.cfg', 'description': 'Use beam laser model', 'ctype': 'std::string', 'cconsttype': 'const char * const'}, {'name': 'likelihood_field_const', 'type': 'str', 'value': 'likelihood_field', 'srcline': 52, 'srcfile': '/home/er/mercury_x1_ros/src/navigation-melodic/amcl/cfg/AMCL.cfg', 'description': 'Use likelihood_field laser model', 'ctype': 'std::string', 'cconsttype': 'const char * const'}, {'name': 'likelihood_field_prob', 'type': 'str', 'value': 'likelihood_field_prob', 'srcline': 52, 'srcfile': '/home/er/mercury_x1_ros/src/navigation-melodic/amcl/cfg/AMCL.cfg', 'description': 'Use likelihood_field_prob laser model', 'ctype': 'std::string', 'cconsttype': 'const char * const'}], 'enum_description': 'Laser Models'}", &AMCLConfig::laser_model_type)));
+      Default.abstract_parameters.push_back(AMCLConfig::AbstractParamDescriptionConstPtr(new AMCLConfig::ParamDescription<std::string>("laser_model_type", "str", 0, "Which model to use, either beam, likelihood_field or likelihood_field_prob.", "{'enum': [{'name': 'beam_const', 'type': 'str', 'value': 'beam', 'srcline': 54, 'srcfile': '/home/er/mercury_x1_ros/src/navigation/amcl/cfg/AMCL.cfg', 'description': 'Use beam laser model', 'ctype': 'std::string', 'cconsttype': 'const char * const'}, {'name': 'likelihood_field_const', 'type': 'str', 'value': 'likelihood_field', 'srcline': 54, 'srcfile': '/home/er/mercury_x1_ros/src/navigation/amcl/cfg/AMCL.cfg', 'description': 'Use likelihood_field laser model', 'ctype': 'std::string', 'cconsttype': 'const char * const'}, {'name': 'likelihood_field_prob', 'type': 'str', 'value': 'likelihood_field_prob', 'srcline': 54, 'srcfile': '/home/er/mercury_x1_ros/src/navigation/amcl/cfg/AMCL.cfg', 'description': 'Use likelihood_field_prob laser model', 'ctype': 'std::string', 'cconsttype': 'const char * const'}], 'enum_description': 'Laser Models'}", &AMCLConfig::laser_model_type)));
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
-      __param_descriptions__.push_back(AMCLConfig::AbstractParamDescriptionConstPtr(new AMCLConfig::ParamDescription<std::string>("laser_model_type", "str", 0, "Which model to use, either beam, likelihood_field or likelihood_field_prob.", "{'enum': [{'name': 'beam_const', 'type': 'str', 'value': 'beam', 'srcline': 52, 'srcfile': '/home/er/mercury_x1_ros/src/navigation-melodic/amcl/cfg/AMCL.cfg', 'description': 'Use beam laser model', 'ctype': 'std::string', 'cconsttype': 'const char * const'}, {'name': 'likelihood_field_const', 'type': 'str', 'value': 'likelihood_field', 'srcline': 52, 'srcfile': '/home/er/mercury_x1_ros/src/navigation-melodic/amcl/cfg/AMCL.cfg', 'description': 'Use likelihood_field laser model', 'ctype': 'std::string', 'cconsttype': 'const char * const'}, {'name': 'likelihood_field_prob', 'type': 'str', 'value': 'likelihood_field_prob', 'srcline': 52, 'srcfile': '/home/er/mercury_x1_ros/src/navigation-melodic/amcl/cfg/AMCL.cfg', 'description': 'Use likelihood_field_prob laser model', 'ctype': 'std::string', 'cconsttype': 'const char * const'}], 'enum_description': 'Laser Models'}", &AMCLConfig::laser_model_type)));
+      __param_descriptions__.push_back(AMCLConfig::AbstractParamDescriptionConstPtr(new AMCLConfig::ParamDescription<std::string>("laser_model_type", "str", 0, "Which model to use, either beam, likelihood_field or likelihood_field_prob.", "{'enum': [{'name': 'beam_const', 'type': 'str', 'value': 'beam', 'srcline': 54, 'srcfile': '/home/er/mercury_x1_ros/src/navigation/amcl/cfg/AMCL.cfg', 'description': 'Use beam laser model', 'ctype': 'std::string', 'cconsttype': 'const char * const'}, {'name': 'likelihood_field_const', 'type': 'str', 'value': 'likelihood_field', 'srcline': 54, 'srcfile': '/home/er/mercury_x1_ros/src/navigation/amcl/cfg/AMCL.cfg', 'description': 'Use likelihood_field laser model', 'ctype': 'std::string', 'cconsttype': 'const char * const'}, {'name': 'likelihood_field_prob', 'type': 'str', 'value': 'likelihood_field_prob', 'srcline': 54, 'srcfile': '/home/er/mercury_x1_ros/src/navigation/amcl/cfg/AMCL.cfg', 'description': 'Use likelihood_field_prob laser model', 'ctype': 'std::string', 'cconsttype': 'const char * const'}], 'enum_description': 'Laser Models'}", &AMCLConfig::laser_model_type)));
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       __min__.odom_model_type = "";
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
@@ -842,9 +870,9 @@ AMCLConfig::GroupDescription<AMCLConfig::DEFAULT, AMCLConfig> Default("Default",
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       __default__.odom_model_type = "diff";
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
-      Default.abstract_parameters.push_back(AMCLConfig::AbstractParamDescriptionConstPtr(new AMCLConfig::ParamDescription<std::string>("odom_model_type", "str", 0, "Which model to use, diff, omni, diff-corrected, or omni-corrected", "{'enum': [{'name': 'diff_const', 'type': 'str', 'value': 'diff', 'srcline': 56, 'srcfile': '/home/er/mercury_x1_ros/src/navigation-melodic/amcl/cfg/AMCL.cfg', 'description': 'Use diff odom model', 'ctype': 'std::string', 'cconsttype': 'const char * const'}, {'name': 'omni_const', 'type': 'str', 'value': 'omni', 'srcline': 57, 'srcfile': '/home/er/mercury_x1_ros/src/navigation-melodic/amcl/cfg/AMCL.cfg', 'description': 'Use omni odom model', 'ctype': 'std::string', 'cconsttype': 'const char * const'}, {'name': 'diff_corrected_const', 'type': 'str', 'value': 'diff-corrected', 'srcline': 58, 'srcfile': '/home/er/mercury_x1_ros/src/navigation-melodic/amcl/cfg/AMCL.cfg', 'description': 'Use corrected diff odom model', 'ctype': 'std::string', 'cconsttype': 'const char * const'}, {'name': 'omni_corrected_const', 'type': 'str', 'value': 'omni-corrected', 'srcline': 59, 'srcfile': '/home/er/mercury_x1_ros/src/navigation-melodic/amcl/cfg/AMCL.cfg', 'description': 'Use corrected omni odom model', 'ctype': 'std::string', 'cconsttype': 'const char * const'}], 'enum_description': 'Odom Models'}", &AMCLConfig::odom_model_type)));
+      Default.abstract_parameters.push_back(AMCLConfig::AbstractParamDescriptionConstPtr(new AMCLConfig::ParamDescription<std::string>("odom_model_type", "str", 0, "Which model to use, diff, omni, diff-corrected, or omni-corrected", "{'enum': [{'name': 'diff_const', 'type': 'str', 'value': 'diff', 'srcline': 58, 'srcfile': '/home/er/mercury_x1_ros/src/navigation/amcl/cfg/AMCL.cfg', 'description': 'Use diff odom model', 'ctype': 'std::string', 'cconsttype': 'const char * const'}, {'name': 'omni_const', 'type': 'str', 'value': 'omni', 'srcline': 59, 'srcfile': '/home/er/mercury_x1_ros/src/navigation/amcl/cfg/AMCL.cfg', 'description': 'Use omni odom model', 'ctype': 'std::string', 'cconsttype': 'const char * const'}, {'name': 'diff_corrected_const', 'type': 'str', 'value': 'diff-corrected', 'srcline': 60, 'srcfile': '/home/er/mercury_x1_ros/src/navigation/amcl/cfg/AMCL.cfg', 'description': 'Use corrected diff odom model', 'ctype': 'std::string', 'cconsttype': 'const char * const'}, {'name': 'omni_corrected_const', 'type': 'str', 'value': 'omni-corrected', 'srcline': 61, 'srcfile': '/home/er/mercury_x1_ros/src/navigation/amcl/cfg/AMCL.cfg', 'description': 'Use corrected omni odom model', 'ctype': 'std::string', 'cconsttype': 'const char * const'}], 'enum_description': 'Odom Models'}", &AMCLConfig::odom_model_type)));
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
-      __param_descriptions__.push_back(AMCLConfig::AbstractParamDescriptionConstPtr(new AMCLConfig::ParamDescription<std::string>("odom_model_type", "str", 0, "Which model to use, diff, omni, diff-corrected, or omni-corrected", "{'enum': [{'name': 'diff_const', 'type': 'str', 'value': 'diff', 'srcline': 56, 'srcfile': '/home/er/mercury_x1_ros/src/navigation-melodic/amcl/cfg/AMCL.cfg', 'description': 'Use diff odom model', 'ctype': 'std::string', 'cconsttype': 'const char * const'}, {'name': 'omni_const', 'type': 'str', 'value': 'omni', 'srcline': 57, 'srcfile': '/home/er/mercury_x1_ros/src/navigation-melodic/amcl/cfg/AMCL.cfg', 'description': 'Use omni odom model', 'ctype': 'std::string', 'cconsttype': 'const char * const'}, {'name': 'diff_corrected_const', 'type': 'str', 'value': 'diff-corrected', 'srcline': 58, 'srcfile': '/home/er/mercury_x1_ros/src/navigation-melodic/amcl/cfg/AMCL.cfg', 'description': 'Use corrected diff odom model', 'ctype': 'std::string', 'cconsttype': 'const char * const'}, {'name': 'omni_corrected_const', 'type': 'str', 'value': 'omni-corrected', 'srcline': 59, 'srcfile': '/home/er/mercury_x1_ros/src/navigation-melodic/amcl/cfg/AMCL.cfg', 'description': 'Use corrected omni odom model', 'ctype': 'std::string', 'cconsttype': 'const char * const'}], 'enum_description': 'Odom Models'}", &AMCLConfig::odom_model_type)));
+      __param_descriptions__.push_back(AMCLConfig::AbstractParamDescriptionConstPtr(new AMCLConfig::ParamDescription<std::string>("odom_model_type", "str", 0, "Which model to use, diff, omni, diff-corrected, or omni-corrected", "{'enum': [{'name': 'diff_const', 'type': 'str', 'value': 'diff', 'srcline': 58, 'srcfile': '/home/er/mercury_x1_ros/src/navigation/amcl/cfg/AMCL.cfg', 'description': 'Use diff odom model', 'ctype': 'std::string', 'cconsttype': 'const char * const'}, {'name': 'omni_const', 'type': 'str', 'value': 'omni', 'srcline': 59, 'srcfile': '/home/er/mercury_x1_ros/src/navigation/amcl/cfg/AMCL.cfg', 'description': 'Use omni odom model', 'ctype': 'std::string', 'cconsttype': 'const char * const'}, {'name': 'diff_corrected_const', 'type': 'str', 'value': 'diff-corrected', 'srcline': 60, 'srcfile': '/home/er/mercury_x1_ros/src/navigation/amcl/cfg/AMCL.cfg', 'description': 'Use corrected diff odom model', 'ctype': 'std::string', 'cconsttype': 'const char * const'}, {'name': 'omni_corrected_const', 'type': 'str', 'value': 'omni-corrected', 'srcline': 61, 'srcfile': '/home/er/mercury_x1_ros/src/navigation/amcl/cfg/AMCL.cfg', 'description': 'Use corrected omni odom model', 'ctype': 'std::string', 'cconsttype': 'const char * const'}], 'enum_description': 'Odom Models'}", &AMCLConfig::odom_model_type)));
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       __min__.odom_alpha1 = 0.0;
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
@@ -1014,19 +1042,19 @@ AMCLConfig::GroupDescription<AMCLConfig::DEFAULT, AMCLConfig> Default("Default",
     return statics;
   }
 
-//#line 52 "/home/er/mercury_x1_ros/src/navigation-melodic/amcl/cfg/AMCL.cfg"
+//#line 54 "/home/er/mercury_x1_ros/src/navigation/amcl/cfg/AMCL.cfg"
       const char * const AMCL_beam_const = "beam";
-//#line 52 "/home/er/mercury_x1_ros/src/navigation-melodic/amcl/cfg/AMCL.cfg"
+//#line 54 "/home/er/mercury_x1_ros/src/navigation/amcl/cfg/AMCL.cfg"
       const char * const AMCL_likelihood_field_const = "likelihood_field";
-//#line 52 "/home/er/mercury_x1_ros/src/navigation-melodic/amcl/cfg/AMCL.cfg"
+//#line 54 "/home/er/mercury_x1_ros/src/navigation/amcl/cfg/AMCL.cfg"
       const char * const AMCL_likelihood_field_prob = "likelihood_field_prob";
-//#line 56 "/home/er/mercury_x1_ros/src/navigation-melodic/amcl/cfg/AMCL.cfg"
+//#line 58 "/home/er/mercury_x1_ros/src/navigation/amcl/cfg/AMCL.cfg"
       const char * const AMCL_diff_const = "diff";
-//#line 57 "/home/er/mercury_x1_ros/src/navigation-melodic/amcl/cfg/AMCL.cfg"
+//#line 59 "/home/er/mercury_x1_ros/src/navigation/amcl/cfg/AMCL.cfg"
       const char * const AMCL_omni_const = "omni";
-//#line 58 "/home/er/mercury_x1_ros/src/navigation-melodic/amcl/cfg/AMCL.cfg"
+//#line 60 "/home/er/mercury_x1_ros/src/navigation/amcl/cfg/AMCL.cfg"
       const char * const AMCL_diff_corrected_const = "diff-corrected";
-//#line 59 "/home/er/mercury_x1_ros/src/navigation-melodic/amcl/cfg/AMCL.cfg"
+//#line 61 "/home/er/mercury_x1_ros/src/navigation/amcl/cfg/AMCL.cfg"
       const char * const AMCL_omni_corrected_const = "omni-corrected";
 }
 

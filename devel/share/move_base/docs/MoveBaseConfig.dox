@@ -15,5 +15,7 @@ Reads and maintains the following parameters on the ROS server
 - \b "~shutdown_costmaps" : \b [bool] Determines whether or not to shutdown the costmaps of the node when move_base is in an inactive state min: False, default: False, max: True
 - \b "~oscillation_timeout" : \b [double] How long in seconds to allow for oscillation before executing recovery behaviors. min: 0.0, default: 0.0, max: 60.0
 - \b "~oscillation_distance" : \b [double] How far in meters the robot must move to be considered not to be oscillating. min: 0.0, default: 0.5, max: 10.0
+- \b "~make_plan_clear_costmap" : \b [bool] Whether or not to clear the global costmap on make_plan service call. min: False, default: True, max: True
+- \b "~make_plan_add_unreachable_goal" : \b [bool] Whether or not to add the original goal to the path if it is unreachable in the make_plan service call. min: False, default: True, max: True
 - \b "~restore_defaults" : \b [bool] Restore to the original configuration min: False, default: False, max: True
 

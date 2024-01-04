@@ -67,7 +67,7 @@ set(fake_localization_CONFIG_INCLUDED TRUE)
 
 # set variables for source/devel/install prefixes
 if("TRUE" STREQUAL "TRUE")
-  set(fake_localization_SOURCE_PREFIX /home/er/mercury_x1_ros/src/navigation-melodic/fake_localization)
+  set(fake_localization_SOURCE_PREFIX /home/er/mercury_x1_ros/src/navigation/fake_localization)
   set(fake_localization_DEVEL_PREFIX /home/er/mercury_x1_ros/devel)
   set(fake_localization_INSTALL_PREFIX "")
   set(fake_localization_PREFIX ${fake_localization_DEVEL_PREFIX})
@@ -110,7 +110,7 @@ if(NOT " " STREQUAL " ")
         message(FATAL_ERROR "Project 'fake_localization' specifies '${idir}' as an include dir, which is not found.  It does not exist in '${include}'.  ${_report}")
       endif()
     else()
-      message(FATAL_ERROR "Project 'fake_localization' specifies '${idir}' as an include dir, which is not found.  It does neither exist as an absolute directory nor in '/home/er/mercury_x1_ros/src/navigation-melodic/fake_localization/${idir}'.  ${_report}")
+      message(FATAL_ERROR "Project 'fake_localization' specifies '${idir}' as an include dir, which is not found.  It does neither exist as an absolute directory nor in '/home/er/mercury_x1_ros/src/navigation/fake_localization/${idir}'.  ${_report}")
     endif()
     _list_append_unique(fake_localization_INCLUDE_DIRS ${include})
   endforeach()
@@ -154,7 +154,7 @@ foreach(library ${libraries})
     set(lib_path "")
     set(lib "${library}-NOTFOUND")
     # since the path where the library is found is returned we have to iterate over the paths manually
-    foreach(path /home/er/mercury_x1_ros/devel/lib;/home/er/tringai_robot/devel/lib;/home/er/myagv_ros/devel/lib;/opt/ros/noetic/lib)
+    foreach(path /home/er/mercury_x1_ros/devel/lib;/home/er/mercury_x1_ros/devel/lib;/opt/ros/noetic/lib)
       find_library(lib ${library}
         PATHS ${path}
         NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
