@@ -348,9 +348,9 @@
       <param name = "robot_description" textfile = "$(find turn_on_mercury_robot)/urdf/mercury_x1/mercury_x1.urdf"/> 
   </group>
   
-  <arg name="gui" default="true" />
+
   <!-- 读取urdf信息(robot_description) 发布话题：/joint_states-->
-  <node name="joint_state_publisher_gui" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" />
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
   <!-- 订阅话题：/joint_states，发布小车TF信息-->
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
 
