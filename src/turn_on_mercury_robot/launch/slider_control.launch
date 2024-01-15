@@ -10,7 +10,7 @@
 	<!-- <node name="simple_base_controller" pkg="mercury_x1" type="simple_base_controller.py" output="screen" /> -->
 
     <!-- Open control script -->
-	<node name="control_slider" pkg="turn_on_mercury_robot" type="slider_control.py" /> 
+	<!-- <node name="control_slider" pkg="turn_on_mercury_robot" type="slider_control.py" />  -->
 
 	<!-- Show in Rviz ，显示在Rviz-->
 	<node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
