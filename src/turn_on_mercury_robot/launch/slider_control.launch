@@ -1,0 +1,18 @@
+<launch>
+	<arg name="rvizconfig" default="$(find turn_on_mercury_robot)/rviz/mercury_x1.rviz" />
+	<arg name="gui" default="true" />
+
+	<!-- Combinejoin values to TF -->
+	<!-- <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" /> -->
+	<node name="joint_state_publisher_gui" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui">
+		<param name="use_gui" value="$(arg gui)" />
+	</node>
+	<!-- <node name="simple_base_controller" pkg="mercury_x1" type="simple_base_controller.py" output="screen" /> -->
+
+    <!-- Open control script -->
+	<!-- <node name="control_slider" pkg="turn_on_mercury_robot" type="slider_control.py" />  -->
+
+	<!-- Show in Rviz ，显示在Rviz-->
+	<node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
+	<!-- <node name="rviz" pkg="rviz" type="rviz" /> -->
+</launch>
