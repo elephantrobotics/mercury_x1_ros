@@ -3,7 +3,7 @@
     <arg name="camera_name" default="camera"/>
     <arg name="output" default="screen"/>
     <!-- Hardware depth registration -->
-    <arg name="depth_registration" default="true"/>
+    <arg name="depth_registration" default="false"/>
     <arg name="serial_number" default=""/>
     <arg name="usb_port" default=""/>
     <arg name="device_num" default="1"/>
@@ -37,7 +37,7 @@
     <arg name="ir_info_uri" default=""/>
     <arg name="color_info_uri" default=""/>
     <arg name="log_level" default="none"/>
-    <arg name="enable_d2c_viewer" default="true"/>
+    <arg name="enable_d2c_viewer" default="false"/>
     <arg name="enable_pipeline" default="true"/>
     <arg name="enable_soft_filter" default="true"/>
     <group ns="$(arg camera_name)">
