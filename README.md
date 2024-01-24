@@ -37,3 +37,30 @@ $ roslaunch turn_on_tringai_robot turn_on_tringai_robot.launch
 ```bash
 $ roslaunch mercury_x1_ps2 mercury_x1_ps2.launch
 ```
+
+## Chassis car + upper body robotic arm control
+
+**1. First start the car's underlying communication program and map building:**
+
+```bash
+$ roslaunch turn_on_mercury_robot mapping.launch
+```
+
+**2. Then Loading display chassis car + upper body robot arm urdf model:**
+
+```bash
+$ roslaunch turn_on_mercury_robot slider_control.launch
+```
+
+**3. Then Turn on upper body robotic arm control:**
+
+```bash
+$ ros run turn_on_mercury_robot slider_control.py
+```
+
+**4. Finally, start the chassis car keyboard control program:**
+
+```bash
+$ ros run turn_on_mercury_robot mercury_keyboard.py
+```
+
