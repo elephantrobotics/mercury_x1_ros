@@ -308,7 +308,7 @@ class MapNavigation:
         self.vel_control([0, 0, -1], speed, control_time)
 
     def turnLeft(self,speed,control_time):
-        self.vel_control([0, 0, -1], speed, control_time)
+        self.vel_control([0, 0,  1], speed, control_time)
 
     def goStraight(self,speed,control_time):
         self.vel_control([1, 0,  0], speed, control_time)
