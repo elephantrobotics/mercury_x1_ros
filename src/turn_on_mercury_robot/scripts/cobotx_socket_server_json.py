@@ -8,7 +8,8 @@ import time
 import fcntl
 import struct
 import signal
-import json  
+import json 
+import sys 
 import rospy
 import actionlib
 
@@ -22,29 +23,40 @@ from geometry_msgs.msg import Point
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import PoseWithCovarianceStamped
 
-interrupt_voltage_receive = False   #Default not to subscribe to voltage topic
-global socket_res
-socket_res = None
-
 # MapNavigation
 class MapNavigation:
     def __init__(self):
+        # Initialize the ROS node
         rospy.init_node('map_navigation', anonymous=False)
-        self.should_exit = False
 
         # rospublisher
         self.pub = rospy.Publisher('/cmd_vel',Twist, queue_size=10)
         self.pub_setpose = rospy.Publisher('/initialpose',PoseWithCovarianceStamped, queue_size=10)
         self.pub_cancel = rospy.Publisher('/move_base/cancel', GoalID, queue_size=10)
-        self.voltage_subscriber = rospy.Subscriber("/Voltage", Float32, self.voltage_callback) #Create a battery-voltage topic subscriber
+        #self.voltage_subscriber = rospy.Subscriber("/Voltage", Float32, self.voltage_callback) #Create a battery-voltage topic subscriber
 
         #Create TCP/IP socket
-        self.ifname = b"eth0"
+        self.ifname = b"wlan0"
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.host = socket.inet_ntoa(fcntl.ioctl(self.server_socket.fileno(), 0x8915, struct.pack('256s', self.ifname[:15]))[20:24])  #IP
         self.port = 9000  # port       
         print("ip: {} port: {}".format(self.host, self.port))
-        
+
+        # Bind IP and set a port
+        self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) #Set socket to be reusable
+        self.server_socket.bind((self.host, self.port))
+        self.server_socket.listen(3)
+        self.server_socket.settimeout(None)
+        print("Waiting for the client to connect")
+
+        # Register the Ctrl+C signal handler
+        self.running_flag = True
+        signal.signal(signal.SIGINT, self.signal_handler)
+
+        # ros topic publishing frequency
+        self.frequency = 0.1
+        self.conn = None
+    
     # init robot feed pose
     def set_pose(self, xGoal, yGoal, orientation_z, orientation_w,covariance):
         pose = PoseWithCovarianceStamped()
@@ -111,25 +123,131 @@ class MapNavigation:
         self.pub.publish(twist)
     
     #voltage Callback
-    def voltage_callback(self, msg):
-        global interrupt_voltage_receive
-        voltage = msg.data
-        if interrupt_voltage_receive:
-            rospy.loginfo(f"Voltage: {voltage} V")
-            self.socket_connect(f"Voltage: {voltage} V")
-            #rospy.loginfo("Interrupting /Voltage topic receive")
-            #self.voltage_subscriber.unregister()  # Unsubscribe Voltage topic
+    # def voltage_callback(self, msg):
+    #     global interrupt_voltage_receive
+    #     voltage = msg.data
+    #     if interrupt_voltage_receive:
+    #         rospy.loginfo(f"Voltage: {voltage} V")
+    #         self.socket_connect(f"Voltage: {voltage} V")
+    #         #rospy.loginfo("Interrupting /Voltage topic receive")
+    #         #self.voltage_subscriber.unregister()  # Unsubscribe Voltage topic
 
     # socket
     def socket_connect(self, data):
-        conn.send(data.encode("UTF-8"))
-        print(data.encode())
+        try:
+            self.conn.sendall(json.dumps(data).encode())
+            print(data.encode())
+        except Exception as e:
+            pass
+
+    # control_thread
+    def process_and_control(self,new_msg, stop_event):       
+        while self.running_flag and not stop_event.is_set():
+            if new_msg:
+                direction = None
+                if "turnRight" in new_msg:
+                    direction = (0, 0, -1)
+                elif "turnLeft" in new_msg:
+                    direction = (0, 0, 1)
+                elif "goStraight" in new_msg:
+                    direction = (1, 0, 0)
+                elif "goBack" in new_msg:
+                    direction = (-1, 0, 0)
+                elif "stop"in new_msg:
+                    direction = (0, 0, 0)
+                else:
+                    print('Unknown command:', new_msg)
+
+                if direction is not None:
+                    json_array.clear()
+                    # Unpack and get data
+                    for i in new_msg.keys():
+                        if isinstance(new_msg[i], dict):          #If it is a dictionary, it enters the inner loop, otherwise it skips.
+                            for j in new_msg[i].keys():
+                                print('key ', j, ' with value ', new_msg[i][j])
+                                json_array.append(new_msg[i][j]) 
+                            print('json_array',json_array)
+                            if len(json_array) != 2:
+                                self.socket_connect("Error: Unexpected number of elements in json_array.")
+                                print("Error: Unexpected number of elements in json_array." )
+                                new_msg=None 
+                            else:
+                                duration,vel=json_array
+                                start_time = time.time()
+                                # Motion control
+                                while (time.time() - start_time) < duration:
+                                    if self.running_flag and not stop_event.is_set():   
+                                        self.pub_vel(direction[0] * abs(vel), direction[1] * abs(vel), direction[2] * abs(vel))
+                                        time.sleep(self.frequency)
+                                    else:
+                                        new_msg=None
+                                        self.pub_vel(0,0,0)
+                                        break 
+                                self.pub_vel(0,0,0)
+                                time.sleep(0.5) 
+                                new_msg=None                      
+                                if not stop_event.is_set():
+                                    command = {f"{i}": {"return": True}}
+                                    self.socket_connect(command)
+                        else:
+                            print(new_msg[i])
+                 
+    def receive_commands(self):
+        while self.running_flag:
+            try:
+                self.conn, address = self.server_socket.accept()
+                print('Connected to: ', address)
+                while self.conn:
+                    try:
+                        msg = self.conn.recv(1024)           # Accept data and decode it according to utf-8
+                        print('The data received is', msg)
+                        print('The data type received is: ',type(msg))
+                        if not msg:
+                            break
+                        msg = json.loads(msg)                          # Use json to parse the data and obtain dict data
+                        
+                        # Interrupt the current task, update data, and restart the task
+                        self.stop_event.set()
+                        self.control_thread.join()
+
+                        new_msg = msg
+                        self.stop_event.clear()
+
+                        self.control_thread = threading.Thread(target=self.process_and_control, args=(new_msg, self.stop_event))
+                        self.control_thread.start()
+
+                    except socket.error as e:
+                        print(e)
+
+            except socket.error as e:
+                print(f'Socket error: {e}')
+
+    def signal_handler(self, signal, frame):
+        print("Ctrl+C pressed. Exiting...")
+        # Close all connections
+        self.running_flag = False
+        if self.conn !=None :
+            self.conn.close()  #Close the connection to the client
+        self.server_socket.close()  # Close server socket
+        print("Connections closed.")
+        sys.exit()
+        
+    def start_control(self):
+        # Creating an instance variable stop_event as a threading.Event
+        self.stop_event = threading.Event()
+        # Create threads
+        self.control_msg = None
+        self.control_thread = threading.Thread(target=self.process_and_control, args=(self.control_msg, self.stop_event))
+        self.command_thread = threading.Thread(target=self.receive_commands)
+        
+        self.control_thread.start()
+        self.command_thread.start()
+        
+        rospy.spin()
 
 if __name__ == '__main__':
     # goals
     goals = [
-    #(5.668717861175537, -0.3587464392185211, 0.28215484027894455, 0.9593688790591257),  # corner1
-    #(6.833220481872559, 0.523029625415802, 0.2635481370520496, 0.9646462457587207),  # corner2
     (8.606064796447754, 2.346750497817993, 0.695545718232533, 0.7184818396093181),  # desk_1
     (8.754322052001953, 6.7733964920043945, 0.774108134204125, 0.6330533915547789),  # desk_2
     (6.705804824829102, 9.912127494812012, 0.7157463080949427, 0.6983603814997379),  # door
@@ -142,148 +260,13 @@ if __name__ == '__main__':
     (8.751319885253906, 7.584722518920898, -0.7253242265223879,0.6884074131062939), #back_desk_2
     (8.408796310424805, 2.4658150672912598, -0.8522438688498349,0.5231447103888803),#back_desk_1
     (8.29449462890625, 0.49819743633270264, -0.7621448326238706,0.6474065601341497),#back_corner1
-    # (5.288103103637695, -0.5398174524307251, 0.9999992606596254, 0.001216009951635678), #back_corner2
-    # (1.2207894325256348, -0.3337854743003845, -0.9999894369910013, 0.004596292682190771),  # testing room 
     ]
 
-    #goToPosition array
-    goals_array = []
+    #json array
+    json_array = []
 
+    interrupt_voltage_receive = False   #Default not to subscribe to voltage topic
+    
     #init navigation
     map_navigation = MapNavigation()
-
-    # Bind IP and set a port
-    map_navigation.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) #Set socket to be reusable
-    map_navigation.server_socket.bind((map_navigation.host, map_navigation.port))
-    map_navigation.server_socket.listen(3)
-    map_navigation.server_socket.settimeout(None)
-    print("Waiting for the client to connect")
-
-    #signal handler
-    def signal_handler(signal, frame):
-        print("Ctrl+C pressed. Exiting...")
-        map_navigation.should_exit = True  # Set exit flag to True
-        conn.close()  #Close the connection to the client
-        map_navigation.server_socket.close()  # Close server socket
-
-    signal.signal(signal.SIGINT, signal_handler)
-
-    while not map_navigation.should_exit:
-        try:
-            conn, address = map_navigation.server_socket.accept()
-            print('Connected to: ', address)
-            while conn:
-                try:
-                    msg = conn.recv(1024).decode('utf-8')           # Accept data and decode it according to utf-8
-                    print('The data received is', msg)
-                    print('The data type received is: ',type(msg))
-                    if not msg:
-                        break
-                    msg = json.loads(msg)                          # Use json to parse the data and obtain dict data          
-                    
-                    if "goToPosition" in msg:
-                        goals_array.clear()
-                        for i in msg.keys():                
-                            if isinstance(msg[i], dict):          #If it is a dictionary, it enters the inner loop, otherwise it skips.
-                                for j in msg[i].keys():
-                                    print('key ', j, ' with value ', msg[i][j])
-                                    goals_array.append(msg[i][j]) 
-                                print('goals_array',goals_array)
-                                x_goal, y_goal, orientation_z, orientation_w = goals_array
-                                #print('x_goal',x_goal, 'y_goal', y_goal, 'orientation_z',orientation_z, 'orientation_w', orientation_w)
-                                flag_feed_goalReached = map_navigation.moveToGoal(x_goal, y_goal, orientation_z, orientation_w)
-                            else:
-                                print(msg[i])
-                        pass #navigation 
-                    
-                    elif "agvOn" in msg:
-                        pass 
-
-                    elif "agvOff" in msg:
-                        conn.close()  #Close the connection to the client
-                        break
-
-                    elif "batteryState" in msg:
-                        pass
-
-                    elif "goToLoad" in msg:
-                        #navigate to target
-                        for goal in goals:
-                            x_goal, y_goal, orientation_z, orientation_w = goal
-                            flag_feed_goalReached = map_navigation.moveToGoal(x_goal, y_goal, orientation_z, orientation_w)
-                            time.sleep(2)
-                        #fixed route to meeting room
-                        for i in range(3):
-                            map_navigation.pub_vel(0,0,0.57)
-                            time.sleep(1)
-                        map_navigation.pub_vel(0,0,0)
-                        time.sleep(1)
-                        map_navigation.socket_connect('finish_load_navigate')  
-
-                    elif "goToUnload" in msg:
-                        #go_back
-                        # for i in range(8):
-                        #     map_navigation.pub_vel(-0.2,0,0)
-                        #     time.sleep(1)
-                        # map_navigation.pub_vel(0,0,0)
-                        # time.sleep(3)
-                        
-                        for i in range(3):
-                            map_navigation.pub_vel(0,0,0.57)
-                            time.sleep(1)
-                        map_navigation.pub_vel(0,0,0)
-                        time.sleep(1)
-                        #navigate to target
-                        for goal in back_goals:
-                            x_goal, y_goal, orientation_z, orientation_w = goal
-                            flag_feed_goalReached = map_navigation.moveToGoal(x_goal, y_goal, orientation_z, orientation_w)
-                        time.sleep(2)
-                        for i in range(6):
-                            map_navigation.pub_vel(0,0,-0.5)
-                            time.sleep(1)
-                        map_navigation.pub_vel(0,0,0)
-                        time.sleep(3)
-                        map_navigation.socket_connect('finish_unload_navigate')
-
-                    elif "turnRight" in msg:
-                        for i in range(2):
-                            map_navigation.pub_vel(0,0,-0.5)
-                            time.sleep(1)
-                        map_navigation.pub_vel(0,0,0)
-                        time.sleep(3)
-                        map_navigation.socket_connect('turnRight_ture')
-
-                    elif "turnLeft" in msg:
-                        for i in range(2):
-                            map_navigation.pub_vel(0,0,0.5)
-                            time.sleep(1)
-                        map_navigation.pub_vel(0,0,0)
-                        time.sleep(3)
-                        map_navigation.socket_connect('turnLeft_ture')
-                    
-                    elif "goStraight" in msg:
-                        for i in range(10):
-                            map_navigation.pub_vel(0.2,0,0)
-                            time.sleep(1)
-                        map_navigation.pub_vel(0,0,0)
-                        time.sleep(3)
-                        map_navigation.socket_connect('goStraight_ture')
-
-                    elif "goBack" in msg:
-                        for i in range(10):
-                            map_navigation.pub_vel(-0.2,0,0)
-                            time.sleep(1)
-                        map_navigation.pub_vel(0,0,0)
-                        time.sleep(3)
-                        map_navigation.socket_connect('goBack_ture')
-
-
-                except socket.error as e:
-                    print("Socket error:", e)
-                    conn.close()
-                    break
-
-        except KeyboardInterrupt:
-            print("Ctrl+C pressed. Closing the server.")
-            map_navigation.server_socket.close()
-            map_navigation.should_exit = True
+    map_navigation.start_control()
