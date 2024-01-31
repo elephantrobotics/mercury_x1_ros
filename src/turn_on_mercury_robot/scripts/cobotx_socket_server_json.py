@@ -39,7 +39,7 @@ class MapNavigation:
         self.ifname = b"wlan0"
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.host = socket.inet_ntoa(fcntl.ioctl(self.server_socket.fileno(), 0x8915, struct.pack('256s', self.ifname[:15]))[20:24])  #IP
-        self.port = 9000  # port       
+        self.port = 9999  # port       
         print("ip: {} port: {}".format(self.host, self.port))
 
         # Bind IP and set a port
