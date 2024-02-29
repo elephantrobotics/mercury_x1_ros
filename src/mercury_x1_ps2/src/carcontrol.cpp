@@ -2,21 +2,10 @@
 #include "ros/ros.h" 
 #include "std_msgs/String.h"
 #include "geometry_msgs/Twist.h"
-
-int ps2_open(char *file_name)
-{
-    int ps2_fd;
- 
-    ps2_fd = open(file_name, O_RDONLY);
-    if (ps2_fd < 0)
-    {
-        perror("open");
-        return -1;
-    }
- 
-    return ps2_fd;
-}
- 
+#include <pthread.h>
+int ps2_fd;
+int len;
+ps2_map_t map;
 int ps2_map_read(int ps2_fd, ps2_map_t *map)
 {
     int len, type, number, value;
@@ -127,14 +116,40 @@ int ps2_map_read(int ps2_fd, ps2_map_t *map)
                 break;
         }
     }
-    else
-    {
-        /* Init do nothing */
-    }
  
     return len;
 }
+int ps2_open(char *file_name)
+{
+    int ps2_fd;
  
+    ps2_fd = open(file_name, O_RDONLY);
+    if (ps2_fd < 0)
+    {
+        perror("open");
+        return -1;
+    }
+ 
+    return ps2_fd;
+}
+//struct ThreadData{
+    //ps2_map_t map;
+    //int ps2_fdd;
+//};
+void* ps2_read_thread(void*){
+    //ThreadData* data = (ThreadData*)arg;
+    
+    memset(&map, 0, sizeof(ps2_map_t));
+    ps2_fd = ps2_open("/dev/input/js0");
+    
+    while(1){
+        ps2_map_read(ps2_fd,&map);
+        usleep(10*1000);
+    }
+    return NULL;
+}
+
+void *ps2ReadThread(void *data); 
 void ps2_close(int ps2_fd)
 {
     close(ps2_fd);
@@ -148,106 +163,132 @@ int main(int argc, char* argv[])
     ros::Publisher pub = n.advertise<geometry_msgs::Twist>("/cmd_vel",1000);
     ros::Rate loop_rate(10);
     geometry_msgs::Twist msg;
-    int ps2_fd ;
-    ps2_map_t map;
-    int len, type;
+    //thread control_thread(controlFunction, ps2_fd, pub);
+    //int ps2_fd ;
+    //ps2_map_t map;
+    int type;
     int axis_value, button_value;
     int number_of_axis, number_of_buttons ;
     float x = 0;
     float y = 0;
     float theta = 0;
+    //std_msgs::String int_msg;
+    //int_msg.data = std::to_string(11);
+    int status=0;
+    
+
+    //memset(&map, 0, sizeof(ps2_map_t));
  
-    memset(&map, 0, sizeof(ps2_map_t));
- 
-    ps2_fd = ps2_open("/dev/input/js0");
+    //ps2_fd = ps2_open("/dev/input/js0");
+    //if(ps2_fd < 0)
+    //{
+        //return -1;
+    //}
+    //ThreadData thread_data;
+    //thread_data.ps2_fdd = ps2_fd;
+    pthread_t thread_id;
+    pthread_create(&thread_id,NULL,ps2_read_thread,NULL);
     if(ps2_fd < 0)
     {
         return -1;
     }
- 
-    while(ros::ok())
+    while (ros::ok())
     {
-        len = ps2_map_read(ps2_fd, &map);
+        //pub.publish(int_msg);
+        //if(ps2_map_read(ps2_fd, &map)>0)
+        //{
+        ///  status =1;
+        // }
         if (len < 0)
         {
             usleep(10*1000);
             continue;
         }
- 
-        // printf("\rTime:%8d A:%d B:%d X:%d Y:%d L1:%d R1:%d select:%d start:%d mode:%d LO:%d RO:%d XX:%-6d YY:%-6d LX:%-6d LY:%-6d RX:%-6d RY:%-6d L2:%-6d R2:%-6d",
-        //         map.time, map.a, map.b, map.x, map.y, map.l1, map.r1, map.select, map.start, map.mode, map.lo, map.ro,
-        //         map.xx, map.yy, map.lx, map.ly, map.rx, map.ry, map.l2, map.r2);
-
-            if(map.x == 1){
-                x = 0;
-                y = 0;
-                theta = 0;
-            }else{
-                if(map.xx == 0 && map.yy == 0 && map.l1 ==0 && map.r1 ==0 ){
-                x = 0;
-                y = 0;
-                theta = 0;
-                }     
-                if(map.yy == -32767){
-                x = 0.2;
-                // y = 0;
-                // theta = 0;
+    //    while(status == 1)
+      //  {
+            // printf("\rTime:%8d A:%d B:%d X:%d Y:%d L1:%d R1:%d select:%d start:%d mode:%d LO:%d RO:%d XX:%-6d YY:%-6d LX:%-6d LY:%-6d RX:%-6d RY:%-6d L2:%-6d R2:%-6d",
+            //         map.time, map.a, map.b, map.x, map.y, map.l1, map.r1, map.select, map.start, map.mode, map.lo, map.ro,
+            //         map.xx, map.yy, map.lx, map.ly, map.rx, map.ry, map.l2, map.r2);
+                //if(ps2_map_read(ps2_fd, &map)<=0)
+                //{
+                //  break;
+                //}
+                
+                if(map.x == 1){
+                    status =0;
+                    x = 0;
+                    y = 0;
+                    theta = 0;
+                   // break;
+                }else{
+                    //status =1;
+                    if(map.xx == 0 && map.yy == 0 && map.l1 ==0 && map.r1 ==0 ){
+                    status =0;
+                    x = 0;
+                    y = 0;
+                    theta = 0;
+                    //break;
+                    }     
+                    if(map.yy == -32767){
+                    x = 0.2;
+                    // y = 0;
+                    // theta = 0;
+                    }
+                    if(map.yy == 32767){
+                    x = -0.2;
+                    // y = 0;
+                    // theta = 0;
+                    }
+                    if(map.yy == 0){
+                    x = 0;
+                    // y = 0;
+                    // theta = 0;
+                    }
+                    if(map.xx == -32767){
+                    // x = 0;
+                    y = 0;
+                    // theta = 0;
+                    }
+                    if(map.xx == 32767){
+                    // x = 0;
+                    y = 0;
+                    // theta = 0;
+                    }
+                    if(map.xx == 0){
+                    // x = 0;
+                    y = 0;
+                    // theta = 0;
+                    }
+                    if(map.l1 == 1){
+                    // x = 0;
+                    // y = 0;
+                    theta = 0.2;
+                    }
+                    if(map.r1 == 1){
+                    // x = 0;
+                    // y = 0;
+                    theta = -0.2;
+                    } 
+                    if(map.r1 == 0 && map.l1 == 0){
+                    // x = 0;
+                    // y = 0;
+                    theta = 0;
+                    }       
                 }
-                if(map.yy == 32767){
-                x = -0.2;
-                // y = 0;
-                // theta = 0;
-                }
-                if(map.yy == 0){
-                x = 0;
-                // y = 0;
-                // theta = 0;
-                }
-                if(map.xx == -32767){
-                // x = 0;
-                y = 0;
-                // theta = 0;
-                }
-                if(map.xx == 32767){
-                // x = 0;
-                y = 0;
-                // theta = 0;
-                }
-                if(map.xx == 0){
-                // x = 0;
-                y = 0;
-                // theta = 0;
-                }
-                if(map.l1 == 1){
-                // x = 0;
-                // y = 0;
-                theta = 0.2;
-                }
-                if(map.r1 == 1){
-                // x = 0;
-                // y = 0;
-                theta = -0.2;
-                } 
-                if(map.r1 == 0 && map.l1 == 0){
-                // x = 0;
-                // y = 0;
-                theta = 0;
-                }       
-            }
-        msg.linear.x = x;
-        msg.linear.y = y;
-        msg.linear.z = 0;
-        msg.angular.x = 0;
-        msg.angular.y = 0;
-        msg.angular.z = theta;
-
-        pub.publish(msg);
-        ros::spinOnce();
-        loop_rate.sleep();
-
-        fflush(stdout);
+            msg.linear.x = x;
+            msg.linear.y = y;
+            msg.linear.z = 0;
+            msg.angular.x = 0;
+            msg.angular.y = 0;
+            msg.angular.z = theta;
+            pub.publish(msg);
+            //msg.linear.x = 1;
+            ros::spinOnce();
+            loop_rate.sleep();
+            fflush(stdout);
+       // }
     }
- 
     ps2_close(ps2_fd);
+    pthread_join(thread_id,NULL);
     return 0;
 }
