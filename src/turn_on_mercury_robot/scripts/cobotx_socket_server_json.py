@@ -337,7 +337,7 @@ class MapNavigation:
                 # Return the battery voltage through the ros callback function
                 elif "batteryState" in new_msg:
                     voltage_data = self.voltage_callback(None)
-                    command = {'batteryVoltage': voltage_data}
+                    command = {'batteryVoltage':{"return": voltage_data}}
                     self.socket_connect(command)
                     self.current_task = None
                     continue
