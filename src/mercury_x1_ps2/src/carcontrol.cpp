@@ -262,12 +262,12 @@ int main(int argc, char* argv[])
                     if(map.l1 == 1){
                     // x = 0;
                     // y = 0;
-                    theta = 0.2;
+                    theta = 0.5;
                     }
                     if(map.r1 == 1){
                     // x = 0;
                     // y = 0;
-                    theta = -0.2;
+                    theta = -0.5;
                     } 
                     if(map.r1 == 0 && map.l1 == 0){
                     // x = 0;
