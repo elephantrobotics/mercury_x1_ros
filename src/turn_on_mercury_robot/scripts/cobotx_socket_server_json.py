@@ -9,7 +9,10 @@ import fcntl
 import struct
 import signal
 import json 
-import sys 
+import sys
+import subprocess
+import os
+import glob
 import rospy
 import actionlib
 
@@ -33,7 +36,7 @@ class MapNavigation:
         self.pub = rospy.Publisher('/cmd_vel',Twist, queue_size=10)
         self.pub_setpose = rospy.Publisher('/initialpose',PoseWithCovarianceStamped, queue_size=10)
         self.pub_cancel = rospy.Publisher('/move_base/cancel', GoalID, queue_size=10)
-        #self.voltage_subscriber = rospy.Subscriber("/Voltage", Float32, self.voltage_callback) #Create a battery-voltage topic subscriber
+        self.voltage_subscriber = rospy.Subscriber("/PowerVoltage", Float32, self.voltage_callback) #Create a battery-voltage topic subscriber
 
         #Create TCP/IP socket
         self.ifname = b"wlan0"
@@ -56,8 +59,31 @@ class MapNavigation:
         # ros topic publishing frequency
         self.frequency = 0.1
         self.conn = None
-    
-    # init robot feed pose
+
+        # definition
+        self.RobotVersion  = 1.0
+        self.SystemVersion = 1.0
+        self.directory = "home/er/mercury_x1_ros/src/turn_on_mercury_robot/map"
+
+        # task manager
+        self.current_task= None # Initialize task as idle
+        # self.pause_flag = False
+        # self.lock = threading.Lock()
+        self.control_messages = {'turnRight', 'turnLeft', 'goStraight', 'goBack', 'stop'}
+        self.navigation_messages = { 'initPosition', 'goToPosition','movebaseCancel'}
+        self.status_messages = { 'getRobotVersion', 'getSystemVersion','batteryState'}
+
+    def signal_handler(self, signal, frame):
+        print("Ctrl+C pressed. Exiting...")
+        # Close all connections
+        self.running_flag = False
+        if self.conn !=None :
+            self.conn.close()  #Close the connection to the client
+        self.server_socket.close()  # Close server socket
+        print("Connections closed.")
+        sys.exit()
+
+    # init robot  pose
     def set_pose(self, xGoal, yGoal, orientation_z, orientation_w,covariance):
         pose = PoseWithCovarianceStamped()
         pose.header.seq = 0
@@ -110,7 +136,7 @@ class MapNavigation:
     def shutdown(self):
         rospy.loginfo("Quit program")
         rospy.sleep()
- 
+
     # speed command
     def pub_vel(self, x, y , theta):
         twist = Twist()
@@ -123,14 +149,8 @@ class MapNavigation:
         self.pub.publish(twist)
     
     #voltage Callback
-    # def voltage_callback(self, msg):
-    #     global interrupt_voltage_receive
-    #     voltage = msg.data
-    #     if interrupt_voltage_receive:
-    #         rospy.loginfo(f"Voltage: {voltage} V")
-    #         self.socket_connect(f"Voltage: {voltage} V")
-    #         #rospy.loginfo("Interrupting /Voltage topic receive")
-    #         #self.voltage_subscriber.unregister()  # Unsubscribe Voltage topic
+    def voltage_callback(self, msg):
+        return msg.data
 
     # socket
     def socket_connect(self, data):
@@ -140,24 +160,56 @@ class MapNavigation:
         except Exception as e:
             pass
 
+    # process_json_array
+    def process_json_array(self,new_msg):
+        json_array.clear()
+        for i in new_msg.keys():                
+            if isinstance(new_msg[i], dict):          #If it is a dictionary, it enters the inner loop, otherwise it skips.
+                for j in new_msg[i].keys():
+                    print('key ', j, ' with value ', new_msg[i][j])
+                    json_array.append(new_msg[i][j]) 
+                print('goals_array',json_array)
+                return json_array
+            else:
+                print(new_msg[i])
+            
     # control_thread
-    def process_and_control(self,new_msg, stop_event):       
+    def process_control(self,new_msg,stop_event):       
         while self.running_flag and not stop_event.is_set():
             if new_msg:
+                # Speed direction init
                 direction = None
+
+                self.current_task = "control"
+
+                # Set the speed direction and enter the motion control    
                 if "turnRight" in new_msg:
                     direction = (0, 0, -1)
+
                 elif "turnLeft" in new_msg:
-                    direction = (0, 0, 1)
+                    direction = (0, 0,  1)
+
                 elif "goStraight" in new_msg:
-                    direction = (1, 0, 0)
+                    direction = (1, 0,  0)
+
                 elif "goBack" in new_msg:
                     direction = (-1, 0, 0)
+
                 elif "stop"in new_msg:
-                    direction = (0, 0, 0)
+                    self.pub_vel( 0, 0, 0)
+                    command = {f"{next(iter(new_msg))}": {"return": True}}
+                    self.socket_connect(command)
+                    new_msg = None
+                    self.current_task=None
+                    continue
+
+                # Unknown command
                 else:
                     print('Unknown command:', new_msg)
+                    command = {'Unknown command': " "}
+                    self.socket_connect(command)
 
+                # Motion control
                 if direction is not None:
                     json_array.clear()
                     # Unpack and get data
@@ -185,17 +237,197 @@ class MapNavigation:
                                         break 
                                 self.pub_vel(0,0,0)
                                 time.sleep(0.5) 
-                                new_msg=None                      
+                                new_msg=None
+                                self.current_task=None                      
                                 if not stop_event.is_set():
                                     command = {f"{i}": {"return": True}}
                                     self.socket_connect(command)
                         else:
                             print(new_msg[i])
-                 
+
+    def process_navigation(self,new_msg,stop_event):           
+        while self.running_flag and not stop_event.is_set():
+            if new_msg:
+                self.current_task = "navigation"        
+                # Moving
+                if "initPosition" in new_msg:                 
+                    json_array = self.process_json_array(new_msg)
+                    if len(json_array) != 5:
+                                self.socket_connect("Error: Unexpected number of elements in json_array.")
+                                print("Error: Unexpected number of elements in json_array." )
+                                new_msg=None 
+                    else:
+                        x_goal, y_goal, orientation_z, orientation_w,covariance = json_array
+                        self.set_pose(x_goal, y_goal, orientation_z, orientation_w,covariance)
+                        command = {f"initPosition": {"return": True}}
+                        self.socket_connect(command)
+                        new_msg = None
+                        self.current_task = None   
+                        continue
+
+                elif "goToPosition" in new_msg:
+                    json_array = self.process_json_array(new_msg)
+                    if len(json_array) != 4:
+                        self.socket_connect("Error: Unexpected number of elements in json_array.")
+                        print("Error: Unexpected number of elements in json_array." )
+                        new_msg=None 
+                    else:
+                        x_goal, y_goal, orientation_z, orientation_w = json_array
+                        #print('x_goal',x_goal, 'y_goal', y_goal, 'orientation_z',orientation_z, 'orientation_w', orientation_w)
+                        flag_feed_goalReached = self.moveToGoal(x_goal, y_goal, orientation_z, orientation_w)
+                        # movebaseCancel
+                        if flag_feed_goalReached == False:
+                            goal_id = GoalID()
+                            self.pub_cancel.publish(goal_id)
+
+                            # Stop the robot movement
+                            stop_cmd = Twist()
+                            stop_cmd.linear.x = 0.0
+                            stop_cmd.angular.z = 0.0
+                            self.pub.publish(stop_cmd)
+                            
+                        command = {f"goToPosition": {"return": flag_feed_goalReached}}
+                        self.socket_connect(command)  
+                        new_msg = None                        
+                        continue
+                
+                elif "movebaseCancel" in new_msg:
+                    # Publish an empty GoalID message to the robot's action server to cancel the current navigation goal.
+                    goal_id = GoalID()
+                    self.pub_cancel.publish(goal_id)
+                    print("cancel the current navigation goal")
+
+                    # Stop the robot movement
+                    stop_cmd = Twist()
+                    stop_cmd.linear.x = 0.0
+                    stop_cmd.angular.z = 0.0
+                    self.pub.publish(stop_cmd)          
+                    rospy.sleep(1.0) # Delay for one second to ensure the message is published and processed
+                    new_msg = None
+                    self.current_task = None
+
+    def process_status_information(self,new_msg,stop_event):
+        while self.running_flag and not stop_event.is_set():
+            if new_msg:
+                self.current_task = "statusInformation"
+                # System status
+                if "getRobotVersion" in new_msg:
+                    command = {f"{next(iter(new_msg))}": {"return": self.RobotVersion}}
+                    self.socket_connect(command)
+                    new_msg = None
+                    self.current_task = None
+                    continue
+
+                elif "getSystemVersion" in new_msg:
+                    command = {f"{next(iter(new_msg))}": {"return": self.SystemVersion}}
+                    self.socket_connect(command)
+                    new_msg = None
+                    self.current_task = None
+                    continue
+                
+                # Return the battery voltage through the ros callback function
+                elif "batteryState" in new_msg:
+                    voltage_data = self.voltage_callback(None)
+                    command = {'batteryVoltage': voltage_data}
+                    self.socket_connect(command)
+                    self.current_task = None
+                    continue
+
+                # Overall Status
+                elif "agvOn" in new_msg:
+                    try:
+                        # Start lidar and odometer communication
+                        launch_command = "roslaunch turn_on_tringai_robot turn_on_tringai_robot.launch"  
+                        subprocess.run(['gnome-terminal', '-e', f"bash -c '{launch_command}; exec $SHELL'"])
+                        command = {f"{next(iter(new_msg))}": {"return": True}}
+                        self.socket_connect(command)
+                    except subprocess.CalledProcessError:
+                        command = {f"{next(iter(new_msg))}": {"return": False}}
+                        self.socket_connect(command)
+                    new_msg = None
+                    self.current_task = None
+                    continue
+
+                elif "agvOff" in new_msg:
+                    try:
+                        # Kill the corresponding process
+                        close_command = "ps -ef | grep -E " + "turn_on_tringai_robot.launch" + \
+                            " | grep -v 'grep' | awk '{print $2}' | xargs kill -2"
+                        subprocess.run(close_command, shell=True)
+                        command = {f"{next(iter(new_msg))}": {"return": True}}
+                        self.socket_connect(command)
+                    except subprocess.CalledProcessError:
+                        command = {f"{next(iter(new_msg))}": {"return": False}}
+                        self.socket_connect(command)    
+                    new_msg = None
+                    self.current_task = None
+                    continue
+                
+                elif "isAgvOn" in new_msg:
+                    # Check whether there is a corresponding process
+                    process_check_command = "ps -ef | grep -E 'turn_on_tringai_robot.launch' | grep -v 'grep'"
+                    result = subprocess.run(process_check_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    if len(result.stdout) > 0:
+                        command = {f"{next(iter(new_msg))}": {"return": True}}
+                        self.socket_connect(command)
+                    else:
+                        command = {f"{next(iter(new_msg))}": {"return": False}}
+                        self.socket_connect(command)
+                    new_msg = None
+                    self.current_task = None
+                    continue
+
+                # Mapping
+                elif "startMapping" in new_msg:
+                    try:
+                        # Start lidar and odometer communication
+                        launch_command = "roslaunch turn_on_tringai_robot mapping.launch"  
+                        subprocess.run(['gnome-terminal', '-e', f"bash -c '{launch_command}; exec $SHELL'"])
+                        command = {f"{next(iter(new_msg))}": {"return": True}}
+                        self.socket_connect(command)
+                    except subprocess.CalledProcessError:
+                        command = {f"{next(iter(new_msg))}": {"return": False}}
+                        self.socket_connect(command)
+                    new_msg = None
+                    self.current_task = None
+                    continue
+
+                elif "stopMapping" in new_msg:
+                    try:
+                        # Kill the corresponding process
+                        close_command = "ps -ef | grep -E " + "mapping.launch" + \
+                            " | grep -v 'grep' | awk '{print $2}' | xargs kill -2"
+                        subprocess.run(close_command, shell=True)
+                        command = {f"{next(iter(new_msg))}": {"return": True}}
+                        self.socket_connect(command)
+                    except subprocess.CalledProcessError:
+                        command = {f"{next(iter(new_msg))}": {"return": False}}
+                        self.socket_connect(command)    
+                    new_msg = None
+                    self.current_task = None
+                    continue
+
+                elif "deleteMap" in new_msg:
+                    files_to_delete = glob.glob(os.path.join(self.directory, "map.pgm")) + \
+                                    glob.glob(os.path.join(self.directory, "map.yaml"))
+                    try:
+                        for file_to_delete in files_to_delete:
+                            os.remove(file_to_delete)
+                            print(f"Deleted file: {file_to_delete}")
+                        command = {f"{next(iter(new_msg))}": {"return": True}}
+                        self.socket_connect(command)
+                    except Exception as e:
+                        command = {f"{next(iter(new_msg))}": {"return": False}}
+                        self.socket_connect(command)    
+                    new_msg = None
+                    self.current_task = None
+                    continue
+                        
+    # Start the thread and wait for the client's connection
     def receive_commands(self):
         while self.running_flag:
             try:
-                self.conn, address = self.server_socket.accept()
+                self.conn, address = self.server_socket.accept() # Return tuple
                 print('Connected to: ', address)
                 while self.conn:
                     try:
@@ -205,68 +437,111 @@ class MapNavigation:
                         if not msg:
                             break
                         msg = json.loads(msg)                          # Use json to parse the data and obtain dict data
-                        
-                        # Interrupt the current task, update data, and restart the task
-                        self.stop_event.set()
-                        self.control_thread.join()
+                        first_key_msg = next(iter(msg))                # Extract the first command from the received message and store it in the variable
 
-                        new_msg = msg
-                        self.stop_event.clear()
+                        if self.current_task is not None: #If the task is not idle
+                            # print(self.current_task,first_key_msg)
 
-                        self.control_thread = threading.Thread(target=self.process_and_control, args=(new_msg, self.stop_event))
-                        self.control_thread.start()
+                            if first_key_msg in self.control_messages:
+                                same_task = "control"
+                            elif first_key_msg in self.navigation_messages:
+                                same_task = "navigation"
+                            elif first_key_msg in self.status_messages:
+                                same_task =  "statusInformation"
+                            
+                            if self.current_task == same_task:  #Check whether the task names are the same
+                                if first_key_msg in self.control_messages:
+                                    # Interrupt the current control task, update data, and restart the task
+                                    self.stop_event.set()
+                                    self.control_thread.join()
+                                    # update data
+                                    new_msg = msg
+                                    self.stop_event.clear()
+                                    # restart the thread
+                                    self.control_thread = threading.Thread(target=self.process_control, args=(new_msg, self.stop_event))
+                                    self.control_thread.start()
+
+                                elif first_key_msg in self.navigation_messages:
+                                    # Interrupt the current control task, update data, and restart the task
+                                    self.stop_event.set()
+                                    self.control_thread.join()
+                                    # update data
+                                    new_msg = msg
+                                    self.stop_event.clear()
+                                    # restart the thread
+                                    self.navigation_thread = threading.Thread(target=self.process_navigation, args=(new_msg, self.stop_event))
+                                    self.navigation_thread.start()
+
+                                elif first_key_msg in self.status_messages:
+                                    # Interrupt the current control task, update data, and restart the task
+                                    self.stop_event.set()
+                                    self.control_thread.join()
+                                    # update data
+                                    new_msg = msg
+                                    self.stop_event.clear()
+                                    # restart the thread
+                                    self.status_thread = threading.Thread(target=self.process_status_information, args=(new_msg, self.stop_event))
+                                    self.status_thread.start()
+                            else:
+                                print("The {} task is busy and has been rejected".format(self.current_task)) #The task is busy and has been rejected
+                        else:
+                            if first_key_msg in self.control_messages:
+                                # Interrupt the current control task, update data, and restart the task
+                                self.stop_event.set()
+                                self.control_thread.join()
+                                # update data
+                                new_msg = msg
+                                self.stop_event.clear()
+                                # restart the thread
+                                self.control_thread = threading.Thread(target=self.process_control, args=(new_msg, self.stop_event))
+                                self.control_thread.start()
+
+                            elif first_key_msg in self.navigation_messages:
+                                # Interrupt the current control task, update data, and restart the task
+                                self.stop_event.set()
+                                self.control_thread.join()
+                                # update data
+                                new_msg = msg
+                                self.stop_event.clear()
+                                # restart the thread
+                                self.navigation_thread = threading.Thread(target=self.process_navigation, args=(new_msg, self.stop_event))
+                                self.navigation_thread.start()
+
+                            elif first_key_msg in self.status_messages:
+                                # Interrupt the current control task, update data, and restart the task
+                                self.stop_event.set()
+                                self.control_thread.join()
+                                # update data
+                                new_msg = msg
+                                self.stop_event.clear()
+                                # restart the thread
+                                self.status_thread = threading.Thread(target=self.process_status_information, args=(new_msg, self.stop_event))
+                                self.status_thread.start()
 
                     except socket.error as e:
                         print(e)
 
             except socket.error as e:
                 print(f'Socket error: {e}')
-
-    def signal_handler(self, signal, frame):
-        print("Ctrl+C pressed. Exiting...")
-        # Close all connections
-        self.running_flag = False
-        if self.conn !=None :
-            self.conn.close()  #Close the connection to the client
-        self.server_socket.close()  # Close server socket
-        print("Connections closed.")
-        sys.exit()
         
     def start_control(self):
         # Creating an instance variable stop_event as a threading.Event
         self.stop_event = threading.Event()
         # Create threads
         self.control_msg = None
-        self.control_thread = threading.Thread(target=self.process_and_control, args=(self.control_msg, self.stop_event))
+        
         self.command_thread = threading.Thread(target=self.receive_commands)
-        
-        self.control_thread.start()
         self.command_thread.start()
-        
+
+        self.control_thread = threading.Thread(target=self.process_control, args=(self.control_msg, self.stop_event))
+        self.control_thread.start()
+
         rospy.spin()
 
 if __name__ == '__main__':
-    # goals
-    goals = [
-    (8.606064796447754, 2.346750497817993, 0.695545718232533, 0.7184818396093181),  # desk_1
-    (8.754322052001953, 6.7733964920043945, 0.774108134204125, 0.6330533915547789),  # desk_2
-    (6.705804824829102, 9.912127494812012, 0.7157463080949427, 0.6983603814997379),  # door
-    (6.714288711547852, 11.711033668518066, 0.7038931321256822, 0.710305890828942),  # meeting room  
-    ]
-    
-    #back
-    back_goals =[
-    (6.6801581382751465, 9.68292236328125,-0.3766679973756092, 0.9263483252821522), #back_door
-    (8.751319885253906, 7.584722518920898, -0.7253242265223879,0.6884074131062939), #back_desk_2
-    (8.408796310424805, 2.4658150672912598, -0.8522438688498349,0.5231447103888803),#back_desk_1
-    (8.29449462890625, 0.49819743633270264, -0.7621448326238706,0.6474065601341497),#back_corner1
-    ]
-
     #json array
     json_array = []
 
-    interrupt_voltage_receive = False   #Default not to subscribe to voltage topic
-    
     #init navigation
     map_navigation = MapNavigation()
     map_navigation.start_control()
