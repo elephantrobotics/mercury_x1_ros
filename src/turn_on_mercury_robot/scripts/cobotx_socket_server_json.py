@@ -39,9 +39,7 @@ class MapNavigation:
         self.voltage_subscriber = rospy.Subscriber("/PowerVoltage", Float32, self.voltage_callback) #Create a battery-voltage topic subscriber
 
         #Create TCP/IP socket
-        self.ifname = b"wlan0"
-        self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.host = socket.inet_ntoa(fcntl.ioctl(self.server_socket.fileno(), 0x8915, struct.pack('256s', self.ifname[:15]))[20:24])  #IP
+        self.host = self.get_host_address() #IP
         self.port = 9999  # port       
         print("ip: {} port: {}".format(self.host, self.port))
 
@@ -72,6 +70,17 @@ class MapNavigation:
         self.control_messages = {'turnRight', 'turnLeft', 'goStraight', 'goBack', 'stop'}
         self.navigation_messages = { 'initPosition', 'goToPosition','movebaseCancel'}
         self.status_messages = { 'getRobotVersion', 'getSystemVersion','batteryState'}
+
+    def get_host_address(self):
+        try:
+            # Try to get the IP address of the network interface
+            self.ifname = b"wlan0"
+            self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.host = socket.inet_ntoa(fcntl.ioctl(self.server_socket.fileno(), 0x8915, struct.pack('256s', self.ifname[:15]))[20:24])  #IP
+            return self.host
+        except IOError:
+            # If there's no network connection, set host to localhost
+            return "127.0.0.1"
 
     def signal_handler(self, signal, frame):
         print("Ctrl+C pressed. Exiting...")
