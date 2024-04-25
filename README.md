@@ -55,12 +55,12 @@ $ roslaunch turn_on_mercury_robot slider_control.launch
 **3. Then Turn on upper body robotic arm control:**
 
 ```bash
-$ ros run turn_on_mercury_robot slider_control.py
+$ rosrun turn_on_mercury_robot slider_control.py
 ```
 
 **4. Finally, start the chassis car keyboard control program:**
 
 ```bash
-$ ros run turn_on_mercury_robot mercury_keyboard.py
+$ rosrun turn_on_mercury_robot mercury_keyboard.py
 ```
 
