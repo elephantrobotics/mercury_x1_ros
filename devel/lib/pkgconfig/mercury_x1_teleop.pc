@@ -1,8 +1,0 @@
-prefix=/home/er/mercury_x1_ros/devel
-
-Name: mercury_x1_teleop
-Description: Description of mercury_x1_teleop
-Version: 2.4.2
-Cflags: 
-Libs: -L${prefix}/lib 
-Requires: roscpp geometry_msgs

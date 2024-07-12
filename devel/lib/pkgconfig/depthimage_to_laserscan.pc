@@ -1,8 +1,0 @@
-prefix=/home/er/mercury_x1_ros/devel
-
-Name: depthimage_to_laserscan
-Description: Description of depthimage_to_laserscan
-Version: 1.0.8
-Cflags: -I/home/er/mercury_x1_ros/devel/include -I/home/er/mercury_x1_ros/src/depthimage_to_laserscan/include
-Libs: -L${prefix}/lib -lDepthImageToLaserScan -lDepthImageToLaserScanROS -lDepthImageToLaserScanNodelet
-Requires: dynamic_reconfigure image_geometry image_transport nodelet roscpp sensor_msgs

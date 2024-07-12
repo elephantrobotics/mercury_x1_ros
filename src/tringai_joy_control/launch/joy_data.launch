@@ -1,6 +1,0 @@
-<launch>
-  <node pkg="tringai_joy" type="joy_node" name="tringai_joy" output="screen" >
-    <param name="dev" type="string" value="/dev/input/js0" />
-    <param name="deadzone" value="0.12" />
-  </node>
-</launch>

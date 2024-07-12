@@ -1,8 +1,0 @@
-prefix=/home/er/mercury_x1_ros/devel
-
-Name: simple_follower
-Description: Description of simple_follower
-Version: 0.0.0
-Cflags: -I/home/er/mercury_x1_ros/devel/include
-Libs: -L${prefix}/lib 
-Requires: roscpp rospy std_msgs message_runtime
