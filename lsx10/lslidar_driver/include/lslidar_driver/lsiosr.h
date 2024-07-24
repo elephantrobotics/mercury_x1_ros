@@ -1,10 +1,10 @@
 /*******************************************************
 @company: Copyright (C) 2021, Leishen Intelligent System
-@product: LSM10
-@filename: lsm10.cpp
+@product: LSM10_N10
+@filename: lsiosr.cpp
 @brief:
 @version:       date:       author:     comments:
-@v1.0           21-2-4      yao          new
+@v1.0           22-10-24      li          new
 *******************************************************/
 #ifndef LSIOSR_H
 #define LSIOSR_H
@@ -23,13 +23,10 @@
 #include <iostream>
 
 //波特率
-#define     BAUD_2400       2400
-#define     BAUD_4800       4800
-#define     BAUD_9600       9600
-#define     BAUD_57600     	57600
-#define     BAUD_115200     115200
-#define	BAUD_230400	230400
+#define     BAUD_230400     230400
 #define     BAUD_460800     460800
+#define     BAUD_500000     500000
+#define     BAUD_921600     921600
 
 //奇偶校验位
 #define     PARITY_ODD    	'O' //奇数
@@ -44,7 +41,7 @@
 #define     DATA_BIT_7     	7
 #define     DATA_BIT_8     	8
 
-namespace ls
+namespace lslidar_driver
 {
 class LSIOSR{
 public:
