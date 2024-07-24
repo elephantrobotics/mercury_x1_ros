@@ -39,14 +39,14 @@ namespace navi_multi_goals_pub_rviz_plugin {
         QVBoxLayout *root_layout = new QVBoxLayout;
         // create a panel about "maxNumGoal"
         QHBoxLayout *maxNumGoal_layout = new QHBoxLayout;
-        maxNumGoal_layout->addWidget(new QLabel("目标最大数量"));
+        maxNumGoal_layout->addWidget(new QLabel("Maximum number of targets"));
         output_maxNumGoal_editor_ = new QLineEdit;
         maxNumGoal_layout->addWidget(output_maxNumGoal_editor_);
-        output_maxNumGoal_button_ = new QPushButton("确定");
+        output_maxNumGoal_button_ = new QPushButton("Define");
         maxNumGoal_layout->addWidget(output_maxNumGoal_button_);
         root_layout->addLayout(maxNumGoal_layout);
 
-        cycle_checkbox_ = new QCheckBox("循环");
+        cycle_checkbox_ = new QCheckBox("Loop");
         root_layout->addWidget(cycle_checkbox_);
         // creat a QTable to contain the poseArray
         poseArray_table_ = new QTableWidget;
@@ -54,11 +54,11 @@ namespace navi_multi_goals_pub_rviz_plugin {
         root_layout->addWidget(poseArray_table_);
         //creat a manipulate layout
         QHBoxLayout *manipulate_layout = new QHBoxLayout;
-        output_reset_button_ = new QPushButton("重置");
+        output_reset_button_ = new QPushButton("Reset");
         manipulate_layout->addWidget(output_reset_button_);
-        output_cancel_button_ = new QPushButton("取消");
+        output_cancel_button_ = new QPushButton("Cancel");
         manipulate_layout->addWidget(output_cancel_button_);
-        output_startNavi_button_ = new QPushButton("开始导航!");
+        output_startNavi_button_ = new QPushButton("Start Navigation");
         manipulate_layout->addWidget(output_startNavi_button_);
         root_layout->addLayout(manipulate_layout);
 
@@ -268,7 +268,7 @@ namespace navi_multi_goals_pub_rviz_plugin {
     void MultiNaviGoalsPanel::statusCB(const actionlib_msgs::GoalStatusArray::ConstPtr &statuses) {
         bool arrived_pre = arrived_;
         arrived_ = checkGoal(statuses->status_list);
-        if (arrived_) { ROS_ERROR("%d,%d", int(arrived_), int(arrived_pre)); }
+        //if (arrived_) { ROS_ERROR("%d,%d", int(arrived_), int(arrived_pre)); }
         if (arrived_ && arrived_ != arrived_pre && ros::ok() && permit_) {
             if (cycle_) cycleNavi();
             else completeNavi();

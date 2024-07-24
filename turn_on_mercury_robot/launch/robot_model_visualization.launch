@@ -233,9 +233,9 @@
   </group>
   <!-- car_mode and tf  brushless_senior_diff-->
   <group if="$(eval car_mode == 'brushless_senior_diff')">
-      <node pkg="tf" type="static_transform_publisher" name="base_to_laser" args="0.036 0.00 0.26 3.14 0 0  base_footprint laser 100" />
-      <node pkg="tf" type="static_transform_publisher" name="base_to_camera" args="0.073 0.00 0.8 0 0 0   base_footprint camera_link 100" />
-      <node pkg="tf" type="static_transform_publisher" name="base_to_gyro" args="-0.194 -0.092 0.22 0 0 0 base_footprint gyro_link 100" />
+      <node pkg="tf" type="static_transform_publisher" name="base_to_laser" args="0.105 0.00 0.166 3.14 0 0  base_footprint laser 100" />
+      <node pkg="tf" type="static_transform_publisher" name="base_to_camera" args="0.04 0.00 0.94 0 0 0   base_footprint camera_link 100" />
+      <node pkg="tf" type="static_transform_publisher" name="base_to_gyro" args="-0.1 -0.035 0.265 0 0 0 base_footprint gyro_link 100" />
   </group>
 
   <!-- URDF 标准化机器人描述格式 -->
