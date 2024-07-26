@@ -140,6 +140,29 @@ namespace lslidar_driver
 		return; 
 	}
 
+	void Input::UDP_M10()
+	{
+		sockaddr_in server_sai;
+		server_sai.sin_family = AF_INET; // IPV4 协议族
+		server_sai.sin_port = htons(UDP_PORT_NUMBER_DIFOP);
+		server_sai.sin_addr.s_addr = inet_addr(devip_str_.c_str());
+		int rtn = 0;
+		for (int k = 0; k < 10; k++)
+		{
+			unsigned char data[188]= {0x00};
+			data[0] = 0xA5;
+			data[1] = 0x5A;
+			data[2] = 0x55;
+			data[184] = 0x01;
+			data[185] = 0x01;
+			data[186] = 0xFA;
+			data[187] = 0xFB;
+			int rtn = sendto(sockfd_, data, 188, 0, (struct sockaddr *)&server_sai, sizeof(struct sockaddr));
+			if (rtn > 0) return; 
+		}
+		return; 
+	}
+
 	void Input::UDP_order(const std_msgs::Int8 msg)
 	{
 		int i = msg.data;
@@ -175,6 +198,10 @@ namespace lslidar_driver
 					data[181] = 0x0C;
 					data[184] = 0x06;
 					data[185] = 0x01;
+				}
+				else if (i == 30){				//雷达停转并停止发数据
+					data[184] = 0x03;
+					data[185] = 0x00;
 				}	
 				else if (i == 100){				
 					data[184] = 0x08;
@@ -242,6 +269,7 @@ namespace lslidar_driver
 			}
 			else
 			{
+				ROS_INFO("Successfully set!");
 				if (i == 1)
 					usleep(3000000);
 				return;
@@ -411,6 +439,8 @@ namespace lslidar_driver
 		{
 			abort();
 		}
+		
+		return 0;
 	}
 
 } // namespace

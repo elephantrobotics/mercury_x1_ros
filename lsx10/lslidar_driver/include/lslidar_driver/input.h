@@ -77,6 +77,7 @@ public:
   void clearUpdateFlag(void);
   void UDP_order(const std_msgs::Int8 msg);
   void UDP_difop();
+  void UDP_M10();
 protected:
   ros::NodeHandle private_nh_;
   uint16_t port_;

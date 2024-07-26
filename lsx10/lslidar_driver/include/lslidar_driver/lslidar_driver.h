@@ -64,7 +64,7 @@ public:
 
     bool initialize();
     bool polling();
-    int getScan(std::vector<ScanPoint> &points, ros::Time &scan_time, float &scan_duration);
+    int getScan(std::vector<ScanPoint> &points, ros::Time &scan_time, double &scan_duration);
     void data_processing(unsigned char *packet_bytes,int len);
     void data_processing_2(unsigned char *packet_bytes,int len);
     void difop_processing(unsigned char *packet_bytes);
@@ -124,9 +124,9 @@ private:
     double degree_compensation = 0.0;
     bool use_gps_ts;
     bool high_reflection;
-    bool n10p_double_echo;
     bool compensation;
     bool first_compensation = true;
+    bool restart = true;
     bool pubScan;
     bool pubPointCloud2;
     int count_num;
@@ -147,11 +147,16 @@ private:
     uint64_t sweep_end_time_hardware;
     int idx = 0;
     int link_time = 0;
-    double last_degree = 0.0;	
+    double last_degree = 0.0;
 
+    double packet_timestamp;
+    double last_packet_timestamp;
+
+    bool n10p_double_echo;
     int truncated_mode_;
     double min_distance,max_distance;
     std::vector<int> disable_angle_min_range, disable_angle_max_range, disable_angle_range_default;
+    
 };
 
 typedef LslidarDriver::LslidarDriverPtr LslidarDriverPtr;
