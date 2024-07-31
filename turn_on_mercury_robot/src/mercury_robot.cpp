@@ -10,7 +10,7 @@ Function: The main function, ROS initialization, creates the Robot_control objec
 ***************************************/
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "tringai_robot"); //ROS initializes and sets the node name //ROS初始化 并设置节点名称 
+  ros::init(argc, argv, "mercury_robot"); //ROS initializes and sets the node name //ROS初始化 并设置节点名称 
   turn_on_robot Robot_Control; //Instantiate an object //实例化一个对象
   Robot_Control.Control(); //Loop through data collection and publish the topic //循环执行数据采集和发布话题等操作
   return 0;  
@@ -221,11 +221,11 @@ bool turn_on_robot::Get_Sensor_Data()
   ROS_INFO("%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x",
   Receive_Data_Pr[0],Receive_Data_Pr[1],Receive_Data_Pr[2],Receive_Data_Pr[3],Receive_Data_Pr[4],Receive_Data_Pr[5],Receive_Data_Pr[6],Receive_Data_Pr[7],
   Receive_Data_Pr[8],Receive_Data_Pr[9],Receive_Data_Pr[10],Receive_Data_Pr[11],Receive_Data_Pr[12],Receive_Data_Pr[13],Receive_Data_Pr[14],Receive_Data_Pr[15],
-  Receive_Data_Pr[16],Receive_Data_Pr[17],Receive_Data_Pr[18],Receive_Data_Pr[19],Receive_Data_Pr[20],Receive_Data_Pr[21],Receive_Data_Pr[22],Receive_Data_Pr[23]);
+  Receive_Data_Pr[16],Receive_Data_Pr[17],Receive_Data_Pr[18],Receive_Data_Pr[19],Receive_Data_Pr[20],Receive_Data_Pr[21],Receive_Data_Pr[22],Receive_Data_Pr[23],Receive_Data_Pr[24],Receive_Data_Pr[25]);
   */  
 
   //Record the position of the head and tail of the frame //记录帧头帧尾位置
-  for(j=0;j<24;j++)
+  for(j=0;j<26;j++)
   {
     if(Receive_Data_Pr[j]==FRAME_HEADER)
     Header_Pos=j;
@@ -233,7 +233,7 @@ bool turn_on_robot::Get_Sensor_Data()
     Tail_Pos=j;    
   }
 
-  if(Tail_Pos==(Header_Pos+23))
+  if(Tail_Pos==(Header_Pos+25))
   {
     //If the end of the frame is the last bit of the packet, copy the packet directly to receive_data.rx
     //如果帧尾在数据包最后一位，直接复制数据包到Receive_Data.rx
@@ -268,7 +268,7 @@ bool turn_on_robot::Get_Sensor_Data()
   */
 
   Receive_Data.Frame_Header= Receive_Data.rx[0]; //The first part of the data is the frame header 0X7B //数据的第一位是帧头0X7B
-  Receive_Data.Frame_Tail= Receive_Data.rx[23];  //The last bit of data is frame tail 0X7D //数据的最后一位是帧尾0X7D
+  Receive_Data.Frame_Tail= Receive_Data.rx[25];  //The last bit of data is frame tail 0X7D //数据的最后一位是帧尾0X7D
 
   if (Receive_Data.Frame_Header == FRAME_HEADER ) //Judge the frame header //判断帧头
   {
@@ -488,11 +488,11 @@ turn_on_robot::turn_on_robot():Sampling_Time(0),Power_voltage(0)
   }
   catch (serial::IOException& e)
   {
-    ROS_ERROR_STREAM("tringai_robot can not open serial port,Please check the serial port cable! "); //If opening the serial port fails, an error message is printed //如果开启串口失败，打印错误信息
+    ROS_ERROR_STREAM("mercury_robot can not open serial port,Please check the serial port cable! "); //If opening the serial port fails, an error message is printed //如果开启串口失败，打印错误信息
   }
   if(Stm32_Serial.isOpen())
   {
-    ROS_INFO_STREAM("tringai_robot serial port opened"); //Serial port opened successfully //串口开启成功提示
+    ROS_INFO_STREAM("mercury_robot serial port opened"); //Serial port opened successfully //串口开启成功提示
   }
 }
 /**************************************
