@@ -15,7 +15,7 @@ class OfflineWakeup:
         # 初始化串口
         try:
             self.ser = serial.Serial(
-                port=self.port,                 # 请根据实际串口设备修改
+                port=self.port,                 # 串口设备
                 baudrate=self.baudrate,         # 波特率 115200
                 bytesize=serial.EIGHTBITS,      # 数据位 8
                 parity=serial.PARITY_NONE,      # 奇偶校验 无
@@ -91,10 +91,3 @@ class OfflineWakeup:
         self.running = False
         self.thread.join()
         self.ser.close()
-
-# if __name__ == "__main__":
-#     try:
-#         wakeup = OfflineWakeup()  # 初始化类实例
-#         wakeup.parse_serial_data()  # 开始解析数据
-#     finally:
-#         wakeup.close_serial()  # 确保在退出时关闭串口

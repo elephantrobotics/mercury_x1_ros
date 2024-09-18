@@ -3,35 +3,50 @@
 import wave
 from pyaudio import PyAudio,paInt16
 
-framerate=16000   # 采样率 16kHz
-NUM_SAMPLES=2000  #采样点
-channels=1  #一个声道
-sampwidth=2 #两个字节十六位
-TIME=4      #条件变量，可以设置定义录音的时间
+class Recording():
+    def __init__(self,TIME=4, pcm_file ='r818.pcm'):
+        self.framerate = 16000   # 采样率 16kHz
+        self.NUM_SAMPLES = 2000  # 采样点
+        self.channels = 1        # 单声道
+        self.sampwidth = 2       # 两个字节十六位
+        self.TIME = TIME         # 录音时长（秒）
+        self.pcm_file = pcm_file # 保存的文件名
  
-def save_wave_file(filename, data):   #save the date to the wav file
-    wf = wave.open(filename, 'wb')  #二进制写入模式
-    wf.setnchannels(channels)  
-    wf.setsampwidth(sampwidth)  #两个字节16位
-    wf.setframerate(framerate)  #帧速率
-    
-    wf.writeframes(b"".join(data))  #把数据加进去，就会存到硬盘上去wf.writeframes(b"".join(data)) 
-    wf.close()
+    def save_wave_file(self, filename, data): 
+        """
+        保存 PCM 数据到 WAV 文件
+        """
+        wf = wave.open(filename, 'wb')   #二进制写入模式
+        wf.setnchannels(self.channels)  
+        wf.setsampwidth(self.sampwidth)  #两个字节16位
+        wf.setframerate(self.framerate)  #帧速率    
+        wf.writeframes(b"".join(data))   # 将数据保存到文件
+        wf.close()
  
-def my_record():
-    pa=PyAudio()
-    stream=pa.open(format=paInt16,channels=1,rate=framerate,input=True,frames_per_buffer=NUM_SAMPLES)
-    my_buf=[]
-    count=0  #
-    while count < TIME*8: #循环2*20次
-        string_audio_data=stream.read(NUM_SAMPLES) #每读完2000个采样加1
-        my_buf.append(string_audio_data)
-        count+=1
-        print(u'Currently recording (simultaneously recording internal system and microphone sound)')
-    save_wave_file('03.pcm',my_buf) #文件保存
-    stream.close()
- 
-if __name__ == "__main__": 
-    a = input(u"Please press enter to start recording. The recording time is 4 seconds (press q to exit):")
-    my_record()
-    print(u'Recording ended!')
+    def start_recording(self):
+        """
+        开始录音并保存到文件
+        """
+        pa=PyAudio()
+        stream=pa.open(format=paInt16,
+                       channels=self.channels,
+                       rate=self.framerate,
+                       input=True,
+                       frames_per_buffer=self.NUM_SAMPLES)
+        audio_buffer = []
+        count = 0  
+
+        # 开始录音，录制指定的时间
+        while count < self.TIME * (self.framerate // self.NUM_SAMPLES): 
+            string_audio_data=stream.read(self.NUM_SAMPLES) # 每次读完2000个样本数
+            audio_buffer.append(string_audio_data)
+            count+=1
+            print(f'Currently recording... {count}/{self.TIME * (self.framerate // self.NUM_SAMPLES)}')
+        self.save_wave_file(self.pcm_file,audio_buffer) # 保存录音数据到文件
+
+        # 关闭流和 PyAudio 对象,避免占用系统资源
+        stream.stop_stream()
+        stream.close()
+        pa.terminate()
+        print(f"Recording saved to {self.pcm_file}")
+        
