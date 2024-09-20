@@ -44,7 +44,7 @@ message_data =  {}
 
 class OnlineSpeechRecognition(object):
     # 初始化
-    def __init__(self, APPID, APIKey, APISecret, AudioFile):
+    def __init__(self, APPID, APIKey, APISecret, AudioFile, BusinessArgs):
         self.APPID = APPID
         self.APIKey = APIKey
         self.APISecret = APISecret
@@ -53,7 +53,8 @@ class OnlineSpeechRecognition(object):
         # 公共参数(common)
         self.CommonArgs = {"app_id": self.APPID}
         # 业务参数(business)，更多个性化参数可在官网查看
-        self.BusinessArgs = {"domain": "iat", "language": "zh_cn", "accent": "mandarin", "vinfo":1,"vad_eos":10000}
+        self.BusinessArgs = BusinessArgs
+        # self.BusinessArgs = {"domain": "iat", "language": "zh_cn", "accent": "mandarin", "vinfo":1,"vad_eos":10000}
 
     # 生成url
     def create_url(self):
@@ -172,13 +173,13 @@ def on_open(ws,wsParam):
 
     thread.start_new_thread(run, ())
 
-def run_speech_recognition(APPID, APISecret, APIKey, AudioFile):
+def run_speech_recognition(APPID, APISecret, APIKey,BusinessArgs,AudioFile,):
     time1 = datetime.now()
-    
     # 创建实例，并配置所需参数
     wsParam = OnlineSpeechRecognition(APPID=APPID, APISecret=APISecret,
                                       APIKey=APIKey,
-                                      AudioFile=AudioFile)
+                                      BusinessArgs=BusinessArgs,
+                                      AudioFile=AudioFile,)
       
     websocket.enableTrace(False) # 关闭 WebSocket 调试信息的输出
 

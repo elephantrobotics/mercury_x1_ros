@@ -37,7 +37,7 @@ STATUS_LAST_FRAME = 2  # 最后一帧的标识
 
 class OnlineSpeechSynthesis(object):
     # 初始化
-    def __init__(self, APPID, APIKey, APISecret, Text):
+    def __init__(self, APPID, APIKey, APISecret, Text, BusinessArgs):
         self.APPID = APPID
         self.APIKey = APIKey
         self.APISecret = APISecret
@@ -46,7 +46,8 @@ class OnlineSpeechSynthesis(object):
         # 公共参数(common)
         self.CommonArgs = {"app_id": self.APPID}
         # 业务参数(business)，更多个性化参数可在官网查看
-        self.BusinessArgs = {"aue": "raw", "auf": "audio/L16;rate=16000", "vcn": "xiaoyan", "tte": "utf8"}
+        self.BusinessArgs = BusinessArgs
+        # self.BusinessArgs = {"aue": "raw", "auf": "audio/L16;rate=16000", "vcn": "xiaoyan", "tte": "utf8"}
         self.Data = {"status": 2, "text": str(base64.b64encode(self.Text.encode('utf-8')), "UTF8")}
         #使用小语种须使用以下方式，此处的unicode指的是 utf16小端的编码方式，即"UTF-16LE"”
         #self.Data = {"status": 2, "text": str(base64.b64encode(self.Text.encode('utf-16')), "UTF8")}
@@ -134,11 +135,12 @@ def on_open(ws,wsParam,pcm_file):
     thread.start_new_thread(run, ())
 
 
-def run_speech_synthesis(APPID, APISecret, APIKey, Text, pcm_file='demo.pcm'):
+def run_speech_synthesis(APPID, APISecret, APIKey, Text, BusinessArgs,pcm_file='demo.pcm'):
     # 创建实例，并配置所需参数
     wsParam = OnlineSpeechSynthesis(APPID=APPID, APISecret=APISecret,
                                     APIKey=APIKey,
-                                    Text=Text)
+                                    Text=Text,
+                                    BusinessArgs=BusinessArgs)
     
     websocket.enableTrace(False) # 关闭 WebSocket 调试信息的输出
     
