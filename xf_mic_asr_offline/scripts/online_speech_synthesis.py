@@ -35,7 +35,7 @@ STATUS_CONTINUE_FRAME = 1  # 中间帧标识
 STATUS_LAST_FRAME = 2  # 最后一帧的标识
 
 
-class Ws_Param(object):
+class OnlineSpeechSynthesis(object):
     # 初始化
     def __init__(self, APPID, APIKey, APISecret, Text):
         self.APPID = APPID
@@ -92,7 +92,7 @@ def on_message(ws, message):
         audio = message["data"]["audio"]
         audio = base64.b64decode(audio)
         status = message["data"]["status"]
-        print(message)
+        #print(message)
         if status == 2:
             print("ws is closed")
             ws.close()
@@ -118,30 +118,40 @@ def on_error(ws, error):
 def on_close(ws):
     print("### closed ###")
 
-
 # 收到websocket连接建立的处理
-def on_open(ws):
+def on_open(ws,wsParam,pcm_file):
     def run(*args):
         d = {"common": wsParam.CommonArgs,
              "business": wsParam.BusinessArgs,
              "data": wsParam.Data,
              }
         d = json.dumps(d)
-        print("------>开始发送文本数据")
+        #print("------>开始发送文本数据")
         ws.send(d)
-        if os.path.exists('./demo.pcm'):
-            os.remove('./demo.pcm')
+        if os.path.exists(pcm_file):
+            os.remove(pcm_file)
 
     thread.start_new_thread(run, ())
 
 
-if __name__ == "__main__":
-    # 测试时候在此处正确填写相关信息即可运行
-    wsParam = Ws_Param(APPID='', APISecret='',
-                       APIKey='',
-                       Text="我的祖父叫赵年余，赵家祖上是十里八乡有名的大地主，最辉煌的日子在城里买了四十多间宅子，也出过一些名人。")
-    websocket.enableTrace(False)
-    wsUrl = wsParam.create_url()
-    ws = websocket.WebSocketApp(wsUrl, on_message=on_message, on_error=on_error, on_close=on_close)
-    ws.on_open = on_open
-    ws.run_forever(sslopt={"cert_reqs": ssl.CERT_NONE})
+def run_speech_synthesis(APPID, APISecret, APIKey, Text, pcm_file='demo.pcm'):
+    # 创建实例，并配置所需参数
+    wsParam = OnlineSpeechSynthesis(APPID=APPID, APISecret=APISecret,
+                       APIKey=APIKey,
+                       Text=Text)
+    
+    websocket.enableTrace(False) # 关闭 WebSocket 调试信息的输出
+    
+    wsUrl = wsParam.create_url() # 生成 WebSocket 连接的 URL
+
+    # 创建 WebSocket 客户端应用，设置回调函数
+    ws = websocket.WebSocketApp(
+        wsUrl,                  # WebSocket 服务器的 URL
+        on_message=on_message,  # 处理收到消息的回调函数
+        on_error=on_error,      # 处理错误的回调函数
+        on_close=on_close)      # 处理连接关闭的回调函数
+    
+    ws.on_open = on_open      # 连接打开时调用的回调函数
+    ws.on_open = lambda ws: on_open(ws, wsParam, pcm_file)
+
+    ws.run_forever(sslopt={"cert_reqs": ssl.CERT_NONE}) # 启动 WebSocket 客户端，保持连接并处理消息

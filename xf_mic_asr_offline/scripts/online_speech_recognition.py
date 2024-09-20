@@ -39,8 +39,10 @@ STATUS_FIRST_FRAME = 0  # 第一帧的标识
 STATUS_CONTINUE_FRAME = 1  # 中间帧标识
 STATUS_LAST_FRAME = 2  # 最后一帧的标识
 
+# 全局变量用于存储消息数据
+message_data =  {}
 
-class Ws_Param(object):
+class OnlineSpeechRecognition(object):
     # 初始化
     def __init__(self, APPID, APIKey, APISecret, AudioFile):
         self.APPID = APPID
@@ -89,6 +91,7 @@ class Ws_Param(object):
 
 # 收到websocket消息的处理
 def on_message(ws, message):
+    global message_data
     try:
         code = json.loads(message)["code"]
         sid = json.loads(message)["sid"]
@@ -103,7 +106,9 @@ def on_message(ws, message):
             for i in data:
                 for w in i["cw"]:
                     result += w["w"]
-            print("sid:%s call success!,data is:%s" % (sid, json.dumps(data, ensure_ascii=False)))
+            #print(result)
+            message_data["result"] += result
+            #print("sid:%s call success!,data is:%s" % (sid, json.dumps(data, ensure_ascii=False)))
     except Exception as e:
         print("receive msg,but parse exception:", e)
 
@@ -120,7 +125,9 @@ def on_close(ws,a,b):
 
 
 # 收到websocket连接建立的处理
-def on_open(ws):
+def on_open(ws,wsParam):
+    global message_data
+    message_data = {"result": ""}   
     def run(*args):
         frameSize = 8000  # 每一帧的音频大小
         intervel = 0.04  # 发送音频间隔(单位:s)
@@ -165,17 +172,33 @@ def on_open(ws):
 
     thread.start_new_thread(run, ())
 
-
-if __name__ == "__main__":
-    # 测试时候在此处正确填写相关信息即可运行
+def run_speech_recognition(APPID, APISecret, APIKey, AudioFile):
     time1 = datetime.now()
-    wsParam = Ws_Param(APPID='', APISecret='',
-                       APIKey='',
-                       AudioFile=r'/home/elephant/iat_pcm_16k.pcm')
-    websocket.enableTrace(False)
-    wsUrl = wsParam.create_url()
-    ws = websocket.WebSocketApp(wsUrl, on_message=on_message, on_error=on_error, on_close=on_close)
-    ws.on_open = on_open
-    ws.run_forever(sslopt={"cert_reqs": ssl.CERT_NONE})
+    
+    # 创建实例，并配置所需参数
+    wsParam = OnlineSpeechRecognition(APPID=APPID, APISecret=APISecret,
+                                      APIKey=APIKey,
+                                      AudioFile=AudioFile)
+      
+    websocket.enableTrace(False) # 关闭 WebSocket 调试信息的输出
+
+    wsUrl = wsParam.create_url() # 生成 WebSocket 连接的 URL
+
+    # 创建 WebSocket 客户端应用，设置回调函数
+    ws = websocket.WebSocketApp(
+        wsUrl,                  # WebSocket 服务器的 URL
+        on_message=on_message,  # 处理收到消息的回调函数
+        on_error=on_error,      # 处理错误的回调函数
+        on_close=on_close       # 处理连接关闭的回调函数
+    )
+
+    # 连接打开时调用的回调函数
+    ws.on_open = lambda ws: on_open(ws, wsParam)
+
+    # 启动 WebSocket 客户端，保持连接并处理消息
+    ws.run_forever(sslopt={"cert_reqs": ssl.CERT_NONE}) 
     time2 = datetime.now()
     print(time2-time1)
+
+    return message_data.get("result", "")
+    

@@ -6,6 +6,13 @@ import threading
 
 class OfflineWakeup:
     def __init__(self, port='/dev/ttyACM4', baudrate=115200, timeout=1):
+        """
+        初始化 OfflineWakeup 类，用于通过串口通信实现离线唤醒功能。
+
+        :param port: 串口端口号，默认值为 '/dev/ttyACM4'
+        :param baudrate: 串口通信的波特率，默认值为 115200
+        :param timeout: 串口通信的超时时间（秒），默认值为 1 秒
+        """
         self.port = port
         self.baudrate = baudrate
         self.timeout = timeout
