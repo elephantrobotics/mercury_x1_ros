@@ -30,12 +30,12 @@ class SpeechManager:
                                                           AudioFile=r'/home/elephant/r818.pcm')
                 print(f"Transcribed Text: {transcribed_text}")
                 
-                # run_speech_synthesis(APPID='ea8d6b60', APISecret='YjcyY2M4NDk0Y2Q4ODY2ZTMxYzk3Y2E3',
-                #                      APIKey='1bc296f114a83f3f37db4f8ab93837d4',
-                #                      Text="好的，你的录音听写我已听到",
-                #                      pcm_file='reply.pcm')
+                run_speech_synthesis(APPID='ea8d6b60', APISecret='YjcyY2M4NDk0Y2Q4ODY2ZTMxYzk3Y2E3',
+                                     APIKey='1bc296f114a83f3f37db4f8ab93837d4',
+                                     Text="好的，你的录音听写我已听到",
+                                     pcm_file='reply.pcm')
                 
-                # self.player.play(filename='reply.pcm')
+                self.player.play(filename='reply.pcm')
 
                 self.player.play(filename='r818.pcm')
 

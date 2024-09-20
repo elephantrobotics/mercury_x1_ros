@@ -84,7 +84,7 @@ class OnlineSpeechSynthesis(object):
         # print('websocket url :', url)
         return url
 
-def on_message(ws, message):
+def on_message(ws, message,pcm_file):
     try:
         message =json.loads(message)
         code = message["code"]
@@ -101,7 +101,7 @@ def on_message(ws, message):
             print("sid:%s call error:%s code is:%s" % (sid, errMsg, code))
         else:
 
-            with open('./demo.pcm', 'ab') as f:
+            with open(pcm_file, 'ab') as f:
                 f.write(audio)
 
     except Exception as e:
@@ -128,8 +128,8 @@ def on_open(ws,wsParam,pcm_file):
         d = json.dumps(d)
         #print("------>开始发送文本数据")
         ws.send(d)
-        if os.path.exists(pcm_file):
-            os.remove(pcm_file)
+        if os.path.exists(pcm_file): 
+            os.remove(pcm_file) #确保后续操作不会因为文件已存在而导致错误或覆盖问题
 
     thread.start_new_thread(run, ())
 
@@ -137,8 +137,8 @@ def on_open(ws,wsParam,pcm_file):
 def run_speech_synthesis(APPID, APISecret, APIKey, Text, pcm_file='demo.pcm'):
     # 创建实例，并配置所需参数
     wsParam = OnlineSpeechSynthesis(APPID=APPID, APISecret=APISecret,
-                       APIKey=APIKey,
-                       Text=Text)
+                                    APIKey=APIKey,
+                                    Text=Text)
     
     websocket.enableTrace(False) # 关闭 WebSocket 调试信息的输出
     
@@ -147,11 +147,11 @@ def run_speech_synthesis(APPID, APISecret, APIKey, Text, pcm_file='demo.pcm'):
     # 创建 WebSocket 客户端应用，设置回调函数
     ws = websocket.WebSocketApp(
         wsUrl,                  # WebSocket 服务器的 URL
-        on_message=on_message,  # 处理收到消息的回调函数
+        on_message=lambda ws, message: on_message(ws, message, pcm_file),  # 处理收到消息的回调函数
         on_error=on_error,      # 处理错误的回调函数
-        on_close=on_close)      # 处理连接关闭的回调函数
+        on_close=on_close       # 处理连接关闭的回调函数
+    )      
     
-    ws.on_open = on_open      # 连接打开时调用的回调函数
-    ws.on_open = lambda ws: on_open(ws, wsParam, pcm_file)
+    ws.on_open = lambda ws: on_open(ws, wsParam, pcm_file) # 连接打开时调用的回调函数
 
     ws.run_forever(sslopt={"cert_reqs": ssl.CERT_NONE}) # 启动 WebSocket 客户端，保持连接并处理消息
