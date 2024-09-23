@@ -93,37 +93,3 @@ class SpeechManager:
         wake_result = self.wakeup.get_wakeup_info()
         return wake_result
         
-# if __name__ == "__main__":
-#     manager = SpeechManager(APPID='', 
-#                             APISecret='',
-#                             APIKey='',
-#                             Recognition_BusinessArgs = {"domain": "iat", "language": "zh_cn", "accent": "mandarin", "vinfo":1,"vad_eos":10000},
-#                             # Recognition_BusinessArgs = {"domain": "iat", "language": "en_us", "accent": "mandarin", "vinfo":1,"vad_eos":10000},
-#                             Synthesis_BusinessArgs = {"aue": "raw", "auf": "audio/L16;rate=16000", "vcn": "xiaoyan", "tte": "utf8"} 
-#                             # Synthesis_BusinessArgs = {"aue": "raw", "auf": "audio/L16;rate=16000", "vcn": "x4_enus_luna_assist", "tte": "utf8"} 
-#                             )
-
-#     while True:
-#         # 检查是否有新的唤醒信息
-#         wakeup_info = manager.get_wakeup_info()
-#         if  wakeup_info:
-#             print("Wake word detected!")
-#             # 处理唤醒信息，例如打印
-#             # print(json.dumps(wakeup_info, indent=4))  # 打印抓取的JSON数据
-#             # print(f"Wakeup information: {wakeup_info}")
-#             print(f"Result: {wakeup_info['content']['result']}")
-#             print(f"Info: {wakeup_info['content']['info']}")
-
-#             manager.start_recording(4,'/home/elephant/r818.pcm')  # 开始录音
-
-#             # 在线语音听写
-#             transcribed_text = manager.online_speech_recognition('./r818.pcm')
-
-#             print(f"Transcribed Text: {transcribed_text}")
-            
-#             # 在线语音合成
-#             manager.online_speech_synthesis('Hello, welcome to iFLYTEK speech synthesis system.','/home/elephant/reply.pcm')
-            
-#             manager.play('/home/elephant/reply.pcm') # 播放语音合成的音频文件
-
-#             manager.play('/home/elephant/r818.pcm')  # 播放录音的音频文件
