@@ -9,6 +9,9 @@
     <param name="odom_frame_id"      type="string" value="$(arg odom_frame_id)"/> 
     <param name="robot_frame_id"     type="string" value="base_footprint"/> 
     <param name="gyro_frame_id"      type="string" value="gyro_link"/> 
+    <param name="ultrasonic_sensor_A_frame_id"      type="string" value="ultrasonic_sensor_A_link"/>
+    <param name="ultrasonic_sensor_B_frame_id"      type="string" value="ultrasonic_sensor_B_link"/>
+    <param name="ultrasonic_sensor_C_frame_id"      type="string" value="ultrasonic_sensor_C_link"/>
     <!-- 如果开启了平滑功能，则订阅平滑速度 -->
     <remap if="$(arg smoother)" from="cmd_vel" to="smoother_cmd_vel"/>
   </node>

@@ -1,4 +1,4 @@
-#include "wheeltec_robot.h"
+#include "mercury_robot.h"
 #include "Quaternion_Solution.h"
 
 sensor_msgs::Imu Mpu6050;//Instantiate an IMU object //实例化IMU对象 
@@ -15,9 +15,8 @@ int main(int argc, char** argv)
   Robot_Control.Control(); //Loop through data collection and publish the topic //循环执行数据采集和发布话题等操作
   return 0;  
 } 
-
 /**************************************
-Date: January 28, 2021
+Date: September 24, 2024
 Function: Data conversion function
 功能: 数据转换函数
 ***************************************/
@@ -38,6 +37,15 @@ float turn_on_robot::Odom_Trans(uint8_t Data_High,uint8_t Data_Low)
   transition_16 |=  Data_Low;      //Get the lowest 8 bits of data //获取数据的低8位
   data_return   =  (transition_16 / 1000)+(transition_16 % 1000)*0.001; // The speed unit is changed from mm/s to m/s //速度单位从mm/s转换为m/s
   return data_return;
+}
+short turn_on_robot::Ultrasonic_Trans(uint8_t Data_High,uint8_t Data_Low)
+{
+  short transition_16;
+  transition_16 = 0;
+  transition_16 |=  Data_High<<8;   
+  transition_16 |=  Data_Low;
+  transition_16 = transition_16/1000+(transition_16 % 1000)*0.001;
+  return transition_16;  
 }
 /**************************************
 Date: January 28, 2021
@@ -73,7 +81,7 @@ void turn_on_robot::Cmd_Vel_Callback(const geometry_msgs::Twist &twist_aux)
   Send_Data.tx[8] = transition;
   Send_Data.tx[7] = transition>>8;
 
-  Send_Data.tx[9]=Check_Sum(9,SEND_DATA_CHECK); //For the BCC check bits, see the Check_Sum function //BCC校验位，规则参见Check_Sum函数
+  Send_Data.tx[9]=Check_Sum(0,9,SEND_DATA_CHECK); //For the BCC check bits, see the Check_Sum function //BCC校验位，规则参见Check_Sum函数
   Send_Data.tx[10]=FRAME_TAIL; //frame tail 0x7D //帧尾0X7D
   try
   {
@@ -120,36 +128,61 @@ Function: Publish the odometer topic, Contains position, attitude, triaxial velo
 ***************************************/
 void turn_on_robot::Publish_Odom()
 {
-    //Convert the Z-axis rotation Angle into a quaternion for expression 
-    //把Z轴转角转换为四元数进行表达
-    geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(Robot_Pos.Z);
+  //Convert the Z-axis rotation Angle into a quaternion for expression 
+  //把Z轴转角转换为四元数进行表达
+  geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(Robot_Pos.Z);
 
-    nav_msgs::Odometry odom; //Instance the odometer topic data //实例化里程计话题数据
-    odom.header.stamp = ros::Time::now(); 
-    odom.header.frame_id = odom_frame_id; // Odometer TF parent coordinates //里程计TF父坐标
-    odom.pose.pose.position.x = Robot_Pos.X; //Position //位置
-    odom.pose.pose.position.y = Robot_Pos.Y;
-    odom.pose.pose.position.z = Robot_Pos.Z;
-    odom.pose.pose.orientation = odom_quat; //Posture, Quaternion converted by Z-axis rotation //姿态，通过Z轴转角转换的四元数
+  nav_msgs::Odometry odom; //Instance the odometer topic data //实例化里程计话题数据
+  odom.header.stamp = ros::Time::now(); 
+  odom.header.frame_id = odom_frame_id; // Odometer TF parent coordinates //里程计TF父坐标
+  odom.pose.pose.position.x = Robot_Pos.X; //Position //位置
+  odom.pose.pose.position.y = Robot_Pos.Y;
+  odom.pose.pose.position.z = Robot_Pos.Z;
+  odom.pose.pose.orientation = odom_quat; //Posture, Quaternion converted by Z-axis rotation //姿态，通过Z轴转角转换的四元数
 
-    odom.child_frame_id = robot_frame_id; // Odometer TF subcoordinates //里程计TF子坐标
-    odom.twist.twist.linear.x =  Robot_Vel.X; //Speed in the X direction //X方向速度
-    odom.twist.twist.linear.y =  Robot_Vel.Y; //Speed in the Y direction //Y方向速度
-    odom.twist.twist.angular.z = Robot_Vel.Z; //Angular velocity around the Z axis //绕Z轴角速度 
+  odom.child_frame_id = robot_frame_id; // Odometer TF subcoordinates //里程计TF子坐标
+  odom.twist.twist.linear.x =  Robot_Vel.X; //Speed in the X direction //X方向速度
+  odom.twist.twist.linear.y =  Robot_Vel.Y; //Speed in the Y direction //Y方向速度
+  odom.twist.twist.angular.z = Robot_Vel.Z; //Angular velocity around the Z axis //绕Z轴角速度 
 
-    //There are two types of this matrix, which are used when the robot is at rest and when it is moving.Extended Kalman Filtering officially provides 2 matrices for the robot_pose_ekf feature pack
-    //这个矩阵有两种，分别在机器人静止和运动的时候使用。扩展卡尔曼滤波官方提供的2个矩阵，用于robot_pose_ekf功能包
-    if(Robot_Vel.X== 0&&Robot_Vel.Y== 0&&Robot_Vel.Z== 0)
-      //If the velocity is zero, it means that the error of the encoder will be relatively small, and the data of the encoder will be considered more reliable
-      //如果velocity是零，说明编码器的误差会比较小，认为编码器数据更可靠
-      memcpy(&odom.pose.covariance, odom_pose_covariance2, sizeof(odom_pose_covariance2)),
-      memcpy(&odom.twist.covariance, odom_twist_covariance2, sizeof(odom_twist_covariance2));
-    else
-      //If the velocity of the trolley is non-zero, considering the sliding error that may be brought by the encoder in motion, the data of IMU is considered to be more reliable
-      //如果小车velocity非零，考虑到运动中编码器可能带来的滑动误差，认为imu的数据更可靠
-      memcpy(&odom.pose.covariance, odom_pose_covariance, sizeof(odom_pose_covariance)),
-      memcpy(&odom.twist.covariance, odom_twist_covariance, sizeof(odom_twist_covariance));       
-    odom_publisher.publish(odom); //Pub odometer topic //发布里程计话题
+  //There are two types of this matrix, which are used when the robot is at rest and when it is moving.Extended Kalman Filtering officially provides 2 matrices for the robot_pose_ekf feature pack
+  //这个矩阵有两种，分别在机器人静止和运动的时候使用。扩展卡尔曼滤波官方提供的2个矩阵，用于robot_pose_ekf功能包
+  if(Robot_Vel.X== 0&&Robot_Vel.Y== 0&&Robot_Vel.Z== 0)
+    //If the velocity is zero, it means that the error of the encoder will be relatively small, and the data of the encoder will be considered more reliable
+    //如果velocity是零，说明编码器的误差会比较小，认为编码器数据更可靠
+    memcpy(&odom.pose.covariance, odom_pose_covariance2, sizeof(odom_pose_covariance2)),
+    memcpy(&odom.twist.covariance, odom_twist_covariance2, sizeof(odom_twist_covariance2));
+  else
+    //If the velocity of the trolley is non-zero, considering the sliding error that may be brought by the encoder in motion, the data of IMU is considered to be more reliable
+    //如果小车velocity非零，考虑到运动中编码器可能带来的滑动误差，认为imu的数据更可靠
+    memcpy(&odom.pose.covariance, odom_pose_covariance, sizeof(odom_pose_covariance)),
+    memcpy(&odom.twist.covariance, odom_twist_covariance, sizeof(odom_twist_covariance));       
+  odom_publisher.publish(odom); //Pub odometer topic //发布里程计话题
+}
+/**************************************
+Date: September 24, 2024
+Function: Pub the ultrasonic topic
+功能: 发布超声波话题
+***************************************/
+void turn_on_robot::Publish_Range(ros::Publisher& pub, const Ultrasonic_DATA& data, int index)
+{
+  sensor_msgs::Range range_msg;
+  range_msg.header.stamp = ros::Time::now();
+  range_msg.header.frame_id = ultrasonic_sensor_frame_ids[index];
+  range_msg.radiation_type = sensor_msgs::Range::ULTRASOUND;
+
+  // Set additional fields
+  range_msg.field_of_view = 0.1;  // Example field of view
+  range_msg.min_range = 0.02;     // Minimum range
+  range_msg.max_range = 4.0;      // Maximum range
+  // Select the corresponding distance value based on the index
+  switch (index) {
+    case 0: range_msg.range = static_cast<float>(data.distanceA); break;
+    case 1: range_msg.range = static_cast<float>(data.distanceB); break;
+    case 2: range_msg.range = static_cast<float>(data.distanceC); break;
+    default: range_msg.range = 0; break;
+  }
+  range_publisher[index].publish(range_msg); //Pub the ultrasonic topic  //发布超声波话题
 }
 /**************************************
 Date: January 28, 2021
@@ -158,175 +191,52 @@ Function: Publish voltage-related information
 ***************************************/
 void turn_on_robot::Publish_Voltage()
 {
-    std_msgs::Float32 voltage_msgs; //Define the data type of the power supply voltage publishing topic //定义电源电压发布话题的数据类型
-    static float Count_Voltage_Pub=0;
-    if(Count_Voltage_Pub++>10)
-      {
-        Count_Voltage_Pub=0;  
-        voltage_msgs.data = Power_voltage; //The power supply voltage is obtained //电源供电的电压获取
-        voltage_publisher.publish(voltage_msgs); //Post the power supply voltage topic unit: V, volt //发布电源电压话题单位：V、伏特
-      }
+  std_msgs::Float32 voltage_msgs; //Define the data type of the power supply voltage publishing topic //定义电源电压发布话题的数据类型
+  static float Count_Voltage_Pub=0;
+  if(Count_Voltage_Pub++>10)
+    {
+      Count_Voltage_Pub=0;  
+      voltage_msgs.data = Power_voltage; //The power supply voltage is obtained //电源供电的电压获取
+      voltage_publisher.publish(voltage_msgs); //Post the power supply voltage topic unit: V, volt //发布电源电压话题单位：V、伏特
+    }
 }
 /**************************************
-Date: January 28, 2021
+Date: September 24, 2024
 Function: Serial port communication check function, packet n has a byte, the NTH -1 byte is the check bit, the NTH byte bit frame end.Bit XOR results from byte 1 to byte n-2 are compared with byte n-1, which is a BCC check
 Input parameter: Count_Number: Check the first few bytes of the packet
 功能: 串口通讯校验函数，数据包n有个字节，第n-1个字节为校验位，第n个字节位帧尾。第1个字节到第n-2个字节数据按位异或的结果与第n-1个字节对比，即为BCC校验
 输入参数： Count_Number：数据包前几个字节加入校验   mode：对发送数据还是接收数据进行校验
 ***************************************/
-unsigned char turn_on_robot::Check_Sum(unsigned char Count_Number,unsigned char mode)
+unsigned char turn_on_robot::Check_Sum(unsigned char start, unsigned char end, unsigned char mode)
 {
-  unsigned char check_sum=0,k;
-  
-  if(mode==0) //Receive data mode //接收数据模式
+  unsigned char check_sum = 0;
+  if (mode == 0) // 接收数据模式
   {
-   for(k=0;k<Count_Number;k++)
+    for (unsigned char k = start; k < end; k++)
     {
-     check_sum=check_sum^Receive_Data.rx[k]; //By bit or by bit //按位异或
-     }
+      check_sum = check_sum ^ Receive_Data.rx[k]; // 按位异或
+    }
   }
-  if(mode==1) //Send data mode //发送数据模式
+  else if (mode == 1) // 发送数据模式
   {
-   for(k=0;k<Count_Number;k++)
+    for (unsigned char k = start; k < end; k++)
     {
-     check_sum=check_sum^Send_Data.tx[k]; //By bit or by bit //按位异或
-     }
+      check_sum = check_sum ^ Send_Data.tx[k]; // 按位异或
+    }
   }
   return check_sum; //Returns the bitwise XOR result //返回按位异或结果
 }
 /**************************************
-Date: November 18, 2021
-Function: The serial port reads and verifies the data sent by the lower computer, and then the data is converted to international units
-Update Note: This checking method can lead to read error data or correct data not to be processed. Instead of this checking method, frame-by-frame checking is now used. 
-             Refer to Get_ Sensor_ Data_ New() function
-功能: 通过串口读取并校验下位机发送过来的数据，然后数据转换为国际单位
-更新说明：该校验方法会导致出现读取错误数据或者正确数据不处理的情况，现在已不用该校验方法，换成逐帧校验方式，参考Get_Sensor_Data_New()函数
-***************************************/
-bool turn_on_robot::Get_Sensor_Data()
-{ 
-  short transition_16=0, j=0, Header_Pos=0, Tail_Pos=0; //Intermediate variable //中间变量
-  static int flag_error=0,temp=1; //Static variable that records the error flag and location //静态变量，用于记录出错标志位和出错位置
-  uint8_t Receive_Data_Pr[RECEIVE_DATA_SIZE]={0},Receive_Data_Tr[temp]={0}; //Temporary variable to save the data of the lower machine //临时变量，保存下位机数据
-  if(flag_error==0) //Normal condition detected //检测到正常情况
-    Stm32_Serial.read(Receive_Data_Pr,sizeof (Receive_Data_Pr)); //Read the data sent by the lower computer through the serial port //通过串口读取下位机发送过来的数据
-  else if (flag_error==1) //Error condition detected 检测到错误情况
-  {
-    //Read wrong bit data through serial port, read only and do not process, so that the correct data is read next time
-    //通过串口读取错位数据，只读取不处理，以便于下次读取到的是正确的数据
-    Stm32_Serial.read(Receive_Data_Tr,sizeof (Receive_Data_Tr)); 
-    flag_error=0; //Error flag position 0 //错误标志位置0
-  }
-
-  /*//View the received raw data directly and debug it for use//直接查看接收到的原始数据，调试使用
-  ROS_INFO("%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x",
-  Receive_Data_Pr[0],Receive_Data_Pr[1],Receive_Data_Pr[2],Receive_Data_Pr[3],Receive_Data_Pr[4],Receive_Data_Pr[5],Receive_Data_Pr[6],Receive_Data_Pr[7],
-  Receive_Data_Pr[8],Receive_Data_Pr[9],Receive_Data_Pr[10],Receive_Data_Pr[11],Receive_Data_Pr[12],Receive_Data_Pr[13],Receive_Data_Pr[14],Receive_Data_Pr[15],
-  Receive_Data_Pr[16],Receive_Data_Pr[17],Receive_Data_Pr[18],Receive_Data_Pr[19],Receive_Data_Pr[20],Receive_Data_Pr[21],Receive_Data_Pr[22],Receive_Data_Pr[23],Receive_Data_Pr[24],Receive_Data_Pr[25]);
-  */  
-
-  //Record the position of the head and tail of the frame //记录帧头帧尾位置
-  for(j=0;j<26;j++)
-  {
-    if(Receive_Data_Pr[j]==FRAME_HEADER)
-    Header_Pos=j;
-    else if(Receive_Data_Pr[j]==FRAME_TAIL)
-    Tail_Pos=j;    
-  }
-
-  if(Tail_Pos==(Header_Pos+25))
-  {
-    //If the end of the frame is the last bit of the packet, copy the packet directly to receive_data.rx
-    //如果帧尾在数据包最后一位，直接复制数据包到Receive_Data.rx
-    // ROS_INFO("1-----");
-    memcpy(Receive_Data.rx, Receive_Data_Pr, sizeof(Receive_Data_Pr));
-    flag_error=0; //Error flag position 0 for next reading //错误标志位置0，便于下次读取
-  }
-  else if(Header_Pos==(1+Tail_Pos))
-  {
-    //If the header is behind the end of the frame, record the position of the header so that the next reading of the error bit data can correct the data position
-    //如果帧头在帧尾后面，记录帧头出现的位置，便于下次读取出错位数据以纠正数据位置
-    //|********7D (7B************|**********7D) 7B************|
-    // ROS_INFO("2-----");
-    temp=Header_Pos; //Record the length of the next read, calculated to be exactly the position of the frame head //记录下一次读取的长度，经计算正好为帧头的位置
-    flag_error=1; //Error flag position 1, error bit array for next read //错误标志位置1，让下一次读取出错位数组
-    return false;
-  }
-  else 
-  {
-    ////其它情况则认为数据包有错误，这种情况一般是正常的数据，但是除帧头帧尾在数据中间出现了7B或7D的数据
-    // In other cases, the packet is considered to be faulty
-    // This is generally normal data, but there is 7B or 7D data in the middle of the data except for the frame header and end.
-    // ROS_INFO("3-----");
-    return false;
-  }    
-  
-  /* //Check receive_data.rx for debugging use //查看Receive_Data.rx，调试使用
-  ROS_INFO("%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x",
-  Receive_Data.rx[0],Receive_Data.rx[1],Receive_Data.rx[2],Receive_Data.rx[3],Receive_Data.rx[4],Receive_Data.rx[5],Receive_Data.rx[6],Receive_Data.rx[7],
-  Receive_Data.rx[8],Receive_Data.rx[9],Receive_Data.rx[10],Receive_Data.rx[11],Receive_Data.rx[12],Receive_Data.rx[13],Receive_Data.rx[14],Receive_Data.rx[15],
-  Receive_Data.rx[16],Receive_Data.rx[17],Receive_Data.rx[18],Receive_Data.rx[19],Receive_Data.rx[20],Receive_Data.rx[21],Receive_Data.rx[22],Receive_Data.rx[23]); 
-  */
-
-  Receive_Data.Frame_Header= Receive_Data.rx[0]; //The first part of the data is the frame header 0X7B //数据的第一位是帧头0X7B
-  Receive_Data.Frame_Tail= Receive_Data.rx[25];  //The last bit of data is frame tail 0X7D //数据的最后一位是帧尾0X7D
-
-  if (Receive_Data.Frame_Header == FRAME_HEADER ) //Judge the frame header //判断帧头
-  {
-    if (Receive_Data.Frame_Tail == FRAME_TAIL) //Judge the end of the frame //判断帧尾
-    { 
-      if (Receive_Data.rx[22] == Check_Sum(22,READ_DATA_CHECK)) //BCC check passes or two packets are interlaced //BCC校验通过或者两组数据包交错
-      {
-        Receive_Data.Flag_Stop=Receive_Data.rx[1]; //set aside //预留位
-        Robot_Vel.X = Odom_Trans(Receive_Data.rx[2],Receive_Data.rx[3]); //Get the speed of the moving chassis in the X direction //获取运动底盘X方向速度
-        Robot_Vel.Y = Odom_Trans(Receive_Data.rx[4],Receive_Data.rx[5]); //Get the speed of the moving chassis in the Y direction, The Y speed is only valid in the omnidirectional mobile robot chassis
-                                                                         //获取运动底盘Y方向速度，Y速度仅在全向移动机器人底盘有效
-        Robot_Vel.Z = Odom_Trans(Receive_Data.rx[6],Receive_Data.rx[7]); //Get the speed of the moving chassis in the Z direction //获取运动底盘Z方向速度   
-        
-        //MPU6050 stands for IMU only and does not refer to a specific model. It can be either MPU6050 or MPU9250
-        //Mpu6050仅代表IMU，不指代特定型号，既可以是MPU6050也可以是MPU9250
-        Mpu6050_Data.accele_x_data = IMU_Trans(Receive_Data.rx[8],Receive_Data.rx[9]);   //Get the X-axis acceleration of the IMU     //获取IMU的X轴加速度  
-        Mpu6050_Data.accele_y_data = IMU_Trans(Receive_Data.rx[10],Receive_Data.rx[11]); //Get the Y-axis acceleration of the IMU     //获取IMU的Y轴加速度
-        Mpu6050_Data.accele_z_data = IMU_Trans(Receive_Data.rx[12],Receive_Data.rx[13]); //Get the Z-axis acceleration of the IMU     //获取IMU的Z轴加速度
-        Mpu6050_Data.gyros_x_data = IMU_Trans(Receive_Data.rx[14],Receive_Data.rx[15]);  //Get the X-axis angular velocity of the IMU //获取IMU的X轴角速度  
-        Mpu6050_Data.gyros_y_data = IMU_Trans(Receive_Data.rx[16],Receive_Data.rx[17]);  //Get the Y-axis angular velocity of the IMU //获取IMU的Y轴角速度  
-        Mpu6050_Data.gyros_z_data = IMU_Trans(Receive_Data.rx[18],Receive_Data.rx[19]);  //Get the Z-axis angular velocity of the IMU //获取IMU的Z轴角速度  
-        //Linear acceleration unit conversion is related to the range of IMU initialization of STM32, where the range is ±2g=19.6m/s^2
-        //线性加速度单位转化，和STM32的IMU初始化的时候的量程有关,这里量程±2g=19.6m/s^2
-        Mpu6050.linear_acceleration.x = Mpu6050_Data.accele_x_data / ACCEl_RATIO;
-        Mpu6050.linear_acceleration.y = Mpu6050_Data.accele_y_data / ACCEl_RATIO;
-        Mpu6050.linear_acceleration.z = Mpu6050_Data.accele_z_data / ACCEl_RATIO;
-        //The gyroscope unit conversion is related to the range of STM32's IMU when initialized. Here, the range of IMU's gyroscope is ±500°/s
-        //Because the robot generally has a slow Z-axis speed, reducing the range can improve the accuracy
-        //陀螺仪单位转化，和STM32的IMU初始化的时候的量程有关，这里IMU的陀螺仪的量程是±500°/s
-        //因为机器人一般Z轴速度不快，降低量程可以提高精度
-        Mpu6050.angular_velocity.x =  Mpu6050_Data.gyros_x_data * GYROSCOPE_RATIO;
-        Mpu6050.angular_velocity.y =  Mpu6050_Data.gyros_y_data * GYROSCOPE_RATIO;
-        Mpu6050.angular_velocity.z =  Mpu6050_Data.gyros_z_data * GYROSCOPE_RATIO;
-
-        //Get the battery voltage
-        //获取电池电压
-        transition_16 = 0;
-        transition_16 |=  Receive_Data.rx[20]<<8;
-        transition_16 |=  Receive_Data.rx[21];  
-        Power_voltage = transition_16/1000+(transition_16 % 1000)*0.001; //Unit conversion millivolt(mv)->volt(v) //单位转换毫伏(mv)->伏(v)
-
-        return true;
-     }
-    }
-  } 
-  return false;
-}
-/**************************************
-Date: November 18, 2021
+Date: September 24, 2024
 Function: Read and verify the data sent by the lower computer frame by frame through the serial port, and then convert the data into international units
 功能: 通过串口读取并逐帧校验下位机发送过来的数据，然后数据转换为国际单位
 ***************************************/
 bool turn_on_robot::Get_Sensor_Data_New()
 {
   short transition_16=0; //Intermediate variable //中间变量
-  uint8_t i=0,check=0, error=1,Receive_Data_Pr[1]; //Temporary variable to save the data of the lower machine //临时变量，保存下位机数据
-  static int count; //Static variable for counting //静态变量，用于计数
-  Stm32_Serial.read(Receive_Data_Pr,sizeof(Receive_Data_Pr)); //Read the data sent by the lower computer through the serial port //通过串口读取下位机发送过来的数据
+  uint8_t i=0,check=0, error=1,Receive_Data_Pr[1]; //Temporary variable to save the data of the lower machine //临时变量，保存下位机数据，Receive_Data_Pr 只能存储一个字节的数据
+  static int count,state = 0; //Static variable for counting //静态变量，用于计数和状态表示
+  Stm32_Serial.read(Receive_Data_Pr,sizeof(Receive_Data_Pr)); //Read the data sent by the lower computer through the serial port //通过串口读取下位机发送过来的数据，读取1字节数的数据
 
   /*//View the received raw data directly and debug it for use//直接查看接收到的原始数据，调试使用
   ROS_INFO("%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x",
@@ -340,24 +250,23 @@ bool turn_on_robot::Get_Sensor_Data_New()
 
   Receive_Data.Frame_Header = Receive_Data.rx[0]; //The first part of the data is the frame header 0X7B //数据的第一位是帧头0X7B
   Receive_Data.Frame_Tail = Receive_Data.rx[25];  //The last bit of data is frame tail 0X7D //数据的最后一位是帧尾0X7D
+  Receive_Data.Distance_Header = Receive_Data.rx[26];
+  Receive_Data.Distance_Tail = Receive_Data.rx[44];
 
   if(Receive_Data_Pr[0] == FRAME_HEADER || count>0) //Ensure that the first data in the array is FRAME_HEADER //确保数组第一个数据为FRAME_HEADER
     count++;
   else 
   	count=0;
-  if(count == 26) //Verify the length of the packet //验证数据包的长度
+  if(count == 45) //Verify the length of the packet //验证数据包的长度
   {
     count=0;  //Prepare for the serial port data to be refill into the array //为串口数据重新填入数组做准备
     if(Receive_Data.Frame_Tail == FRAME_TAIL) //Verify the frame tail of the packet //验证数据包的帧尾
     {
-      check=Check_Sum(24,READ_DATA_CHECK);  //BCC check passes or two packets are interlaced //BCC校验通过或者两组数据包交错
+      check=Check_Sum(0,24,READ_DATA_CHECK);  //BCC check passes or two packets are interlaced //BCC校验通过或者两组数据包交错
 
-      if(check == Receive_Data.rx[24])  
+      if(check == Receive_Data.rx[24])  //XOR bit check successful //异或位校验成功
       {
-        error=0;  //XOR bit check successful //异或位校验成功
-      }
-      if(error == 0)
-      {
+        error=0;
         /*//Check receive_data.rx for debugging use //查看Receive_Data.rx，调试使用 
         ROS_INFO("%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x",
         Receive_Data.rx[0],Receive_Data.rx[1],Receive_Data.rx[2],Receive_Data.rx[3],Receive_Data.rx[4],Receive_Data.rx[5],Receive_Data.rx[6],Receive_Data.rx[7],
@@ -400,15 +309,27 @@ bool turn_on_robot::Get_Sensor_Data_New()
         transition_16 |=  Receive_Data.rx[20]<<8;
         transition_16 |=  Receive_Data.rx[21];  
         Power_voltage = transition_16/1000+(transition_16 % 1000)*0.001; //Unit conversion millivolt(mv)->volt(v) //单位转换毫伏(mv)->伏(v)
-          
-        return true;
+
+        state = 1;     
       }
+    }
+    if((Receive_Data.Distance_Tail == Distance_TAIL) && (state == 1))
+    {
+      check=Check_Sum(26,43,READ_DATA_CHECK);  //BCC check passes or two packets are interlaced //BCC校验通过或者两组数据包交错
+      if(check == Receive_Data.rx[43])//XOR bit check successful //异或位校验成功
+      {
+        Ultrasonic_Date.distanceA = Ultrasonic_Trans(Receive_Data.rx[27],Receive_Data.rx[28]);
+        Ultrasonic_Date.distanceB = Ultrasonic_Trans(Receive_Data.rx[29],Receive_Data.rx[30]);
+        Ultrasonic_Date.distanceC = Ultrasonic_Trans(Receive_Data.rx[31],Receive_Data.rx[32]);
+      }
+      state = 0 ;
+      return true;
     }
   }
   return false;
 }
 /**************************************
-Date: January 28, 2021
+Date: September 24, 2024
 Function: Loop access to the lower computer data and issue topics
 功能: 循环获取下位机数据与发布话题
 ***************************************/
@@ -420,11 +341,8 @@ void turn_on_robot::Control()
     _Now = ros::Time::now();
     Sampling_Time = (_Now - _Last_Time).toSec(); //Retrieves time interval, which is used to integrate velocity to obtain displacement (mileage) 
                                                  //获取时间间隔，用于积分速度获得位移(里程) 
-    if (true == Get_Sensor_Data_New()) //The serial port reads and verifies the data sent by the lower computer, and then the data is converted to international units
-                                   //通过串口读取并校验下位机发送过来的数据，然后数据转换为国际单位
+    if (true == Get_Sensor_Data_New()) //The serial port reads and verifies the data sent by the lower computer, and then the data is converted to international units //通过串口读取并校验下位机发送过来的数据，然后数据转换为国际单位                              
     {
-      
-
       Robot_Pos.X+=(Robot_Vel.X * cos(Robot_Pos.Z) - Robot_Vel.Y * sin(Robot_Pos.Z)) * Sampling_Time; //Calculate the displacement in the X direction, unit: m //计算X方向的位移，单位：m
       Robot_Pos.Y+=(Robot_Vel.X * sin(Robot_Pos.Z) + Robot_Vel.Y * cos(Robot_Pos.Z)) * Sampling_Time; //Calculate the displacement in the Y direction, unit: m //计算Y方向的位移，单位：m
       Robot_Pos.Z+=Robot_Vel.Z * Sampling_Time; //The angular displacement about the Z axis, in rad //绕Z轴的角位移，单位：rad 
@@ -432,21 +350,24 @@ void turn_on_robot::Control()
       //Calculate the three-axis attitude from the IMU with the angular velocity around the three-axis and the three-axis acceleration
       //通过IMU绕三轴角速度与三轴加速度计算三轴姿态
       Quaternion_Solution(Mpu6050.angular_velocity.x, Mpu6050.angular_velocity.y, Mpu6050.angular_velocity.z,\
-                Mpu6050.linear_acceleration.x, Mpu6050.linear_acceleration.y, Mpu6050.linear_acceleration.z);
+                          Mpu6050.linear_acceleration.x, Mpu6050.linear_acceleration.y, Mpu6050.linear_acceleration.z);
 
       Publish_Odom();      //Pub the speedometer topic //发布里程计话题
       Publish_ImuSensor(); //Pub the IMU topic //发布IMU话题    
       Publish_Voltage();   //Pub the topic of power supply voltage //发布电源电压话题
+      for (int i = 0; i < 3; ++i)
+      {
+        Publish_Range(range_publisher[i],Ultrasonic_Date,i); //Pub the ultrasonic topic  //发布超声波话题
+      }
 
       _Last_Time = _Now; //Record the time and use it to calculate the time interval //记录时间，用于计算时间间隔
       
     }
-    
     ros::spinOnce();   //The loop waits for the callback function //循环等待回调函数
     }
 }
 /**************************************
-Date: January 28, 2021
+Date: September 24, 2024
 Function: Constructor, executed only once, for initialization
 功能: 构造函数, 只执行一次，用于初始化
 ***************************************/
@@ -468,10 +389,16 @@ turn_on_robot::turn_on_robot():Sampling_Time(0),Power_voltage(0)
   private_nh.param<std::string>("odom_frame_id",    odom_frame_id,    "odom_combined");      //The odometer topic corresponds to the parent TF coordinate //里程计话题对应父TF坐标
   private_nh.param<std::string>("robot_frame_id",   robot_frame_id,   "base_footprint"); //The odometer topic corresponds to sub-TF coordinates //里程计话题对应子TF坐标
   private_nh.param<std::string>("gyro_frame_id",    gyro_frame_id,    "gyro_link"); //IMU topics correspond to TF coordinates //IMU话题对应TF坐标
-
-  voltage_publisher = n.advertise<std_msgs::Float32>("PowerVoltage", 10); //Create a battery-voltage topic publisher //创建电池电压话题发布者
-  odom_publisher    = n.advertise<nav_msgs::Odometry>("odom", 50); //Create the odometer topic publisher //创建里程计话题发布者
-  imu_publisher     = n.advertise<sensor_msgs::Imu>("imu", 20); //Create an IMU topic publisher //创建IMU话题发布者
+  voltage_publisher    = n.advertise<std_msgs::Float32>("PowerVoltage", 10); //Create a battery-voltage topic publisher //创建电池电压话题发布者
+  odom_publisher       = n.advertise<nav_msgs::Odometry>("odom", 50); //Create the odometer topic publisher //创建里程计话题发布者
+  imu_publisher        = n.advertise<sensor_msgs::Imu>("imu", 20); //Create an IMU topic publisher //创建IMU话题发布者
+  for (int i =0;i < 3; ++i)
+  {
+    char sensor_id = 'A' + i;
+    std::string param_name = "ultrasonic_sensor_" + std::string(1,sensor_id) + "_frame_id";// Construct the parameter name for each ultrasonic sensor frame ID // 为每个超声波传感器的坐标系 ID 构建参数名称
+    private_nh.param<std::string>(param_name, ultrasonic_sensor_frame_ids[i], "ultrasonic_sensor_" + std::to_string(char('A' + i)) + "_link");// Retrieve the frame ID from the parameter server, defaulting to "ultrasonic_sensor_X" if not set // 从参数服务器获取对应的坐标系 ID，若未设置则默认值为 "ultrasonic_sensor_X"
+    range_publisher[i] = n.advertise<sensor_msgs::Range>("ultrasonic/range" + std::string(1,sensor_id), 10); //Create an ultrasonic topic publisher //创建超声波话题发布者
+  }
 
   //Set the velocity control command callback function
   //速度控制命令订阅回调函数设置
@@ -521,7 +448,7 @@ turn_on_robot::~turn_on_robot()
   //The target velocity of the Z-axis of the robot //机器人Z轴的目标角速度 
   Send_Data.tx[8] = 0;  
   Send_Data.tx[7] = 0;    
-  Send_Data.tx[9]=Check_Sum(9,SEND_DATA_CHECK); //Check the bits for the Check_Sum function //校验位，规则参见Check_Sum函数
+  Send_Data.tx[9]=Check_Sum(0,9,SEND_DATA_CHECK); //Check the bits for the Check_Sum function //校验位，规则参见Check_Sum函数
   Send_Data.tx[10]=FRAME_TAIL; 
   try
   {

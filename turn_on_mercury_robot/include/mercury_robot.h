@@ -1,6 +1,6 @@
 
-#ifndef __WHEELTEC_ROBOT_H_
-#define __WHEELTEC_ROBOT_H_
+#ifndef __MERCURY_ROBOT_H_
+#define __MERCURY_ROBOT_H_
 
 #include "ros/ros.h"
 #include <iostream>
@@ -23,17 +23,21 @@
 #include <geometry_msgs/Vector3.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <sensor_msgs/Imu.h>
+#include <sensor_msgs/Range.h>
 using namespace std;
 
 //Macro definition
 //宏定义
-#define SEND_DATA_CHECK   1          //Send data check flag bits //发送数据校验标志位
-#define READ_DATA_CHECK   0          //Receive data to check flag bits //接收数据校验标志位
-#define FRAME_HEADER      0X7B       //Frame head //帧头
-#define FRAME_TAIL        0X7D       //Frame tail //帧尾
-#define RECEIVE_DATA_SIZE 26         //The length of the data sent by the lower computer //下位机发送过来的数据的长度
-#define SEND_DATA_SIZE    11         //The length of data sent by ROS to the lower machine //ROS向下位机发送的数据的长度
-#define PI 				  3.1415926f //PI //圆周率
+#define SEND_DATA_CHECK    1          //Send data check flag bits //发送数据校验标志位
+#define READ_DATA_CHECK    0          //Receive data to check flag bits //接收数据校验标志位
+#define FRAME_HEADER       0X7B       //Frame head //串口帧头
+#define FRAME_TAIL         0X7D       //Frame tail //串口帧尾
+#define Distance_HEADER    0XFA       //Frame head //超声波帧头
+#define Distance_TAIL      0XFC       //Frame tail //超声波帧尾
+#define RECEIVE_DATA_SIZE  26         //The length of the data sent by the lower computer //下位机发送过来的数据的长度
+#define TOTAL_RECEIVE_SIZE 45         // 26 + 19 字节
+#define SEND_DATA_SIZE     11         //The length of data sent by ROS to the lower machine //ROS向下位机发送的数据的长度
+#define PI 				   3.1415926f //PI //圆周率
 
 //Relative to the range set by the IMU gyroscope, the range is ±500°, corresponding data range is ±32768
 //The gyroscope raw data is converted in radian (rad) units, 1/65.5/57.30=0.00026644
@@ -100,29 +104,39 @@ typedef struct __MPU6050_DATA_
 
 }MPU6050_DATA;
 
+//ultrasonic data structure
+//超声波数据结构体
+typedef struct __Ultrasonic_Data_
+{
+	short distanceA;            // 2 字节
+	short distanceB;            // 2 字节
+	short distanceC;            // 2 字节
+	short distanceD;            // 2 字节
+	short distanceE;            // 2 字节
+	short distanceF;            // 2 字节
+}Ultrasonic_DATA;
+
 //The structure of the ROS to send data to the down machine
 //ROS向下位机发送数据的结构体
 typedef struct _SEND_DATA_  
 {
-	    uint8_t tx[SEND_DATA_SIZE];
-		float X_speed;	       
-		float Y_speed;           
-		float Z_speed;         
-		unsigned char Frame_Tail; 
+	uint8_t tx[SEND_DATA_SIZE];
+	float X_speed;	       
+	float Y_speed;           
+	float Z_speed;         
+	unsigned char Frame_Tail; 
 }SEND_DATA;
 
 //The structure in which the lower computer sends data to the ROS
 //下位机向ROS发送数据的结构体
 typedef struct _RECEIVE_DATA_     
 {
-	    uint8_t rx[RECEIVE_DATA_SIZE];
-	    uint8_t Flag_Stop;
-		unsigned char Frame_Header;
-		float X_speed;  
-		float Y_speed;  
-		float Z_speed;  
-		float Power_Voltage;	
-		unsigned char Frame_Tail;
+	uint8_t rx[TOTAL_RECEIVE_SIZE];
+	uint8_t Flag_Stop;
+	unsigned char Frame_Header;
+	unsigned char Frame_Tail;
+	unsigned char Distance_Header;
+	unsigned char Distance_Tail;
 }RECEIVE_DATA;
 
 //The robot chassis class uses constructors to initialize data, publish topics, etc
@@ -144,27 +158,28 @@ class turn_on_robot
 		//速度话题订阅回调函数
 		void Cmd_Vel_Callback(const geometry_msgs::Twist &twist_aux);              
 
-		ros::Publisher odom_publisher, imu_publisher, voltage_publisher; //Initialize the topic publisher //初始化话题发布者
+		ros::Publisher odom_publisher, imu_publisher, voltage_publisher, range_publisher[3]; //Initialize the topic publisher //初始化话题发布者
 		void Publish_Odom();      //Pub the speedometer topic //发布里程计话题
 		void Publish_ImuSensor(); //Pub the IMU sensor topic //发布IMU传感器话题
 		void Publish_Voltage();   //Pub the power supply voltage topic //发布电源电压话题
+		void Publish_Range(ros::Publisher& pub, const Ultrasonic_DATA& data, int index);	  //Pub the ultrasonic topic  //发布超声波话题
 
-        //从串口(ttyUSB)读取运动底盘速度、IMU、电源电压数据
-        //Read motion chassis speed, IMU, power supply voltage data from serial port (ttyUSB)
-        bool Get_Sensor_Data();   
+		//从串口(ttyUSB)读取运动底盘速度、IMU、电源电压数据
+		//Read motion chassis speed, IMU, power supply voltage data from serial port (ttyUSB)  
 		bool Get_Sensor_Data_New();
-        unsigned char Check_Sum(unsigned char Count_Number,unsigned char mode); //BBC check function //BBC校验函数
-        short IMU_Trans(uint8_t Data_High,uint8_t Data_Low);  //IMU data conversion read //IMU数据转化读取
+		unsigned char Check_Sum(unsigned char start, unsigned char end, unsigned char mode); //BBC check function //BBC校验函数
+		short IMU_Trans(uint8_t Data_High,uint8_t Data_Low);  //IMU data conversion read //IMU数据转化读取
 		float Odom_Trans(uint8_t Data_High,uint8_t Data_Low); //Odometer data is converted to read //里程计数据转化读取
+		short Ultrasonic_Trans(uint8_t Data_High,uint8_t Data_Low);
+		string usart_port_name, robot_frame_id, gyro_frame_id, odom_frame_id, ultrasonic_sensor_frame_ids[3]; //Define the related variables //定义相关变量
+		int serial_baud_rate;      //Serial communication baud rate //串口通信波特率
+		RECEIVE_DATA Receive_Data; //The serial port receives the data structure //串口接收数据结构体
+		SEND_DATA Send_Data;       //The serial port sends the data structure //串口发送数据结构体
 
-        string usart_port_name, robot_frame_id, gyro_frame_id, odom_frame_id; //Define the related variables //定义相关变量
-        int serial_baud_rate;      //Serial communication baud rate //串口通信波特率
-        RECEIVE_DATA Receive_Data; //The serial port receives the data structure //串口接收数据结构体
-        SEND_DATA Send_Data;       //The serial port sends the data structure //串口发送数据结构体
-
-        Vel_Pos_Data Robot_Pos;    //The position of the robot //机器人的位置
-        Vel_Pos_Data Robot_Vel;    //The speed of the robot //机器人的速度
-        MPU6050_DATA Mpu6050_Data; //IMU data //IMU数据
-        float Power_voltage;       //Power supply voltage //电源电压
+		Vel_Pos_Data Robot_Pos;    //The position of the robot //机器人的位置
+		Vel_Pos_Data Robot_Vel;    //The speed of the robot //机器人的速度
+		MPU6050_DATA Mpu6050_Data; //IMU data //IMU数据
+		Ultrasonic_DATA Ultrasonic_Date;
+		float Power_voltage;       //Power supply voltage //电源电压
 };
 #endif
