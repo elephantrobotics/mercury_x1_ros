@@ -35,7 +35,7 @@ using namespace std;
 #define Distance_HEADER    0XFA       //Frame head //超声波帧头
 #define Distance_TAIL      0XFC       //Frame tail //超声波帧尾
 #define RECEIVE_DATA_SIZE  26         //The length of the data sent by the lower computer //下位机发送过来的数据的长度
-#define TOTAL_RECEIVE_SIZE 45         // 26 + 19 字节
+#define TOTAL_RECEIVE_SIZE 43         // 26 + 19 字节
 #define SEND_DATA_SIZE     11         //The length of data sent by ROS to the lower machine //ROS向下位机发送的数据的长度
 #define PI 				   3.1415926f //PI //圆周率
 
@@ -108,12 +108,12 @@ typedef struct __MPU6050_DATA_
 //超声波数据结构体
 typedef struct __Ultrasonic_Data_
 {
-	short distanceA;            // 2 字节
-	short distanceB;            // 2 字节
-	short distanceC;            // 2 字节
-	short distanceD;            // 2 字节
-	short distanceE;            // 2 字节
-	short distanceF;            // 2 字节
+	float distanceA;            
+	float distanceB;            
+	float distanceC;            
+	float distanceD;            
+	float distanceE;            
+	float distanceF;            
 }Ultrasonic_DATA;
 
 //The structure of the ROS to send data to the down machine
@@ -170,7 +170,7 @@ class turn_on_robot
 		unsigned char Check_Sum(unsigned char start, unsigned char end, unsigned char mode); //BBC check function //BBC校验函数
 		short IMU_Trans(uint8_t Data_High,uint8_t Data_Low);  //IMU data conversion read //IMU数据转化读取
 		float Odom_Trans(uint8_t Data_High,uint8_t Data_Low); //Odometer data is converted to read //里程计数据转化读取
-		short Ultrasonic_Trans(uint8_t Data_High,uint8_t Data_Low);
+		float Ultrasonic_Trans(uint8_t Data_High,uint8_t Data_Low);
 		string usart_port_name, robot_frame_id, gyro_frame_id, odom_frame_id, ultrasonic_sensor_frame_ids[3]; //Define the related variables //定义相关变量
 		int serial_baud_rate;      //Serial communication baud rate //串口通信波特率
 		RECEIVE_DATA Receive_Data; //The serial port receives the data structure //串口接收数据结构体

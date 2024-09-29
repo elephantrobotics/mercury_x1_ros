@@ -38,14 +38,16 @@ float turn_on_robot::Odom_Trans(uint8_t Data_High,uint8_t Data_Low)
   data_return   =  (transition_16 / 1000)+(transition_16 % 1000)*0.001; // The speed unit is changed from mm/s to m/s //速度单位从mm/s转换为m/s
   return data_return;
 }
-short turn_on_robot::Ultrasonic_Trans(uint8_t Data_High,uint8_t Data_Low)
+float turn_on_robot::Ultrasonic_Trans(uint8_t Data_High,uint8_t Data_Low)
 {
-  short transition_16;
+  uint16_t transition_16;
   transition_16 = 0;
   transition_16 |=  Data_High<<8;   
   transition_16 |=  Data_Low;
-  transition_16 = transition_16/1000+(transition_16 % 1000)*0.001;
-  return transition_16;  
+  // ROS_INFO("Transition 16 (before conversion): %u", static_cast<unsigned int>(transition_16));
+  float distance = transition_16 / 1000.0f;
+  // ROS_INFO("Distance (in meters): %f", distance);
+  return distance;  
 }
 /**************************************
 Date: January 28, 2021
@@ -172,9 +174,9 @@ void turn_on_robot::Publish_Range(ros::Publisher& pub, const Ultrasonic_DATA& da
   range_msg.radiation_type = sensor_msgs::Range::ULTRASOUND;
 
   // Set additional fields
-  range_msg.field_of_view = 0.1;  // Example field of view
+  range_msg.field_of_view = 0.524;  // Example field of view
   range_msg.min_range = 0.02;     // Minimum range
-  range_msg.max_range = 4.0;      // Maximum range
+  range_msg.max_range = 3.00;      // Maximum range
   // Select the corresponding distance value based on the index
   switch (index) {
     case 0: range_msg.range = static_cast<float>(data.distanceA); break;
@@ -238,43 +240,39 @@ bool turn_on_robot::Get_Sensor_Data_New()
   static int count,state = 0; //Static variable for counting //静态变量，用于计数和状态表示
   Stm32_Serial.read(Receive_Data_Pr,sizeof(Receive_Data_Pr)); //Read the data sent by the lower computer through the serial port //通过串口读取下位机发送过来的数据，读取1字节数的数据
 
-  /*//View the received raw data directly and debug it for use//直接查看接收到的原始数据，调试使用
-  ROS_INFO("%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x",
-  Receive_Data_Pr[0],Receive_Data_Pr[1],Receive_Data_Pr[2],Receive_Data_Pr[3],Receive_Data_Pr[4],Receive_Data_Pr[5],Receive_Data_Pr[6],Receive_Data_Pr[7],
-  Receive_Data_Pr[8],Receive_Data_Pr[9],Receive_Data_Pr[10],Receive_Data_Pr[11],Receive_Data_Pr[12],Receive_Data_Pr[13],Receive_Data_Pr[14],Receive_Data_Pr[15],
-  Receive_Data_Pr[16],Receive_Data_Pr[17],Receive_Data_Pr[18],Receive_Data_Pr[19],Receive_Data_Pr[20],Receive_Data_Pr[21],Receive_Data_Pr[22],Receive_Data_Pr[23],
-  Receive_Data_Pr[24],Receive_Data_Pr[25]);
-  */  
-
+  //View the received raw data directly and debug it for use//直接查看接收到的原始数据，调试使用
+  // ROS_INFO("Serial:%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x",
+  // Receive_Data_Pr[0],Receive_Data_Pr[1],Receive_Data_Pr[2],Receive_Data_Pr[3],Receive_Data_Pr[4],Receive_Data_Pr[5],Receive_Data_Pr[6],Receive_Data_Pr[7],
+  // Receive_Data_Pr[8],Receive_Data_Pr[9],Receive_Data_Pr[10],Receive_Data_Pr[11],Receive_Data_Pr[12],Receive_Data_Pr[13],Receive_Data_Pr[14],Receive_Data_Pr[15],
+  // Receive_Data_Pr[16],Receive_Data_Pr[17],Receive_Data_Pr[18],Receive_Data_Pr[19],Receive_Data_Pr[20],Receive_Data_Pr[21],Receive_Data_Pr[22],Receive_Data_Pr[23]
+  // );
   Receive_Data.rx[count] = Receive_Data_Pr[0]; //Fill the array with serial data //串口数据填入数组
 
   Receive_Data.Frame_Header = Receive_Data.rx[0]; //The first part of the data is the frame header 0X7B //数据的第一位是帧头0X7B
-  Receive_Data.Frame_Tail = Receive_Data.rx[25];  //The last bit of data is frame tail 0X7D //数据的最后一位是帧尾0X7D
-  Receive_Data.Distance_Header = Receive_Data.rx[26];
-  Receive_Data.Distance_Tail = Receive_Data.rx[44];
+  Receive_Data.Frame_Tail = Receive_Data.rx[23];  //The last bit of data is frame tail 0X7D //数据的最后一位是帧尾0X7D
+  Receive_Data.Distance_Header = Receive_Data.rx[24];
+  Receive_Data.Distance_Tail = Receive_Data.rx[42];
 
   if(Receive_Data_Pr[0] == FRAME_HEADER || count>0) //Ensure that the first data in the array is FRAME_HEADER //确保数组第一个数据为FRAME_HEADER
     count++;
   else 
   	count=0;
-  if(count == 45) //Verify the length of the packet //验证数据包的长度
+  if(count == 43) //Verify the length of the packet //验证数据包的长度
   {
     count=0;  //Prepare for the serial port data to be refill into the array //为串口数据重新填入数组做准备
     if(Receive_Data.Frame_Tail == FRAME_TAIL) //Verify the frame tail of the packet //验证数据包的帧尾
     {
-      check=Check_Sum(0,24,READ_DATA_CHECK);  //BCC check passes or two packets are interlaced //BCC校验通过或者两组数据包交错
+      check=Check_Sum(0,22,READ_DATA_CHECK);  //BCC check passes or two packets are interlaced //BCC校验通过或者两组数据包交错
 
-      if(check == Receive_Data.rx[24])  //XOR bit check successful //异或位校验成功
+      if(check == Receive_Data.rx[22])  //XOR bit check successful //异或位校验成功
       {
         error=0;
-        /*//Check receive_data.rx for debugging use //查看Receive_Data.rx，调试使用 
-        ROS_INFO("%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x",
-        Receive_Data.rx[0],Receive_Data.rx[1],Receive_Data.rx[2],Receive_Data.rx[3],Receive_Data.rx[4],Receive_Data.rx[5],Receive_Data.rx[6],Receive_Data.rx[7],
-        Receive_Data.rx[8],Receive_Data.rx[9],Receive_Data.rx[10],Receive_Data.rx[11],Receive_Data.rx[12],Receive_Data.rx[13],Receive_Data.rx[14],Receive_Data.rx[15],
-        Receive_Data.rx[16],Receive_Data.rx[17],Receive_Data.rx[18],Receive_Data.rx[19],Receive_Data.rx[20],Receive_Data.rx[21],Receive_Data.rx[22],Receive_Data.rx[23],
-        Receive_Data_Pr[24],Receive_Data_Pr[25]); 
-        */
-
+        //Check receive_data.rx for debugging use //查看Receive_Data.rx，调试使用 
+        // ROS_INFO("Serial:%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x",
+        // Receive_Data.rx[0],Receive_Data.rx[1],Receive_Data.rx[2],Receive_Data.rx[3],Receive_Data.rx[4],Receive_Data.rx[5],Receive_Data.rx[6],Receive_Data.rx[7],
+        // Receive_Data.rx[8],Receive_Data.rx[9],Receive_Data.rx[10],Receive_Data.rx[11],Receive_Data.rx[12],Receive_Data.rx[13],Receive_Data.rx[14],Receive_Data.rx[15],
+        // Receive_Data.rx[16],Receive_Data.rx[17],Receive_Data.rx[18],Receive_Data.rx[19],Receive_Data.rx[20],Receive_Data.rx[21],Receive_Data.rx[22],Receive_Data.rx[23]); 
+        
         Receive_Data.Flag_Stop=Receive_Data.rx[1]; //set aside //预留位
         Robot_Vel.X = Odom_Trans(Receive_Data.rx[2],Receive_Data.rx[3]); //Get the speed of the moving chassis in the X direction //获取运动底盘X方向速度
           
@@ -315,12 +313,20 @@ bool turn_on_robot::Get_Sensor_Data_New()
     }
     if((Receive_Data.Distance_Tail == Distance_TAIL) && (state == 1))
     {
-      check=Check_Sum(26,43,READ_DATA_CHECK);  //BCC check passes or two packets are interlaced //BCC校验通过或者两组数据包交错
-      if(check == Receive_Data.rx[43])//XOR bit check successful //异或位校验成功
+      check=Check_Sum(24,41,READ_DATA_CHECK);  //BCC check passes or two packets are interlaced //BCC校验通过或者两组数据包交错
+      if(check == Receive_Data.rx[41])//XOR bit check successful //异或位校验成功
       {
-        Ultrasonic_Date.distanceA = Ultrasonic_Trans(Receive_Data.rx[27],Receive_Data.rx[28]);
-        Ultrasonic_Date.distanceB = Ultrasonic_Trans(Receive_Data.rx[29],Receive_Data.rx[30]);
-        Ultrasonic_Date.distanceC = Ultrasonic_Trans(Receive_Data.rx[31],Receive_Data.rx[32]);
+        // ROS_INFO("ultrasonic:%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x",
+        // Receive_Data.rx[24],Receive_Data.rx[25],Receive_Data.rx[26],Receive_Data.rx[27],Receive_Data.rx[28],Receive_Data.rx[29],Receive_Data.rx[30],Receive_Data.rx[31],
+        // Receive_Data.rx[32],Receive_Data.rx[33],Receive_Data.rx[34],Receive_Data.rx[35],Receive_Data.rx[36],Receive_Data.rx[37],Receive_Data.rx[38],Receive_Data.rx[39],
+        // Receive_Data.rx[40],Receive_Data.rx[41],Receive_Data.rx[42]
+        // );
+        Ultrasonic_Date.distanceA = Ultrasonic_Trans(Receive_Data.rx[25],Receive_Data.rx[26]);
+        Ultrasonic_Date.distanceB = Ultrasonic_Trans(Receive_Data.rx[27],Receive_Data.rx[28]);
+        Ultrasonic_Date.distanceC = Ultrasonic_Trans(Receive_Data.rx[29],Receive_Data.rx[30]);
+        // ROS_INFO("Distance A: %f", Ultrasonic_Date.distanceA);
+        // ROS_INFO("Distance B: %f", Ultrasonic_Date.distanceB);
+        // ROS_INFO("Distance C: %f", Ultrasonic_Date.distanceC);
       }
       state = 0 ;
       return true;
@@ -380,6 +386,7 @@ turn_on_robot::turn_on_robot():Sampling_Time(0),Power_voltage(0)
   memset(&Receive_Data, 0, sizeof(Receive_Data)); 
   memset(&Send_Data, 0, sizeof(Send_Data));
   memset(&Mpu6050_Data, 0, sizeof(Mpu6050_Data));
+  memset(&Ultrasonic_Date, 0, sizeof(Ultrasonic_Date));
 
   ros::NodeHandle private_nh("~"); //Create a node handle //创建节点句柄
   //The private_nh.param() entry parameter corresponds to the initial value of the name of the parameter variable on the parameter server
@@ -396,7 +403,7 @@ turn_on_robot::turn_on_robot():Sampling_Time(0),Power_voltage(0)
   {
     char sensor_id = 'A' + i;
     std::string param_name = "ultrasonic_sensor_" + std::string(1,sensor_id) + "_frame_id";// Construct the parameter name for each ultrasonic sensor frame ID // 为每个超声波传感器的坐标系 ID 构建参数名称
-    private_nh.param<std::string>(param_name, ultrasonic_sensor_frame_ids[i], "ultrasonic_sensor_" + std::to_string(char('A' + i)) + "_link");// Retrieve the frame ID from the parameter server, defaulting to "ultrasonic_sensor_X" if not set // 从参数服务器获取对应的坐标系 ID，若未设置则默认值为 "ultrasonic_sensor_X"
+    private_nh.param<std::string>(param_name, ultrasonic_sensor_frame_ids[i], "ultrasonic_sensor_" + std::string(1,sensor_id) + "_link");// Retrieve the frame ID from the parameter server, defaulting to "ultrasonic_sensor_X" if not set // 从参数服务器获取对应的坐标系 ID，若未设置则默认值为 "ultrasonic_sensor_X"
     range_publisher[i] = n.advertise<sensor_msgs::Range>("ultrasonic/range" + std::string(1,sensor_id), 10); //Create an ultrasonic topic publisher //创建超声波话题发布者
   }
 

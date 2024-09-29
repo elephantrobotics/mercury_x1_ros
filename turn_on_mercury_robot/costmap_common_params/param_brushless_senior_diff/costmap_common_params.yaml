@@ -99,7 +99,18 @@ obstacle_layer:
   #publish_voxel_map: false
   #如果设置为true，机器人将把它所经过的空间标记为自由区域
   #footprint_clearing_enabled: true
-  
+sonar_layer:
+  enabled: true
+  #此参数如果为0 ，没有任何影响.否则，如果在这个时间段内没有收到任何声纳数据，超声波层会警告用户，并且此层不被使用
+  no_readings_timout: 0.0
+  #栅格概率比该值低的标记为free
+  clear_threshold: 0.8
+  #栅格概率大于该值标定为占据
+  mark_threshold: 0.9
+  #超声波话题
+  topics: ["/ultrasonic/rangeA","/ultrasonic/rangeB","/ultrasonic/rangeC"]
+  #是否将超出sonar最大距离清除
+  clear_on_max_reading: true  
 
 #设置膨胀层参数
 #根据obstacle_layer、static_layer和footprint生成代价地图

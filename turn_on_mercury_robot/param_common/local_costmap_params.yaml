@@ -29,6 +29,7 @@ local_costmap:
   plugins:
     #定义地图层的名称，设置地图层的类型
     - {name: obstacle_layer,      type: "costmap_2d::ObstacleLayer"}
+    - {name: sonar_layer, type: "range_sensor_layer::RangeSensorLayer"}
     #定义地图层的名称，设置地图层的类型
     - {name: inflation_layer,     type: "costmap_2d::InflationLayer"}
   #各地图层的参数，会以地图层名称作为命名空间

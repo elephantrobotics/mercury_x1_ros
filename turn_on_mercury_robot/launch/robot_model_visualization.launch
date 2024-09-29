@@ -6,9 +6,9 @@
   <node pkg="tf" type="static_transform_publisher" name="base_to_laser" args="0.105 0.00 0.166 3.14 0 0  base_footprint laser 100" />
   <node pkg="tf" type="static_transform_publisher" name="base_to_camera" args="0.04 0.00 0.94 0 0 0   base_footprint camera_link 100" />
   <node pkg="tf" type="static_transform_publisher" name="base_to_gyro" args="-0.1 -0.035 0.265 0 0 0 base_footprint gyro_link 100" />
-  <node pkg="tf" type="static_transform_publisher" name="base_to_gyro" args="-0.23 0.0 0.11 3.14 0 0 base_footprint ultrasonic_sensor_A_link 100" />
-  <node pkg="tf" type="static_transform_publisher" name="base_to_gyro" args="-0.045 -0.135 0.11 4.715 0 0 base_footprint ultrasonic_sensor_B_link 100" />
-  <node pkg="tf" type="static_transform_publisher" name="base_to_gyro" args="-0.045 0.135 0.11 1.575 0 0 base_footprint ultrasonic_sensor_C_link 100" />
+  <node pkg="tf" type="static_transform_publisher" name="base_to_ultrasonic_sensor_A" args="-0.23 0.0 0.11 3.14 0 0 base_footprint ultrasonic_sensor_A_link 100" />
+  <node pkg="tf" type="static_transform_publisher" name="base_to_ultrasonic_sensor_B" args="-0.045 -0.135 0.11 4.715 0 0 base_footprint ultrasonic_sensor_B_link 100" />
+  <node pkg="tf" type="static_transform_publisher" name="base_to_ultrasonic_sensor_C" args="-0.045 0.135 0.11 1.575 0 0 base_footprint ultrasonic_sensor_C_link 100" />
 
   <!-- URDF 标准化机器人描述格式 -->
   <param name = "robot_description" textfile = "$(find turn_on_mercury_robot)/urdf/mercury_x1/mercury_x1.urdf"/> 
