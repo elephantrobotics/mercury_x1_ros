@@ -9,6 +9,7 @@
   <node pkg="tf" type="static_transform_publisher" name="base_to_ultrasonic_sensor_A" args="-0.23 0.0 0.11 3.14 0 0 base_footprint ultrasonic_sensor_A_link 100" />
   <node pkg="tf" type="static_transform_publisher" name="base_to_ultrasonic_sensor_B" args="-0.045 -0.135 0.11 4.715 0 0 base_footprint ultrasonic_sensor_B_link 100" />
   <node pkg="tf" type="static_transform_publisher" name="base_to_ultrasonic_sensor_C" args="-0.045 0.135 0.11 1.575 0 0 base_footprint ultrasonic_sensor_C_link 100" />
+  <node pkg="tf" type="static_transform_publisher" name="base_to_ultrasonic_sensor_D" args="0.105 0.00 0.51 0 0 0 base_footprint ultrasonic_sensor_D_link 100" />
 
   <!-- URDF 标准化机器人描述格式 -->
   <param name = "robot_description" textfile = "$(find turn_on_mercury_robot)/urdf/mercury_x1/mercury_x1.urdf"/> 

@@ -108,7 +108,7 @@ sonar_layer:
   #栅格概率大于该值标定为占据
   mark_threshold: 0.9
   #超声波话题
-  topics: ["/ultrasonic/rangeA","/ultrasonic/rangeB","/ultrasonic/rangeC"]
+  topics: ["/ultrasonic/rangeA","/ultrasonic/rangeB","/ultrasonic/rangeC","/ultrasonic/rangeD"]
   #是否将超出sonar最大距离清除
   clear_on_max_reading: true  
 

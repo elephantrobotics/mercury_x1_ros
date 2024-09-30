@@ -182,6 +182,7 @@ void turn_on_robot::Publish_Range(ros::Publisher& pub, const Ultrasonic_DATA& da
     case 0: range_msg.range = static_cast<float>(data.distanceA); break;
     case 1: range_msg.range = static_cast<float>(data.distanceB); break;
     case 2: range_msg.range = static_cast<float>(data.distanceC); break;
+    case 3: range_msg.range = static_cast<float>(data.distanceD); break;
     default: range_msg.range = 0; break;
   }
   range_publisher[index].publish(range_msg); //Pub the ultrasonic topic  //发布超声波话题
@@ -324,9 +325,11 @@ bool turn_on_robot::Get_Sensor_Data_New()
         Ultrasonic_Date.distanceA = Ultrasonic_Trans(Receive_Data.rx[25],Receive_Data.rx[26]);
         Ultrasonic_Date.distanceB = Ultrasonic_Trans(Receive_Data.rx[27],Receive_Data.rx[28]);
         Ultrasonic_Date.distanceC = Ultrasonic_Trans(Receive_Data.rx[29],Receive_Data.rx[30]);
+        Ultrasonic_Date.distanceD = Ultrasonic_Trans(Receive_Data.rx[31],Receive_Data.rx[32]);
         // ROS_INFO("Distance A: %f", Ultrasonic_Date.distanceA);
         // ROS_INFO("Distance B: %f", Ultrasonic_Date.distanceB);
         // ROS_INFO("Distance C: %f", Ultrasonic_Date.distanceC);
+        // ROS_INFO("Distance D: %f", Ultrasonic_Date.distanceD);
       }
       state = 0 ;
       return true;
@@ -361,7 +364,7 @@ void turn_on_robot::Control()
       Publish_Odom();      //Pub the speedometer topic //发布里程计话题
       Publish_ImuSensor(); //Pub the IMU topic //发布IMU话题    
       Publish_Voltage();   //Pub the topic of power supply voltage //发布电源电压话题
-      for (int i = 0; i < 3; ++i)
+      for (int i = 0; i < ULTRASONIC_SENSOR_COUNT; ++i)
       {
         Publish_Range(range_publisher[i],Ultrasonic_Date,i); //Pub the ultrasonic topic  //发布超声波话题
       }
@@ -399,7 +402,7 @@ turn_on_robot::turn_on_robot():Sampling_Time(0),Power_voltage(0)
   voltage_publisher    = n.advertise<std_msgs::Float32>("PowerVoltage", 10); //Create a battery-voltage topic publisher //创建电池电压话题发布者
   odom_publisher       = n.advertise<nav_msgs::Odometry>("odom", 50); //Create the odometer topic publisher //创建里程计话题发布者
   imu_publisher        = n.advertise<sensor_msgs::Imu>("imu", 20); //Create an IMU topic publisher //创建IMU话题发布者
-  for (int i =0;i < 3; ++i)
+  for (int i =0;i < ULTRASONIC_SENSOR_COUNT; ++i)
   {
     char sensor_id = 'A' + i;
     std::string param_name = "ultrasonic_sensor_" + std::string(1,sensor_id) + "_frame_id";// Construct the parameter name for each ultrasonic sensor frame ID // 为每个超声波传感器的坐标系 ID 构建参数名称
