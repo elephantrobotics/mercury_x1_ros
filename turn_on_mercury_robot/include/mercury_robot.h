@@ -34,8 +34,7 @@ using namespace std;
 #define FRAME_TAIL         0X7D       //Frame tail //串口帧尾
 #define Distance_HEADER    0XFA       //Frame head //超声波帧头
 #define Distance_TAIL      0XFC       //Frame tail //超声波帧尾
-#define RECEIVE_DATA_SIZE  26         //The length of the data sent by the lower computer //下位机发送过来的数据的长度
-#define TOTAL_RECEIVE_SIZE 43         // 26 + 19 字节
+#define TOTAL_RECEIVE_SIZE 45         // 26 + 19 字节 //The length of the data sent by the lower computer //下位机发送过来的数据的长度
 #define SEND_DATA_SIZE     11         //The length of data sent by ROS to the lower machine //ROS向下位机发送的数据的长度
 #define PI 				   3.1415926f //PI //圆周率
 #define ULTRASONIC_SENSOR_COUNT 4  	  //Number of ultrasonic sensors //超声波传感器的数量

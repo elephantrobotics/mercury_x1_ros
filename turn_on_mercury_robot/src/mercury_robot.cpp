@@ -250,22 +250,22 @@ bool turn_on_robot::Get_Sensor_Data_New()
   Receive_Data.rx[count] = Receive_Data_Pr[0]; //Fill the array with serial data //串口数据填入数组
 
   Receive_Data.Frame_Header = Receive_Data.rx[0]; //The first part of the data is the frame header 0X7B //数据的第一位是帧头0X7B
-  Receive_Data.Frame_Tail = Receive_Data.rx[23];  //The last bit of data is frame tail 0X7D //数据的最后一位是帧尾0X7D
-  Receive_Data.Distance_Header = Receive_Data.rx[24];
-  Receive_Data.Distance_Tail = Receive_Data.rx[42];
+  Receive_Data.Frame_Tail = Receive_Data.rx[25];  //The last bit of data is frame tail 0X7D //数据的最后一位是帧尾0X7D
+  Receive_Data.Distance_Header = Receive_Data.rx[26];
+  Receive_Data.Distance_Tail = Receive_Data.rx[44];
 
   if(Receive_Data_Pr[0] == FRAME_HEADER || count>0) //Ensure that the first data in the array is FRAME_HEADER //确保数组第一个数据为FRAME_HEADER
     count++;
   else 
   	count=0;
-  if(count == 43) //Verify the length of the packet //验证数据包的长度
+  if(count == 45) //Verify the length of the packet //验证数据包的长度
   {
     count=0;  //Prepare for the serial port data to be refill into the array //为串口数据重新填入数组做准备
     if(Receive_Data.Frame_Tail == FRAME_TAIL) //Verify the frame tail of the packet //验证数据包的帧尾
     {
-      check=Check_Sum(0,22,READ_DATA_CHECK);  //BCC check passes or two packets are interlaced //BCC校验通过或者两组数据包交错
+      check=Check_Sum(0,24,READ_DATA_CHECK);  //BCC check passes or two packets are interlaced //BCC校验通过或者两组数据包交错
 
-      if(check == Receive_Data.rx[22])  //XOR bit check successful //异或位校验成功
+      if(check == Receive_Data.rx[24])  //XOR bit check successful //异或位校验成功
       {
         error=0;
         //Check receive_data.rx for debugging use //查看Receive_Data.rx，调试使用 
@@ -314,18 +314,18 @@ bool turn_on_robot::Get_Sensor_Data_New()
     }
     if((Receive_Data.Distance_Tail == Distance_TAIL) && (state == 1))
     {
-      check=Check_Sum(24,41,READ_DATA_CHECK);  //BCC check passes or two packets are interlaced //BCC校验通过或者两组数据包交错
-      if(check == Receive_Data.rx[41])//XOR bit check successful //异或位校验成功
+      check=Check_Sum(26,43,READ_DATA_CHECK);  //BCC check passes or two packets are interlaced //BCC校验通过或者两组数据包交错
+      if(check == Receive_Data.rx[43])//XOR bit check successful //异或位校验成功
       {
         // ROS_INFO("ultrasonic:%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x",
         // Receive_Data.rx[24],Receive_Data.rx[25],Receive_Data.rx[26],Receive_Data.rx[27],Receive_Data.rx[28],Receive_Data.rx[29],Receive_Data.rx[30],Receive_Data.rx[31],
         // Receive_Data.rx[32],Receive_Data.rx[33],Receive_Data.rx[34],Receive_Data.rx[35],Receive_Data.rx[36],Receive_Data.rx[37],Receive_Data.rx[38],Receive_Data.rx[39],
         // Receive_Data.rx[40],Receive_Data.rx[41],Receive_Data.rx[42]
         // );
-        Ultrasonic_Date.distanceA = Ultrasonic_Trans(Receive_Data.rx[25],Receive_Data.rx[26]);
-        Ultrasonic_Date.distanceB = Ultrasonic_Trans(Receive_Data.rx[27],Receive_Data.rx[28]);
-        Ultrasonic_Date.distanceC = Ultrasonic_Trans(Receive_Data.rx[29],Receive_Data.rx[30]);
-        Ultrasonic_Date.distanceD = Ultrasonic_Trans(Receive_Data.rx[31],Receive_Data.rx[32]);
+        Ultrasonic_Date.distanceA = Ultrasonic_Trans(Receive_Data.rx[27],Receive_Data.rx[28]);
+        Ultrasonic_Date.distanceB = Ultrasonic_Trans(Receive_Data.rx[29],Receive_Data.rx[30]);
+        Ultrasonic_Date.distanceC = Ultrasonic_Trans(Receive_Data.rx[31],Receive_Data.rx[32]);
+        Ultrasonic_Date.distanceD = Ultrasonic_Trans(Receive_Data.rx[33],Receive_Data.rx[34]);
         // ROS_INFO("Distance A: %f", Ultrasonic_Date.distanceA);
         // ROS_INFO("Distance B: %f", Ultrasonic_Date.distanceB);
         // ROS_INFO("Distance C: %f", Ultrasonic_Date.distanceC);
