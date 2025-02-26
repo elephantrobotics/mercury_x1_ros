@@ -4,7 +4,7 @@ Use of Mercury X1 mobile chassis ROS
 ## Package Download and Install
 
 ```bash
-$ git clone -b noetic-edu https://github.com/elephantrobotics/mercury_x1_ros.git
+$ git clone -b noetic-edu https://github.com/elephantrobotics/mercury_x1_ros.git mercury_x1_ros/src
 $ cd ~/mercury_x1_ros/turn_on_mercury_robot/scripts
 $ ./apt_install.sh
 $ cd ~/mercury_x1_ros
