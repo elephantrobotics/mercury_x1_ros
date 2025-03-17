@@ -67,6 +67,10 @@ class OBCameraNode {
 
   bool isInitialized() const;
 
+  void rebootDevice();
+
+  void clean();
+
  private:
   struct IMUData {
     IMUData() = default;
@@ -92,6 +96,8 @@ class OBCameraNode {
   void setupDevices();
 
   void selectBaseStream();
+
+  void setupRecommendedPostFilters();
 
   void setupFrameCallback();
 
@@ -121,6 +127,8 @@ class OBCameraNode {
   void onNewFrameSetCallback(const std::shared_ptr<ob::FrameSet> &frame_set);
 
   std::shared_ptr<ob::Frame> processDepthFrameFilter(std::shared_ptr<ob::Frame> &frame);
+
+  uint64_t getFrameTimestampUs(const std::shared_ptr<ob::Frame> &frame);
 
   void onNewColorFrameCallback();
 
@@ -343,7 +351,7 @@ class OBCameraNode {
   int default_white_balance_ = 0;
   std::string camera_link_frame_id_ = "camera_link";
   std::string camera_name_ = "camera";
-  const std::string imu_optical_frame_id_ = "camera_gyro_optical_frame";
+  std::string accel_gyro_frame_id_ = "camera_accel_gyro_optical_frame";
   const std::string imu_frame_id_ = "camera_gyro_frame";
   std::map<stream_index_pair, ros::ServiceServer> get_exposure_srv_;
   std::map<stream_index_pair, ros::ServiceServer> set_exposure_srv_;
@@ -409,10 +417,22 @@ class OBCameraNode {
   bool is_initialized_ = false;
   bool enable_soft_filter_ = true;
   bool enable_color_auto_exposure_ = true;
+  bool enable_color_auto_white_balance_ = true;
   int color_exposure_ = -1;
+  int color_gain_ = -1;
+  int color_white_balance_ = -1;
+  int color_ae_max_exposure_ = -1;
+  int color_brightness_ = -1;
+  int color_sharpness_ = -1;
+  int color_contrast_ = -1;
+  int color_saturation_ = -1;
+  int color_gamma_ = -1;
+  int color_hue_ = -1;
   bool enable_ir_auto_exposure_ = true;
   bool enable_depth_scale_ = true;
   int ir_exposure_ = -1;
+  int ir_gain_ = -1;
+  int ir_ae_max_exposure_ = -1;
   bool enable_ir_long_exposure_ = false;
   int soft_filter_max_diff_ = -1;
   int soft_filter_speckle_size_ = -1;
@@ -458,7 +478,6 @@ class OBCameraNode {
   std::shared_ptr<std::thread> colorFrameThread_ = nullptr;
   std::mutex colorFrameMtx_;
   std::condition_variable colorFrameCV_;
-  bool use_hardware_time_ = false;
   // ordered point cloud
   bool ordered_pc_ = false;
   std::shared_ptr<ob::Frame> depth_frame_ = nullptr;
@@ -512,6 +531,24 @@ class OBCameraNode {
   uint8_t *rgb_point_cloud_buffer_ = nullptr;
   uint32_t rgb_point_cloud_buffer_size_ = 0;
   ros::Publisher sdk_version_pub_;
+  bool enable_heartbeat_ = false;
+  bool has_first_color_frame_ = false;
+  // rotation degree
+  std::map<stream_index_pair, int> image_rotation_;
+  std::string time_domain_ = "global";
+  bool enable_sync_host_time_ = true;
+  ros::Timer sync_host_time_timer_;
+  // AE ROI
+  int color_ae_roi_left_ = -1;
+  int color_ae_roi_right_ = -1;
+  int color_ae_roi_top_ = -1;
+  int color_ae_roi_bottom_ = -1;
+  int depth_ae_roi_left_ = -1;
+  int depth_ae_roi_right_ = -1;
+  int depth_ae_roi_top_ = -1;
+  int depth_ae_roi_bottom_ = -1;
+  int color_backlight_compensation_ = -1;
+  std::string frame_aggregate_mode_;
 };
 
 }  // namespace orbbec_camera

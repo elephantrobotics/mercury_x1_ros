@@ -88,7 +88,7 @@ find_package(Eigen3 REQUIRED)
 find_package(Boost REQUIRED)
 find_package(PkgConfig REQUIRED)
 find_package(Threads REQUIRED)
-find_package(Boost COMPONENTS filesystem system REQUIRED)  
+find_package(Boost COMPONENTS filesystem system REQUIRED)
 # check if boost was found
 if(Boost_FOUND)
     message(STATUS "Boost found!")
@@ -207,6 +207,7 @@ set(COMMON_LINK_LIBRARIES
   -L${ORBBEC_LIBS_DIR}
   Threads::Threads
   -lrt
+  -ldw # for stack trace
 )
 
 if (USE_RK_HW_DECODER)
