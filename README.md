@@ -1,5 +1,5 @@
 # mercury_x1_ros
-Use of Mercury X1 mobile chassis ROS
+Use of Mercury X1 7-axis mobile chassis ROS
 
 ## Package Download and Install
 
