@@ -32,12 +32,12 @@ def callback(data):
         data_list.append(radians_to_angles)
         
     print('data_list: {}'.format(data_list))
-    left_arm = data_list[:7]
-    right_arm = data_list[7:-3]
-    middle_arm = data_list[-3:]
-    # 为左臂和右臂的 J6 关节角度加上偏移量 90°
-    left_arm[5] = left_arm[5] + 90
-    right_arm[5] = right_arm[5] + 90
+    left_arm = data_list[:6]
+    right_arm = data_list[6:-2]
+    middle_arm = data_list[-2:]
+    # 为左臂和右臂的 J5 关节角度加上偏移量 90°
+    left_arm[4] = left_arm[4] + 90
+    right_arm[4] = right_arm[4] + 90
     print('left_angles: {}'.format(left_arm))
     print('right_angles: {}'.format(right_arm))
     print('middle_angles: {}'.format(middle_arm))
@@ -46,7 +46,6 @@ def callback(data):
     r.send_angles(right_arm, 16, _async=True)
     r.send_angle(11, middle_arm[0], 16, _async=True)
     r.send_angle(12, middle_arm[1], 16, _async=True)
-    r.send_angle(13, middle_arm[2], 16, _async=True)
 
 
 def listener():

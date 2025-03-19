@@ -1,6 +1,6 @@
 <launch>
-	<arg name="model" default="$(find turn_on_mercury_robot)/urdf/mercury_x1/mercury_x1_turing_stack.urdf"/>
-	<arg name="rvizconfig" default="$(find turn_on_mercury_robot)/rviz/mercury_x1_turing_stack.rviz" />
+	<arg name="model" default="$(find turn_on_mercury_robot)/urdf/mercury_x1/mercury_x1.urdf"/>
+	<arg name="rvizconfig" default="$(find turn_on_mercury_robot)/rviz/mercury_x1.rviz" />
 	<arg name="gui" default="true" />
 
 	<param name="robot_description" command="$(find xacro)/xacro --inorder $(arg model)" />
