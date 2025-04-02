@@ -1,399 +1,275 @@
-/*******************************************************
-@company: Copyright (C) 2022, Leishen Intelligent System
-@product: LSM10 and N10
-@filename: lsiosr.cpp
-@brief:
-@version:       date:       author:     comments:
-@v1.0           21-2-4      yao          new
-*******************************************************/
-#include "lslidar_driver/lsiosr.h"
+/******************************************************************************
+ * This file is part of lslidar_driver.
+ *
+ * Copyright 2022 LeiShen Intelligent Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *****************************************************************************/
+
+#include "lslidar_driver/lsiosr.hpp"
 
 namespace lslidar_driver {
 
-LSIOSR * LSIOSR::instance(std::string name, int speed, int fd)
-{
-  static LSIOSR obj(name, speed, fd);
-  return &obj;
-}
-
-LSIOSR::LSIOSR(std::string port, int baud_rate, int fd):port_(port), baud_rate_(baud_rate), fd_(fd)
-{
-  printf("port = %s, baud_rate = %d\n", port.c_str(), baud_rate);
-}
-
-LSIOSR::~LSIOSR()
-{
-  close();
-}
-/* 串口配置的函数 */
-int LSIOSR::setOpt(int nBits, uint8_t nEvent, int nStop)
-{
-  struct termios newtio, oldtio;
-  /*保存测试现有串口参数设置，在这里如果串口号等出错，会有相关的出错信息*/
-  if (tcgetattr(fd_, &oldtio) != 0)
-  {
-    perror("SetupSerial 1");
-    return -1;
-  }
-  bzero(&newtio, sizeof(newtio));
-  /*步骤一，设置字符大小*/
-  newtio.c_cflag |= CLOCAL;   //如果设置，modem 的控制线将会被忽略。如果没有设置，则 open()函数会阻塞直到载波检测线宣告 modem 处于摘机状态为止。
-  newtio.c_cflag |= CREAD;    //使端口能读取输入的数据
-  /*设置每个数据的位数*/
-  switch (nBits)
-  {
-  case 7:
-    newtio.c_cflag |= CS7;
-    break;
-  case 8:
-    newtio.c_cflag |= CS8;
-    break;
-  }
-  /*设置奇偶校验位*/
-  switch (nEvent)
-  {
-  case 'O': //奇数
-    newtio.c_iflag |= (INPCK | ISTRIP);
-    newtio.c_cflag |= PARENB;   //使能校验，如果不设PARODD则是偶校验
-    newtio.c_cflag |= PARODD;   //奇校验
-    break;
-  case 'E': //偶数
-    newtio.c_iflag |= (INPCK | ISTRIP);
-    newtio.c_cflag |= PARENB;
-    newtio.c_cflag &= ~PARODD;
-    break;
-  case 'N':  //无奇偶校验位
-    newtio.c_cflag &= ~PARENB;
-    break;
-  }
-  /*设置波特率*/
-  switch (baud_rate_)
-  {
-  case 230400:
-    cfsetispeed(&newtio, B230400);
-    cfsetospeed(&newtio, B230400);
-    break;
-  case 460800:
-    cfsetispeed(&newtio, B460800);
-    cfsetospeed(&newtio, B460800);
-    break;
-  case 500000:
-    cfsetispeed(&newtio, B500000);
-    cfsetospeed(&newtio, B500000);
-    break;
-  case 921600:
-    cfsetispeed(&newtio, B921600);
-    cfsetospeed(&newtio, B921600);
-    break;
-  default:
-    cfsetispeed(&newtio, B460800);
-    cfsetospeed(&newtio, B460800);
-    break;
-  }
-
-  /*
-   * 设置停止位
-   * 设置停止位的位数， 如果设置，则会在每帧后产生两个停止位， 如果没有设置，则产生一个
-   * 停止位。一般都是使用一位停止位。需要两位停止位的设备已过时了。
-   * */
-  if (nStop == 1)
-    newtio.c_cflag &= ~CSTOPB;
-  else if (nStop == 2)
-    newtio.c_cflag |= CSTOPB;
-  /*设置等待时间和最小接收字符*/
-  newtio.c_cc[VTIME] = 0;
-  newtio.c_cc[VMIN] = 0;
-  /*处理未接收字符*/
-  tcflush(fd_, TCIFLUSH);
-  /*激活新配置*/
-  if ((tcsetattr(fd_, TCSANOW, &newtio)) != 0)
-  {
-    perror("serial set error");
-    return -1;
-  }
-
-  return 0;
-}
-
-void LSIOSR::flushinput() {
-  tcflush(fd_, TCIFLUSH);
-}
-
-/* 从串口中读取数据 */
-int LSIOSR::read(unsigned char *buffer, int length, int timeout)
-{
-  memset(buffer, 0, length);
-
-  int totalBytesRead = 0;
-  int rc;
-  int unlink = 0;
-  unsigned char* pb = buffer;
-
-  if (timeout > 0)
-  {
-    rc = waitReadable(timeout);
-    if (rc <= 0)
-    {
-      return (rc == 0) ? 0 : -1;
-    }
-
-    int	retry = 3;
-    while (length > 0)
-    {
-      rc = ::read(fd_, pb, (size_t)length);
-
-      if (rc > 0)
-      {		
-        length -= rc;
-        pb += rc;
-        totalBytesRead += rc;
-
-        if (length == 0)
-        {
-          break;
+    LSIOSR::LSIOSR(const std::string& port, BaudRate baud_rate,
+                DataBits data_bits, Parity parity, StopBits stop_bits)
+        : port_(port), baud_rate_(baud_rate), data_bits_(data_bits),
+        parity_(parity), stop_bits_(stop_bits), fd_(-1) {
+        // fd_ = ::open(port_.c_str(), O_RDWR | O_NOCTTY);
+        fd_ = ::open(port_.c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK);
+        
+        if (fd_ < 0) {
+            throw std::system_error(errno, std::system_category(),
+                                    "Unable to open serial port: " + port);
         }
-      }
-      else if (rc < 0)
-      {
-        printf("error \n");
-        retry--;
-        if (retry <= 0)
-        {
-          break;
+
+        flushIO();
+
+        setOpt(data_bits_, parity_, stop_bits_);
+
+        ROS_INFO("Successfully opened serial port %s at %d baud", 
+                port_.c_str(), static_cast<int>(baud_rate_));
+    }
+
+    LSIOSR::~LSIOSR() {
+        if (fd_ >= 0) {
+            ::close(fd_);
         }
-      }
-	  unlink++;
-      rc = waitReadable(20);
-	  if(unlink > 10)
-		  return -1;
-	  
-      if (rc <= 0)
-      {
-        break;
-      }
-    }
-  }
-  else
-  {
-    rc = ::read(fd_, pb, (size_t)length);
-
-    if (rc > 0)
-    {
-      totalBytesRead += rc;
-    }
-    else if ((rc < 0) && (errno != EINTR) && (errno != EAGAIN))
-    {
-      printf("read error\n");
-      return -1;
-    }
-  }
-
-  return totalBytesRead;
-}
-
-int LSIOSR::waitReadable(int millis)
-{
-  if (fd_ < 0)
-  {
-    return -1;
-  }
-  int serial = fd_;
-  
-  fd_set fdset;
-  struct timeval tv;
-  int rc = 0;
-  
-  while (millis > 0)
-  {
-    if (millis < 5000)
-    {
-      tv.tv_usec = millis % 1000 * 1000;
-      tv.tv_sec  = millis / 1000;
-
-      millis = 0;
-    }
-    else
-    {
-      tv.tv_usec = 0;
-      tv.tv_sec  = 5;
-
-      millis -= 5000;
     }
 
-    FD_ZERO(&fdset);
-    FD_SET(serial, &fdset);
+    void LSIOSR::flushIO() {
+        if (fd_ >= 0) {
+            tcflush(fd_, TCIOFLUSH);
+        }
+    }
+
+    void LSIOSR::setOpt(DataBits nBits, Parity nEvent, StopBits nStop) {
+        struct termios newtio;
+        if (tcgetattr(fd_, &newtio) != 0) {
+            throw std::system_error(errno, std::system_category(),
+                                    "Failed to retrieve serial port properties");
+        }
+
+        // 清空配置并设置基本参数
+        // bzero(&newtio, sizeof(newtio));
+        cfmakeraw(&newtio);
+        newtio.c_cflag |= CLOCAL | CREAD;
+
+        // 设置数据位
+        switch (nBits) {
+            case DataBits::SEVEN: 
+                newtio.c_cflag |= CS7; 
+                break;
+            case DataBits::EIGHT: 
+                newtio.c_cflag |= CS8; 
+                break;
+            default:
+                throw std::invalid_argument("Invalid DataBits value");
+        }
+
+        // 设置奇偶校验
+        switch (nEvent) {
+            case Parity::NONE:
+                newtio.c_cflag &= ~PARENB;
+                break;
+            case Parity::ODD:
+                newtio.c_cflag |= (PARENB | PARODD);
+                newtio.c_iflag |= (INPCK | ISTRIP);
+                break;
+            case Parity::EVEN:
+                newtio.c_cflag |= PARENB;
+                newtio.c_cflag &= ~PARODD;
+                newtio.c_iflag |= (INPCK | ISTRIP);
+                break;
+            default:
+                throw std::invalid_argument("Invalid Baud rate value");
+        }
+
+        // 设置波特率
+        speed_t baud;
+        switch (baud_rate_) {
+            case BaudRate::BAUD_230400:
+                baud = B230400;
+                break;
+            case BaudRate::BAUD_460800:
+                baud = B460800;
+                break;
+            case BaudRate::BAUD_500000:
+                baud = B500000;
+                break;
+            case BaudRate::BAUD_921600:
+                baud = B921600;
+                break;
+            default:
+                throw std::invalid_argument("Unsupported baud rate");
+        }
+
+        cfsetispeed(&newtio, baud);
+        cfsetospeed(&newtio, baud);
+
+        // 设置停止位
+        switch (nStop) {
+            case StopBits::ONE:
+                newtio.c_cflag &= ~CSTOPB;
+                break;
+            case StopBits::TWO:
+                newtio.c_cflag |= CSTOPB;
+                break;
+            default:
+                throw std::invalid_argument("Invalid StopBits value");
+        }
+
+
+        // 设置超时和最小字符
+        newtio.c_cc[VTIME] = 0;
+        newtio.c_cc[VMIN] = 0;
+
+        // 应用配置
+        flushIO();
+        if (tcsetattr(fd_, TCSANOW, &newtio) != 0) {
+            throw std::system_error(errno, std::system_category(),
+                                    "Failed to set serial port!");
+        }
+    }
+
+    bool LSIOSR::waitEvent(short events, int timeout_ms) {
+        if (fd_ < 0) return false;
+
+        struct pollfd fds[1];
+        fds[0].fd = fd_;
+        fds[0].events = events;
+
+        int retval = poll(fds, 1, timeout_ms);
+
+        if (retval > 0) {
+            return (fds[0].revents & events) != 0;
+        } else if (retval == 0) {
+            time_t curTime = time(NULL);
+            struct tm *curTm = localtime(&curTime);
+            char bufTime[72] = {0};
+            sprintf(bufTime, "%d-%d-%d %d:%d:%d", 
+                    curTm->tm_year + 1900, curTm->tm_mon + 1,
+                    curTm->tm_mday, curTm->tm_hour, 
+                    curTm->tm_min, curTm->tm_sec);
+            ROS_WARN("%s lslidar poll() timeout, serial port: %s", 
+                    bufTime, port_.c_str());
+        }
+        else {
+            if (errno != EINTR) {
+                ROS_ERROR("poll() error: %s", strerror(errno));
+            }
+        }
+
+        return false;
+    }
+
+    ssize_t LSIOSR::read(unsigned char* buffer, size_t length) {
+        if (fd_ < 0) {
+            throw std::runtime_error("Serial port not open");
+        }
+
+        ssize_t totalBytesRead = 0;
+        if (!waitEvent(POLLIN, 2000)) {
+            return 0;
+        }
+
+        while (length > 0) {
+            ssize_t rc = ::read(fd_, buffer, length);
+            if (rc > 0) {
+                length -= rc;
+                buffer += rc;
+                totalBytesRead += rc;
+            } else if (rc < 0) {
+                if (errno != EINTR && errno != EAGAIN) {
+                    return -1;
+                }
+            } else {
+                break;
+            }
+        }
+        return totalBytesRead;
+    }
     
-    rc = select(serial + 1, &fdset, NULL, NULL, &tv);
-    if (rc > 0)
-    {
-      rc = (FD_ISSET(serial, &fdset)) ? 1 : -1;
-      break;
-    }
-    else if (rc < 0)
-    {
-      rc = -1;
-      break;
-    }
-  }
-
-  return rc;
-}
-
-
-int LSIOSR::waitWritable(int millis)
-{
-  if (fd_ < 0)
-  {
-    return -1;
-  }
-  int serial = fd_;
-
-  fd_set fdset;
-  struct timeval tv;
-  int rc = 0;
-
-  while (millis > 0)
-  {
-    if (millis < 5000)
-    {
-      tv.tv_usec = millis % 1000 * 1000;
-      tv.tv_sec  = millis / 1000;
-
-      millis = 0;
-    }
-    else
-    {
-      tv.tv_usec = 0;
-      tv.tv_sec  = 5;
-
-      millis -= 5000;
-    }
-
-    FD_ZERO(&fdset);
-    FD_SET(serial, &fdset);
-
-    rc = select(serial + 1, NULL, &fdset, NULL, &tv);
-    if (rc > 0)
-    {
-      rc = (FD_ISSET(serial, &fdset)) ? 1 : -1;
-      break;
-    }
-    else if (rc < 0)
-    {
-      rc = -1;
-      break;
-    }
-  }
-
-  return rc;
-}
-
-/* 向串口中发送数据 */
-int LSIOSR::send(const char* buffer, int length, int timeout)
-{
-  if (fd_ < 0)
-  {
-    return -1;
-  }
-
-  if ((buffer == 0) || (length <= 0))
-  {
-    return -1;
-  }
-
-  int	totalBytesWrite = 0;
-  int rc;
-  char* pb = (char*)buffer;
-
-
-  if (timeout > 0)
-  {
-    rc = waitWritable(timeout);
-    if (rc <= 0)
-    {
-      return (rc == 0) ? 0 : -1;
-    }
-
-    int	retry = 3;
-    while (length > 0)
-    {
-      rc = write(fd_, pb, (size_t)length);
-      if (rc > 0)
-      {
-        length -= rc;
-        pb += rc;
-        totalBytesWrite += rc;
-
-        if (length == 0)
-        {
-          break;
-        }
-      }
-      else
-      {
-        retry--;
-        if (retry <= 0)
-        {
-          break;
-        }
-      }
-
-      rc = waitWritable(50);
-      if (rc <= 0)
-      {
-        break;
-      }
-    }
-  }
-  else
-  {
-    rc = write(fd_, pb, (size_t)length);
-    if (rc > 0)
-    {
-      totalBytesWrite += rc;
-    }
-    else if ((rc < 0) && (errno != EINTR) && (errno != EAGAIN))
-    {
-      return -1;
-    }
-  }
-
-  return totalBytesWrite;
-}
-
-int LSIOSR::init()
-{
-	int error_code = 0;
-		
-	fd_ = open(port_.c_str(), O_RDWR|O_NOCTTY|O_NDELAY);
-	if (0 < fd_)
+    //  获取单线雷达串口数据
+    int LSIOSR::getSerialData(lslidar_msgs::LslidarPacketPtr &packet, int packet_length, std::string lidar_model) 
 	{
-		error_code = 0;
-		setOpt(DATA_BIT_8, PARITY_NONE, STOP_BIT_1);//设置串口参数
-		//printf("open_port %s  OK !\n", port_.c_str());
-	}
-	else
-	{
-		error_code = -1;
+		int count = 0;
+		int count_2 = 0;
+
+		while (count < 1) {
+			count = read(&packet->data[count], 1);
+		}
+		if (packet->data[0] != 0xA5) return 0;
+
+		while (count_2 < 1) {
+			count_2 = read(&packet->data[count], 1);
+			if (count_2 > 0) count += count_2;
+		}
+		if (packet->data[1] != 0x5A) return 0;
+
+		count_2 = 0;
+		if (lidar_model == "M10P") {
+			while (count_2 < 2) {
+				count_2 = read(&packet->data[count], 2 - count_2);
+				if (count_2 > 0) {
+					count += count_2;
+				}
+			}
+
+			packet_length = (packet->data[2] << 8) + packet->data[3];
+			if (packet_length > 180) return 0;
+		}
+
+		count_2 = 0;
+		while (count < packet_length) {
+			count_2 = read(&packet->data[count], packet_length - count);
+			if (count_2 < 0) {
+				return -1;
+			}
+			count += count_2;
+		}
+
+		return count;
 	}
 
-	return error_code;
-}
+    ssize_t LSIOSR::send(const char* buffer, size_t length) {
+        if (fd_ < 0) {
+            throw std::runtime_error("Serial port not open.");
+        }
 
-int LSIOSR::close()
-{
-  ::close(fd_);
-}
+        ssize_t totalBytesWrite = 0;
+        if (!waitEvent(POLLOUT, 2000)) {
+            return -1;
+        }
 
-std::string LSIOSR::getPort()
-{
-  return port_;
-}
+        char* pb = (char*)buffer;
 
-int LSIOSR::setPortName(std::string name)
-{
-  port_ = name;
-  return 0;
-}
+        while (length > 0) {
+            ssize_t rc = ::write(fd_, pb, length);
+            if (rc > 0) {
+                length -= rc;
+                pb += rc;
+                totalBytesWrite += rc;
+            } else if (rc < 0) {
+                if (errno != EINTR && errno != EAGAIN) {
+                    throw std::system_error(errno, std::system_category(),
+                                            "Writing to serial port failed!");
+                }
+            } else {
+                break;
+            }
+        }
 
-}
+        return totalBytesWrite;
+    }
+
+} // namespace lslidar_driver
