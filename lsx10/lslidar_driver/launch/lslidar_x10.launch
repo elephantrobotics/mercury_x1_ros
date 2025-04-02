@@ -37,6 +37,9 @@
     <param name="roll" value="0.0"/>      <!-- rviz 中表现为围绕红色的 x 轴旋转   单位: rad-->
     <param name="pitch" value="0.0"/>     <!-- rviz 中表现为围绕绿色的 y 轴旋转   单位: rad-->
     <param name="yaw" value="0.0"/>       <!-- rviz 中表现为围绕蓝色的 z 轴旋转   单位: rad-->
+
+    <remap from="/x10/scan" to="/scan"/>
+
   </node>
 
   <!--node pkg="rviz" type="rviz" name="rviz" args="-d $(find lslidar_driver)/rviz/lslidar_x10.rviz"/--> <!-- 注释此行不启动RViz -->
