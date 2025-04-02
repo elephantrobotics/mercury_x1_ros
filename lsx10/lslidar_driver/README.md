@@ -1,7 +1,7 @@
-# LSLIDAR_ROS_V5.1.1_250331 使用说明
+# LSLIDAR_ROS_V5.1.1_250402 使用说明
 
 ## 1.工程介绍
-​		LSLIDAR_ROS_V5.1.1_250331为linux环境下雷达ros驱动，程序在ubuntu 20.04 ros noetic,ubuntu18.04 ros melodic以及ubuntu16.04 ros kinetic下测试通过。
+​		LSLIDAR_ROS_V5.1.1_250402为linux环境下雷达ros驱动，程序在ubuntu 20.04 ros noetic,ubuntu18.04 ros melodic以及ubuntu16.04 ros kinetic下测试通过。
 
 #### 1.1 支持的雷达型号
 
@@ -89,6 +89,8 @@ roslaunch lslidar_driver lslidar_ls.launch  # 1550雷达
 # 可根据实际情况自定义launch文件
 roslaunch lslidar_driver lslidar_double.launch
 ~~~
+
+
 
 
 
@@ -220,13 +222,23 @@ roslaunch lslidar_driver lslidar_double.launch
 
   Please grant the corresponding serial port permissions.
 
+
+
 ### 特殊参数说明：
 
 #### 以下功能仅对特定系列雷达支持
 
 - **serial_port**
 
-  激光雷达连接的串口名称（例如 `/dev/ttyUSB0` 或 `/dev/ttyACM0`），在使用串口雷达时，请填写正确的串口名称，并确保已授予该串口的读写权限。
+  激光雷达连接的串口名称（例如 `/dev/ttyUSB0` 或 `/dev/ttyACM0`），**使用串口雷达时，请填写正确的串口名称，并确保已授予该串口的读写权限**。
+
+- **publish_multiecholaserscan**
+
+  N10Plus雷达是否发布`sensor_msgs::MultiEchoLaserScan`数据，此值为true时发布数据。
+
+- **enable_noise_filter**
+
+  孤立噪点滤波开关，此值为true时将过滤孤立点(N10Plus不生效)。
 
 - **pcl_type**
 
@@ -241,7 +253,7 @@ roslaunch lslidar_driver lslidar_double.launch
 
 - **publish_scan**
 
-  发布 `LaserScan` 数据，此值为true时发布 `LaserScan` 数据。
+  发布 `LaserScan` 数据，此值为true时发布数据。
 
 - **scan_num**
 
@@ -632,14 +644,14 @@ Date    : 2025-03-24
 
 
 
-update version : LSLIDAR_ROS_V5.1.1_250331
+update version : LSLIDAR_ROS_V5.1.1_250402
 
 Modify: 
 
 1. 新增兼容N10Plus雷达
-1. N10Plus雷达发布数据为PointCloud2和MultiEchoLaserScan
+1. N10Plus雷达新增MultiEchoLaserScan消息
 
-Date    : 2025-03-31
+Date    : 2025-04-02
 
 --------------------------------------------------------------------
 

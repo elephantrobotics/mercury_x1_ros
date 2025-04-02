@@ -27,7 +27,7 @@ namespace lslidar_driver {
         PCL_ADD_POINT4D;     // x, y, z 和 data[4]
         PCL_ADD_INTENSITY;   // 强度
         std::uint16_t ring;  // 线号
-        float time;          // 时间
+        float time;          // 时间    绝对时间(Absolute Timestamp) : float -> double
 
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW  // 确保内存对齐
     } EIGEN_ALIGN16;  // 强制 16 字节对齐
@@ -41,6 +41,6 @@ POINT_CLOUD_REGISTER_POINT_STRUCT(lslidar_driver::PointXYZIRT,
                                         (float, z, z)
                                         (float, intensity, intensity)
                                         (std::uint16_t, ring, ring)
-                                        (float, time, time))
+                                        (float, time, time))    // 绝对时间(Absolute Timestamp) : float -> double
 
 #endif  // LSLIDAR_POINTCLOUD_HPP

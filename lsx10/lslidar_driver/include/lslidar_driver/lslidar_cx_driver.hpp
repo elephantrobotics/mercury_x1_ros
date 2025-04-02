@@ -192,7 +192,7 @@ namespace lslidar_driver {
 
         bool initAngleConfig();
 
-        bool checkPacketValidity(lslidar_msgs::LslidarPacketPtr &packet);
+        bool checkPacketValidity(const lslidar_msgs::LslidarPacketPtr &packet) const;
 
         void decodePacket(lslidar_msgs::LslidarPacketPtr &packet);
 

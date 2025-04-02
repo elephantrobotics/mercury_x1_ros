@@ -254,12 +254,13 @@ namespace lslidar_driver {
         laserscan_pub_.publish(scan_msg_bak);
     }
 
-    bool LslidarCxDriver::checkPacketValidity(lslidar_msgs::LslidarPacketPtr &packet) {
+    bool LslidarCxDriver::checkPacketValidity(const lslidar_msgs::LslidarPacketPtr &packet) const {
         for (size_t blk_idx = 0; blk_idx < BLOCKS_PER_PACKET; ++blk_idx) {
-            if (packet->data[blk_idx * 100] != 0xff && packet->data[blk_idx * 100 + 1] != 0xee) {
+            if (packet->data[blk_idx * 100] != 0xff || packet->data[blk_idx * 100 + 1] != 0xee) {
                 return false;
             }
         }
+
         return true;
     }
 

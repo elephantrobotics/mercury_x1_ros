@@ -74,9 +74,15 @@ namespace lslidar_driver {
 
         void publishLiadrData();
 
-        void publishMultiEchoLaserScan();   // 发布多回波2D扫描数据
+        void publishMultiEchoLaserScan();
+        
+        std::function<bool(const lslidar_msgs::LslidarPacketPtr &packet, int packet_size)> checkPacketValidity;
 
-        bool checkPacketValidity(lslidar_msgs::LslidarPacketPtr &packet, int packet_size);
+        bool checkPacketValidityM10(const lslidar_msgs::LslidarPacketPtr &packet, int packet_size) const;
+
+        bool checkPacketValidityN10(const lslidar_msgs::LslidarPacketPtr &packet, int packet_size) const;
+
+        bool checkPacketValidityN301(const lslidar_msgs::LslidarPacketPtr &packet, int packet_size) const;
 
         std::function<void(lslidar_msgs::LslidarPacketPtr &packet)> decodePacket;
 
@@ -84,7 +90,7 @@ namespace lslidar_driver {
 
         void decodePacketN10(lslidar_msgs::LslidarPacketPtr &packetlidardata);
 
-        void decodePacketN10P(lslidar_msgs::LslidarPacketPtr &packetlidardata);
+        void decodePacketN10Plus(lslidar_msgs::LslidarPacketPtr &packetlidardata);
 
         void decodePacketN301_1_6(lslidar_msgs::LslidarPacketPtr &packetlidardata);
 
@@ -146,6 +152,7 @@ namespace lslidar_driver {
         std::atomic<bool> motor_running{true};
         bool is_first_sweep;
         bool publish_scan;
+        bool publish_multiecholaserscan;
         bool enable_noise_filter;
         bool is_valid_point;
 

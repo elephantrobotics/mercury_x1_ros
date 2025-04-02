@@ -56,7 +56,8 @@ namespace lslidar_driver {
         pnh.param<int>("angle_disable_max", angle_disable_max, 0);
         pnh.param<int>("N10P_hz", N10P_hz, 10);
         pnh.param<bool>("publish_scan", publish_scan, false);
-        pnh.param<std::string>("san_topic", san_topic_, std::string("scan"));
+        pnh.param<bool>("publish_multiecholaserscan", publish_multiecholaserscan, false);
+        pnh.param<std::string>("laserscan_topic", san_topic_, std::string("scan"));
         pnh.param<std::string>("lidar_model", lidar_model, std::string(""));
         pnh.param<std::string>("serial_port", serial_port_, std::string(""));
         pnh.param<float>("n301_protocol", n301_protocol, 7.0);
@@ -71,8 +72,8 @@ namespace lslidar_driver {
 
     bool LslidarX10Driver::createRosIO() {
         pointcloud_pub_ = nh.advertise<sensor_msgs::PointCloud2>(pointcloud_topic_, 10);
-        if(publish_scan && lidar_model != "N10Plus") laserscan_pub_ = nh.advertise<sensor_msgs::LaserScan>(san_topic_, 10);
-        if(publish_scan && lidar_model == "N10Plus") multiecho_scan_pub_ = nh.advertise<sensor_msgs::MultiEchoLaserScan>(san_topic_, 10);  // N10Plus 双回波雷达
+        if(publish_scan) laserscan_pub_ = nh.advertise<sensor_msgs::LaserScan>(san_topic_, 10);
+        if(publish_multiecholaserscan && lidar_model == "N10Plus") multiecho_scan_pub_ = nh.advertise<sensor_msgs::MultiEchoLaserScan>("multiecho_scan", 10);
         time_pub_ = nh.advertise<std_msgs::Float64>("time_topic", 10);
         motor_control_sub_ = nh.subscribe<std_msgs::Int8>("motor_control", 1, &LslidarX10Driver::motorControl, this);
 
@@ -169,7 +170,7 @@ namespace lslidar_driver {
         point_cloud_xyzi_->header.frame_id = frame_id;
         point_cloud_xyzi_->height = 1;
 
-        if(publish_scan && lidar_model == "N10Plus") {
+        if(publish_multiecholaserscan && lidar_model == "N10Plus") {
             resetMultiEchoLaserScan();
         }
 
@@ -209,7 +210,7 @@ namespace lslidar_driver {
     }
 
     void LslidarX10Driver::resetMultiEchoLaserScan() {
-        point_size = ceil(5400.0 / N10P_hz);
+        point_size = ceil(5400.0 / N10P_hz);    // 一圈点数 = 重频 / 点击频率， 实际点数 = 一圈点数 * 2
 
         multiecho_scan_.reset(new sensor_msgs::MultiEchoLaserScan());
         multiecho_scan_->header.frame_id = frame_id;
@@ -276,55 +277,6 @@ namespace lslidar_driver {
         }
     }
 
-    bool LslidarX10Driver::checkPacketValidity(lslidar_msgs::LslidarPacketPtr &packet, int packet_size) {
-        if (lidar_model != "N301") {
-            if (packet->data[0] != 0xA5 || packet->data[1] != 0x5A) {
-                if (lidar_model == "M10" || lidar_model == "M10GPS" || lidar_model == "M10P") {
-                    if (packet->data[packet_size - 2] != 0xFA || packet->data[packet_size - 1] != 0xFB)  return false;
-                }
-
-                return false;
-            }
-        } else {
-            for (size_t blk_idx = 0; blk_idx < BLOCKS_PER_PACKET_N301; ++blk_idx) {
-                if (packet->data[blk_idx * SIZE_BLOCK_N301] != 0xff && packet->data[blk_idx * SIZE_BLOCK_N301 + 1] != 0xee) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
-
-
-    bool LslidarX10Driver::isPointValid(const int fir_idx) const {
-        if (!(points[fir_idx].distance >= min_range && points[fir_idx].distance <= max_range)) return false;
-
-        if (angle_able_max > 36000) {
-            if ((points[fir_idx].azimuth > (angle_able_max - 36000)) && points[fir_idx].azimuth < angle_able_min)  return false;
-        } else {
-            if ((points[fir_idx].azimuth > angle_able_max) || points[fir_idx].azimuth < angle_able_min) return false;
-        }
-
-        return true;
-    }
-
-    bool LslidarX10Driver::isNoisePoint(size_t curr_idx, size_t end_fir_idx) const {
-        if (curr_idx == 0 || curr_idx >= end_fir_idx - 1) {
-            return false; 
-        }
-
-        const auto& curr = points[curr_idx];
-        const auto& prev = points[curr_idx - 1];
-        const auto& next = points[curr_idx + 1];
-
-        float dynamic_threshold = 0.015f + 0.0005f * curr.distance;
-        float diff_prev = fabs(curr.distance - prev.distance) / prev.distance;
-        float diff_next = fabs(curr.distance - next.distance) / next.distance;
-
-        return (diff_prev > dynamic_threshold) && (diff_next > dynamic_threshold);
-    }
-
     bool LslidarX10Driver::poll() {
         if (!motor_running.load()) {
             usleep(1000000);
@@ -338,7 +290,7 @@ namespace lslidar_driver {
             if (packet_size == 0) continue; 
             if (packet_size < 0) return false;
         }
-
+        
         //check if the packet is valid
         if (!checkPacketValidity(packet, packet_size))  return false;
 
@@ -441,8 +393,8 @@ namespace lslidar_driver {
                 point_cloud_xyzi_->points.push_back(point_xyzi);
                 ++point_cloud_xyzi_->width;
             }
-
-            if(publish_scan && lidar_model == "N10Plus") {
+            
+            if(publish_multiecholaserscan && lidar_model == "N10Plus") {
                 if (fir_idx == start_fir_idx || points[fir_idx].azimuth != points[fir_idx - 1].azimuth) {
                     double angle = atan2(y_coord, x_coord) + M_PI;
                     int index = std::min(static_cast<int>(angle / multiecho_scan_->angle_increment), 
@@ -497,16 +449,14 @@ namespace lslidar_driver {
             }
 
             thread_pool_->enqueue([this]() { publishLiadrData(); });
-            thread_pool_->enqueue([this]() { publishMultiEchoLaserScan(); });
-
+            if(publish_multiecholaserscan && lidar_model == "N10Plus") {
+                thread_pool_->enqueue([this]() { publishMultiEchoLaserScan(); });
+                resetMultiEchoLaserScan();
+            }
+            
             point_cloud_xyzi_.reset(new pcl::PointCloud<pcl::PointXYZI>());
             point_cloud_xyzi_->header.frame_id = frame_id;
             point_cloud_xyzi_->height = 1;
-
-            // 刷新数据 MultiEchoLaserScan
-            if(publish_scan && lidar_model == "N10Plus") {
-                resetMultiEchoLaserScan();
-            }
             
             last_azimuth = points[actual_points - 1].azimuth;
             start_fir_idx = end_fir_idx;
@@ -535,7 +485,7 @@ namespace lslidar_driver {
                     ++point_cloud_xyzi_->width;
                 }
 
-                if(publish_scan && lidar_model == "N10Plus") {
+                if(publish_multiecholaserscan && lidar_model == "N10Plus") {
                     if (fir_idx == start_fir_idx || points[fir_idx].azimuth != points[fir_idx - 1].azimuth) {
                         double angle = atan2(y_coord, x_coord) + M_PI;
                         int index = std::min(static_cast<int>(angle / multiecho_scan_->angle_increment), 
@@ -579,6 +529,75 @@ namespace lslidar_driver {
         return true;
     }
 
+    bool LslidarX10Driver::isPointValid(const int fir_idx) const {
+        if (!(points[fir_idx].distance >= min_range && points[fir_idx].distance <= max_range)) return false;
+
+        if (angle_able_max > 36000) {
+            if ((points[fir_idx].azimuth > (angle_able_max - 36000)) && points[fir_idx].azimuth < angle_able_min)  return false;
+        } else {
+            if ((points[fir_idx].azimuth > angle_able_max) || points[fir_idx].azimuth < angle_able_min) return false;
+        }
+
+        return true;
+    }
+
+    bool LslidarX10Driver::isNoisePoint(size_t curr_idx, size_t end_fir_idx) const {
+        if (lidar_model == "N10Plus") return false; 
+        if (curr_idx == 0 || curr_idx >= end_fir_idx - 1) {
+            return false; 
+        }
+
+        const auto& curr = points[curr_idx];
+        const auto& prev = points[curr_idx - 1];
+        const auto& next = points[curr_idx + 1];
+
+        float dynamic_threshold = 0.015f + 0.0005f * curr.distance;
+        float diff_prev = fabs(curr.distance - prev.distance) / prev.distance;
+        float diff_next = fabs(curr.distance - next.distance) / next.distance;
+
+        return (diff_prev > dynamic_threshold) && (diff_next > dynamic_threshold);
+    }
+
+    bool LslidarX10Driver::checkPacketValidityM10(const lslidar_msgs::LslidarPacketPtr &packet, int packet_size) const {
+        if (packet->data[0] == 0xA5 && packet->data[1] == 0x5A && 
+            packet->data[packet_size - 2] == 0xFA && packet->data[packet_size - 1] == 0xFB) {
+
+            return true;
+        }
+
+        return false;
+    }
+
+    bool LslidarX10Driver::checkPacketValidityN10(const lslidar_msgs::LslidarPacketPtr &packet, int packet_size) const {
+        if (packet->data[0] == 0xA5 && packet->data[1] == 0x5A) {
+            uint8_t computed_crc = 0;
+            for (int i = 0; i < packet_size - 1; ++i) {
+                computed_crc += packet->data[i];
+            }
+            
+            if (computed_crc != packet->data[packet_size - 1]) {
+                ROS_WARN("CRC check failed: calculated: %02x, received: %02x", computed_crc, packet->data[packet_size - 1]);
+                ROS_WARN("Abandon the current data packet.");
+
+                return false;
+            }
+        } else {
+            return false;
+        }
+
+        return true;
+    }
+
+    bool LslidarX10Driver::checkPacketValidityN301(const lslidar_msgs::LslidarPacketPtr &packet, int packet_size) const {
+        for (size_t blk_idx = 0; blk_idx < BLOCKS_PER_PACKET_N301; ++blk_idx) {
+            if (packet->data[blk_idx * SIZE_BLOCK_N301] != 0xff || packet->data[blk_idx * SIZE_BLOCK_N301 + 1] != 0xee) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     void LslidarX10Driver::decodePacketM10(lslidar_msgs::LslidarPacketPtr &packet) {
         std::vector<FiringX10> raw_points;
         raw_points.reserve(packet_points_max);
@@ -610,19 +629,6 @@ namespace lslidar_driver {
     }
 
     void LslidarX10Driver::decodePacketN10(lslidar_msgs::LslidarPacketPtr &packet) {
-        // N10 系列校验
-        uint8_t computed_crc = 0;
-        for (int i = 0; i < packet_length - 1; ++i) {
-            computed_crc += packet->data[i];
-        }
-        
-        if (computed_crc != packet->data[packet_length - 1]) {
-            ROS_WARN("CRC check failed: calculated: %02x, received: %02x", computed_crc, packet->data[packet_length - 1]);
-            ROS_WARN("Abandon the current data packet.");
-
-            return;
-        }
-        
         int start_angle = ((packet->data[angle_bits_start] << 8) + packet->data[angle_bits_start + 1]) % 36000;
         int end_angle = ((packet->data[end_angle_bits_start] << 8) + packet->data[end_angle_bits_start + 1]) % 36000;
 
@@ -650,19 +656,7 @@ namespace lslidar_driver {
         return;
     }
 
-    void LslidarX10Driver::decodePacketN10P(lslidar_msgs::LslidarPacketPtr &packet) {
-        // N10系列校验
-        uint8_t computed_crc = 0;
-        for (int i = 0; i < packet_length - 1; ++i) {
-            computed_crc += packet->data[i];
-        }
-        
-        if (computed_crc != packet->data[packet_length - 1]) {
-            ROS_WARN("CRC check failed: calculated: %02x, received: %02x", computed_crc, packet->data[packet_length - 1]);
-            ROS_WARN("Abandon the current data packet.");
-            return;
-        }
-        
+    void LslidarX10Driver::decodePacketN10Plus(lslidar_msgs::LslidarPacketPtr &packet) {
         int start_angle = ((packet->data[angle_bits_start] << 8) + packet->data[angle_bits_start + 1]) % 36000;
         int end_angle = ((packet->data[end_angle_bits_start] << 8) + packet->data[end_angle_bits_start + 1]) % 36000;
 
@@ -697,46 +691,6 @@ namespace lslidar_driver {
         }
 
         return;
-    }
-
-    void LslidarX10Driver::decodePacketN301_1_7(lslidar_msgs::LslidarPacketPtr &packet) {
-        uint16_t firing_azimuth[BLOCKS_PER_PACKET_N301];
-
-        for (size_t b_idx = 0; b_idx < BLOCKS_PER_PACKET_N301; ++b_idx) {
-            firing_azimuth[b_idx] = (packet->data[b_idx * SIZE_BLOCK_N301 + 2] + (packet->data[b_idx * SIZE_BLOCK_N301 + 3] << 8)) % 36000;
-        }
-
-        actual_points = packet_points_max;
-
-        points.clear();
-        points.reserve(actual_points);
-
-        for (size_t block_idx = 0; block_idx < BLOCKS_PER_PACKET_N301; ++block_idx) {
-            int32_t azimuth_diff_b = 0;
-            if (block_idx < BLOCKS_PER_PACKET_N301 - 1) {
-                azimuth_diff_b = firing_azimuth[block_idx + 1] - firing_azimuth[block_idx];
-            } else {
-                azimuth_diff_b = firing_azimuth[block_idx] - firing_azimuth[block_idx - 1];
-            }
-            azimuth_diff_b = azimuth_diff_b < 0 ? azimuth_diff_b + 36000 : azimuth_diff_b;
-
-            // 每一块30个点
-            for (size_t scan_fir_idx = 0; scan_fir_idx < SCANS_PER_BLOCK_N301_1_7; ++scan_fir_idx) {
-                if (scan_fir_idx == 15) continue;   // 跳过非点信息 每块第 49 50 51 byte为 年 月 日
-                size_t byte_idx = RAW_SCAN_SIZE_N301 * scan_fir_idx;
-                size_t idx = scan_fir_idx;
-                if (scan_fir_idx > 15) idx -= 1;
-
-                FiringX10 point;
-                point.azimuth = firing_azimuth[block_idx] + idx * azimuth_diff_b / FIRING_TOFFSET_N301_1_7;
-                point.azimuth = point.azimuth % 36000;
-                point.distance = static_cast<float>((packet->data[block_idx * SIZE_BLOCK_N301 + byte_idx + 4] + 
-                                                    (packet->data[block_idx * SIZE_BLOCK_N301 + byte_idx + 5] << 8)) * DISTANCE_RESOLUTION_N301_1_7);
-                point.intensity = static_cast<float>(packet->data[block_idx * SIZE_BLOCK_N301 + byte_idx + 6]);
-
-                points.push_back(point);
-            }
-        }
     }
 
     void LslidarX10Driver::decodePacketN301_1_6(lslidar_msgs::LslidarPacketPtr &packet) {
@@ -779,6 +733,46 @@ namespace lslidar_driver {
         }
     }
 
+    void LslidarX10Driver::decodePacketN301_1_7(lslidar_msgs::LslidarPacketPtr &packet) {
+        uint16_t firing_azimuth[BLOCKS_PER_PACKET_N301];
+
+        for (size_t b_idx = 0; b_idx < BLOCKS_PER_PACKET_N301; ++b_idx) {
+            firing_azimuth[b_idx] = (packet->data[b_idx * SIZE_BLOCK_N301 + 2] + (packet->data[b_idx * SIZE_BLOCK_N301 + 3] << 8)) % 36000;
+        }
+
+        actual_points = packet_points_max;
+
+        points.clear();
+        points.reserve(actual_points);
+
+        for (size_t block_idx = 0; block_idx < BLOCKS_PER_PACKET_N301; ++block_idx) {
+            int32_t azimuth_diff_b = 0;
+            if (block_idx < BLOCKS_PER_PACKET_N301 - 1) {
+                azimuth_diff_b = firing_azimuth[block_idx + 1] - firing_azimuth[block_idx];
+            } else {
+                azimuth_diff_b = firing_azimuth[block_idx] - firing_azimuth[block_idx - 1];
+            }
+            azimuth_diff_b = azimuth_diff_b < 0 ? azimuth_diff_b + 36000 : azimuth_diff_b;
+
+            // 每一块30个点
+            for (size_t scan_fir_idx = 0; scan_fir_idx < SCANS_PER_BLOCK_N301_1_7; ++scan_fir_idx) {
+                if (scan_fir_idx == 15) continue;   // 跳过非点信息 每块第 49 50 51 byte为 年 月 日
+                size_t byte_idx = RAW_SCAN_SIZE_N301 * scan_fir_idx;
+                size_t idx = scan_fir_idx;
+                if (scan_fir_idx > 15) idx -= 1;
+
+                FiringX10 point;
+                point.azimuth = firing_azimuth[block_idx] + idx * azimuth_diff_b / FIRING_TOFFSET_N301_1_7;
+                point.azimuth = point.azimuth % 36000;
+                point.distance = static_cast<float>((packet->data[block_idx * SIZE_BLOCK_N301 + byte_idx + 4] + 
+                                                    (packet->data[block_idx * SIZE_BLOCK_N301 + byte_idx + 5] << 8)) * DISTANCE_RESOLUTION_N301_1_7);
+                point.intensity = static_cast<float>(packet->data[block_idx * SIZE_BLOCK_N301 + byte_idx + 6]);
+
+                points.push_back(point);
+            }
+        }
+    }
+
     bool LslidarX10Driver::judgmentProtocol(lslidar_msgs::LslidarPacketPtr &packet) {
         for (size_t idx = 0; idx < BLOCKS_PER_PACKET_N301; ++idx) {
             // 1.6协议 每个数据块前 7 个字节为FF EE 角度 第一个点
@@ -794,16 +788,16 @@ namespace lslidar_driver {
     }
 
     bool LslidarX10Driver::determineN301Model() {
-        if (n301_protocol == 1.0) {
-            n301_protocol = 1.6;
-        } else if (n301_protocol == 2.0) {
-            n301_protocol = 1.7;
-        } else  if (n301_protocol > 3.0) {    // launch不指定协议，启用自动判断
+        if (n301_protocol > 3.0) {    // launch不指定协议，启用自动判断
             lslidar_msgs::LslidarPacketPtr pkt(new lslidar_msgs::LslidarPacket());
             int packet_size;
             while (true) {
                 packet_size = msop_input_->getPacket(pkt);
-                if (packet_size >= packet_length) break;
+                if (packet_size == packet_length) {
+                    if (!checkPacketValidity(pkt, packet_size)) continue;
+
+                    break;
+                }
                 if (packet_size == 0) continue; 
                 if (packet_size < 0) return false;
             }
@@ -828,6 +822,8 @@ namespace lslidar_driver {
             DAY   = 1151;
             packet_points_max = BLOCKS_PER_PACKET_N301 * FIRING_TOFFSET_N301_1_7;
             decodePacket = std::bind(&LslidarX10Driver::decodePacketN301_1_7, this, std::placeholders::_1);
+        } else {
+            ROS_WARN("N301 protocol error");
         }
 
         ROS_INFO("Protocol: %.1f", n301_protocol);
@@ -843,6 +839,7 @@ namespace lslidar_driver {
             angle_bits_start = 2;
             data_bits_start = 6;
             decodePacket = std::bind(&LslidarX10Driver::decodePacketM10, this, std::placeholders::_1);
+            checkPacketValidity = std::bind(&LslidarX10Driver::checkPacketValidityM10, this, std::placeholders::_1, std::placeholders::_2);
         } else if (lidar_model == "M10GPS") {
             baud_rate_ = BaudRate::BAUD_460800;
             packet_length = 102;
@@ -850,12 +847,14 @@ namespace lslidar_driver {
             angle_bits_start = 2;
             data_bits_start = 6;
             decodePacket = std::bind(&LslidarX10Driver::decodePacketM10, this, std::placeholders::_1);
+            checkPacketValidity = std::bind(&LslidarX10Driver::checkPacketValidityM10, this, std::placeholders::_1, std::placeholders::_2);
         } else if (lidar_model == "M10P") {
             baud_rate_ = BaudRate::BAUD_500000;
             packet_length = 140;
             angle_bits_start = 4;
             data_bits_start = 8;
             decodePacket = std::bind(&LslidarX10Driver::decodePacketM10, this, std::placeholders::_1);
+            checkPacketValidity = std::bind(&LslidarX10Driver::checkPacketValidityM10, this, std::placeholders::_1, std::placeholders::_2);
         } else if (lidar_model == "N10") {
             baud_rate_ = BaudRate::BAUD_230400;
             packet_length = 58;
@@ -864,6 +863,7 @@ namespace lslidar_driver {
             end_angle_bits_start = 55;
 			data_bits_start = 7;
             decodePacket = std::bind(&LslidarX10Driver::decodePacketN10, this, std::placeholders::_1);
+            checkPacketValidity = std::bind(&LslidarX10Driver::checkPacketValidityN10, this, std::placeholders::_1, std::placeholders::_2);
 		} else if (lidar_model == "N10Plus") {
             baud_rate_ = BaudRate::BAUD_460800;
             packet_length = 108;
@@ -871,9 +871,11 @@ namespace lslidar_driver {
 			angle_bits_start = 5;
 			end_angle_bits_start = 105;
             data_bits_start = 7;
-            decodePacket = std::bind(&LslidarX10Driver::decodePacketN10P, this, std::placeholders::_1);
+            decodePacket = std::bind(&LslidarX10Driver::decodePacketN10Plus, this, std::placeholders::_1);
+            checkPacketValidity = std::bind(&LslidarX10Driver::checkPacketValidityN10, this, std::placeholders::_1, std::placeholders::_2);
 		} else if (lidar_model == "N301") {
             packet_length = 1206;
+            checkPacketValidity = std::bind(&LslidarX10Driver::checkPacketValidityN301, this, std::placeholders::_1, std::placeholders::_2);
         } else {
             return false;
         }

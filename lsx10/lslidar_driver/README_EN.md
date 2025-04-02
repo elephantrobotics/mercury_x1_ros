@@ -1,7 +1,7 @@
-## Instruction Manual for LSLIDAR_ROS_V5.1.1_250331
+## Instruction Manual for LSLIDAR_ROS_V5.1.1_250402
 
 ### 1.Project Introduction
-​		LSLIDAR_ROS_V5.1.1_250331 is a ROS driver for LiDAR in the Linux  environment. The program has been tested and proven compatible with  Ubuntu 20.04 running ROS Noetic, Ubuntu 18.04 with ROS Melodic, and  Ubuntu 16.04 using ROS Kinetic.
+​		LSLIDAR_ROS_V5.1.1_250402 is a ROS driver for LiDAR in the Linux  environment. The program has been tested and proven compatible with  Ubuntu 20.04 running ROS Noetic, Ubuntu 18.04 with ROS Melodic, and  Ubuntu 16.04 using ROS Kinetic.
 
 #### 1.1  Supported Lidar Models
 
@@ -231,6 +231,12 @@ For the meaning of each parameter, refer to the comments or consult **`Technical
 - **serial_port**
 
   The serial port name connected to the LiDAR (e.g., `/dev/ttyUSB0` or `/dev/ttyACM0`). When using a serial port LiDAR, please fill in the correct serial port  name and ensure that read and write permissions have been granted to the serial port.
+
+- **publish_multiecholaserscan**
+  Has the N10Plus LiDAR been released with `sensor_msgs::MultiEchoLaserScan` data, when this value is true, publish the data.
+  
+- **enable_noise_filter**
+  Isolated noise filtering switch. When this value is true, isolated points will be filtered (not effective for N10Plus).
 
 - **pcl_type**
 
@@ -635,13 +641,13 @@ Date    : 2025-03-24
 
 --------------------------------------------------------------------
 
-update version : LSLIDAR_ROS_V5.1.1_250331
+update version : LSLIDAR_ROS_V5.1.1_250402
 
 Modify: 
 
 1. Added compatibility with N10Plus LiDAR.
-1. N10Plus LiDAR releases data for PointCloud2 and MultiEchoLaserScan.
+1. N10Plus LiDAR adds MultiEchoLaserScan message.
 
-Date    : 2025-03-31
+Date    : 2025-04-02
 
 --------------------------------------------------------------------
