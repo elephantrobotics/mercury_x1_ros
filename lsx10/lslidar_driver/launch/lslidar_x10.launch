@@ -22,8 +22,8 @@
     <param name="pointcloud_topic" value="lslidar_point_cloud"/>  <!-- 发布点云话题名 -->
     <param name="min_range" value="0.15"/>          <!-- 雷达扫描最小距离 小于该值的点将被过滤 -->
     <param name="max_range" value="25.0"/>          <!-- 雷达扫描最大距离 大于该值的点将被过滤 -->
-    <param name="angle_disable_min" value="100"/>     <!-- 雷达扫描最小裁剪角度 填整数 单位: 0.01° -->
-    <param name="angle_disable_max" value="260"/>     <!-- 雷达扫描最大裁剪角度 填整数 单位: 0.01° -->
+    <param name="angle_disable_min" value="10000"/>     <!-- 雷达扫描最小裁剪角度 填整数 单位: 0.01° -->
+    <param name="angle_disable_max" value="26000"/>     <!-- 雷达扫描最大裁剪角度 填整数 单位: 0.01° -->
     <param name="publish_scan" value="true"/>       <!-- 是否发布 LaserScan 数据  N10Plus仅发布第一回波数据 -->
     <param name="publish_multiecholaserscan" value="false"/>  <!-- N10Plus 是否发布 MultiEchoLaserScan -->
     <param name="laserscan_topic" value="scan"/>    <!-- 发布 LaserScan 数据话题名称-->
