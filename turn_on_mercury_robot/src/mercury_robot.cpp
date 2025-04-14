@@ -339,20 +339,20 @@ bool turn_on_robot::Get_Sensor_Data_New()
   Receive_Data.rx[count] = Receive_Data_Pr[0]; //Fill the array with serial data //串口数据填入数组
 
   Receive_Data.Frame_Header = Receive_Data.rx[0]; //The first part of the data is the frame header 0X7B //数据的第一位是帧头0X7B
-  Receive_Data.Frame_Tail = Receive_Data.rx[25];  //The last bit of data is frame tail 0X7D //数据的最后一位是帧尾0X7D
+  Receive_Data.Frame_Tail = Receive_Data.rx[23];  //The last bit of data is frame tail 0X7D //数据的最后一位是帧尾0X7D
 
   if(Receive_Data_Pr[0] == FRAME_HEADER || count>0) //Ensure that the first data in the array is FRAME_HEADER //确保数组第一个数据为FRAME_HEADER
     count++;
   else 
   	count=0;
-  if(count == 26) //Verify the length of the packet //验证数据包的长度
+  if(count == 24) //Verify the length of the packet //验证数据包的长度
   {
     count=0;  //Prepare for the serial port data to be refill into the array //为串口数据重新填入数组做准备
     if(Receive_Data.Frame_Tail == FRAME_TAIL) //Verify the frame tail of the packet //验证数据包的帧尾
     {
-      check=Check_Sum(24,READ_DATA_CHECK);  //BCC check passes or two packets are interlaced //BCC校验通过或者两组数据包交错
+      check=Check_Sum(22,READ_DATA_CHECK);  //BCC check passes or two packets are interlaced //BCC校验通过或者两组数据包交错
 
-      if(check == Receive_Data.rx[24])  
+      if(check == Receive_Data.rx[22])  
       {
         error=0;  //XOR bit check successful //异或位校验成功
       }
