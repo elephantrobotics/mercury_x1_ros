@@ -1,35 +1,37 @@
-<package>
-
+<?xml version="1.0"?>
+<package format="2">
   <name>lslidar_driver</name>
-  <version>1.2.0</version>
-  <description>
-    ROS device driver for Leishen M10 and N10 lidar.
-  </description>
-  <maintainer email="honghangli@lslidar.com">Nick Li</maintainer>
-  <author>Nick Li</author>
-  <license>GNU General Public License V3.0</license>
+  <version>5.1.1</version>
+  <description>The lslidar_driver package</description>
+  <maintainer email="jianjiangxie@lslidar.com">lslidar</maintainer>
+
+  <license>TODO</license>
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>diagnostic_updater</build_depend>
-  <build_depend>nodelet</build_depend>
   <build_depend>roscpp</build_depend>
-  <build_depend>lslidar_msgs</build_depend>
-  <build_depend>sensor_msgs</build_depend>
-  <build_depend>libpcl-all-dev</build_depend>
-  <build_depend>libpcl-all</build_depend>
-  <build_depend>rospy</build_depend>
   <build_depend>pcl_ros</build_depend>
   <build_depend>pcl_conversions</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>message_generation</build_depend>
+  <build_depend>lslidar_msgs</build_depend>
+  <build_depend>libyaml-cpp-dev</build_depend>
 
-  <run_depend>diagnostic_updater</run_depend>
-  <run_depend>nodelet</run_depend>
-  <run_depend>roscpp</run_depend>
-  <run_depend>lslidar_msgs</run_depend>
-  <run_depend>sensor_msgs</run_depend>
-  <run_depend>libpcl-all-dev</run_depend>
-  <run_depend>libpcl-all</run_depend>
-  <run_depend>rospy</run_depend>
-  <run_depend>pcl_ros</run_depend>
-  <run_depend>pcl_conversions</run_depend>
+  <build_export_depend>roscpp</build_export_depend>
+  <build_export_depend>pcl_ros</build_export_depend>
+  <build_export_depend>pcl_conversions</build_export_depend>
+  <build_export_depend>std_msgs</build_export_depend>
+  <build_export_depend>sensor_msgs</build_export_depend>
+  <build_export_depend>message_runtime</build_export_depend>
+  <build_export_depend>lslidar_msgs</build_export_depend>
+
+  <exec_depend>roscpp</exec_depend>
+  <exec_depend>pcl_ros</exec_depend>
+  <exec_depend>pcl_conversions</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>message_runtime</exec_depend>
+  <exec_depend>lslidar_msgs</exec_depend>
+  <exec_depend>libyaml-cpp</exec_depend>
 </package>
