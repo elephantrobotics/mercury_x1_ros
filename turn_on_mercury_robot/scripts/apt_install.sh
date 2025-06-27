@@ -19,4 +19,4 @@ sudo apt-get install libuvc-dev -y
 sudo apt install python3-rosdep python3-rosinstall python3-rosinstall-generator python3-wstool build-essential -y
 sudo apt-get install ros-noetic-moveit -y
 sudo apt install ros-noetic-joint-state-publisher-gui -y
-
+sudo apt install libdw-dev -y
